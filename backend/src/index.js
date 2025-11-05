@@ -1,9 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
+import customerRoutes from './routes/customerRoutes.js';
 
-const port = process.env.PORT ;
+const port = process.env.PORT;
 const app = express();
+
+// Middlewares
+app.use(cors());
 app.use(express.json());
+
+app.use('/api/customers', customerRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the NearBuy API');
@@ -28,6 +35,8 @@ async function startServer() {
     console.log(`Server is running on port ${port}`);
   });
 }
+
+
 
 startServer().catch((err) => {
   console.error("Failed to start server:", err);
