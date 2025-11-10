@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import customerRoutes from './routes/customerRoutes.js';
 import vendorRoutes from './routes/vendorRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 const port = process.env.PORT;
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use('/api/customers', customerRoutes);
 app.use('/api/vendors', vendorRoutes);
+app.use('/api/products', productRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the NearBuy API');

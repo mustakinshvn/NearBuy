@@ -5,7 +5,7 @@ import {
   getCustomerById,
   updateCustomer,
   deleteCustomer,
-} from '../controllers/customerController.js';
+} from '../controllers/CustomerController.js';
 
 import {
   validateCustomerRegister,
