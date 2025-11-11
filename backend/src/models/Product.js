@@ -149,6 +149,33 @@ class Product {
         }
     }
 
+    // Reduce stock quantity for a product
+    static async reduceStock(productId, quantityToReduce) {
+        try {
+            // Check if product exists and has sufficient stock
+            const product = await Product.getById(productId);
+            if (!product) {
+                throw new Error(`Product with ID ${productId} not found`);
+            }
+            if (product.stock_quantity < quantityToReduce) {
+                throw new Error(`Insufficient stock. Available: ${product.stock_quantity}, Requested: ${quantityToReduce}`);
+            }
+
+            // Reduce stock quantity
+            const query = `
+            UPDATE products
+            SET stock_quantity = stock_quantity - $1, updated_at = CURRENT_TIMESTAMP
+            WHERE product_id = $2
+            RETURNING *;
+            `;
+
+            const { rows } = await pool.query(query, [quantityToReduce, productId]);
+            return rows[0];
+        } catch (error) {
+            throw new Error(`Error reducing product stock: ${error.message}`);
+        }
+    }
+
     static async delete(productId) {
         try {
             const query = `DELETE FROM products WHERE product_id = $1 RETURNING *;`;

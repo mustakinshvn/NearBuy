@@ -4,6 +4,8 @@ import cors from 'cors';
 import customerRoutes from './routes/customerRoutes.js';
 import vendorRoutes from './routes/vendorRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import orderItemRoutes from './routes/orderItemRoutes.js';
 
 const port = process.env.PORT;
 const app = express();
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use('/api/customers', customerRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/order-items', orderItemRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the NearBuy API');
@@ -33,6 +37,7 @@ async function initDb() {
 }
 
 async function startServer() {
+  console.log("Initializing database connection...");
   await initDb();
   
   app.listen(port, () => {
