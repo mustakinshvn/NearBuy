@@ -1,8 +1,8 @@
-import Logo from '../sharingComponents/logo'
-import Cart from './Cart'
-import ProfileLogo from './ProfileLogo'
-import Navbar from './NavBar'
-import SearchBar from './SearchBar'
+import Logo from './sharingComponents/logo'
+import Cart from './headerComponents/Cart'
+import ProfileLogo from './headerComponents/ProfileLogo'
+import Navbar from './headerComponents/NavBar'
+import SearchBar from './headerComponents/SearchBar'
 const Header = () => {
   return (
     <>

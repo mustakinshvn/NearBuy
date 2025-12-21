@@ -7,7 +7,11 @@ const Cart = () => {
   const { getCartCount } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const cartCount = getCartCount();
+  let cartCount = 0;
+
+  if(getCartCount) {
+    cartCount = getCartCount()
+  }
 
   const handleCartClick = () => {
     if (!isAuthenticated) {
