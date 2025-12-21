@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../hooks/useNotifications';
 import ButtonCardWithoutBG from '../sharingComponents/ButtonCardWithoutBG';
+import ButtonCard from '../sharingComponents/Button';
+
 
 const ProfileLogo = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -45,7 +47,7 @@ const ProfileLogo = () => {
         onClick={() => setShowDropdown(!showDropdown)}
         className='flex items-center gap-2 cursor-pointer group'
       >
-        <div className='flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl curosor-pointer'>
+        <div className='flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-br from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl curosor-pointer'>
           <User className='text-white' size={20} />
         </div>
         <span className='hidden md:block text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors'>
