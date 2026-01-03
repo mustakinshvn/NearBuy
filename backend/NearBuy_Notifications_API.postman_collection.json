@@ -1,0 +1,591 @@
+{
+  "info": {
+    "_postman_id": "nearbuy-notifications-api",
+    "name": "NearBuy - Notifications API",
+    "description": "Complete Notifications API for NearBuy Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Notifications",
+      "item": [
+        {
+          "name": "Create Basic Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"title\": \"Welcome to NearBuy\",\n  \"message\": \"Thank you for joining our platform\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Create with Order Reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"order_id\": 10,\n  \"title\": \"Order Confirmed\",\n  \"message\": \"Your order #10 has been confirmed and will be processed soon\",\n  \"type\": \"Order\",\n  \"priority\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Create with Product Reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"product_id\": 5,\n  \"title\": \"Product Available\",\n  \"message\": \"The product you were looking for is now available\",\n  \"type\": \"Product\",\n  \"priority\": \"Normal\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Create for Vendor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendor_id\": 2,\n  \"title\": \"New Order Received\",\n  \"message\": \"You have received a new order from a customer\",\n  \"type\": \"Order\",\n  \"priority\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Create with All Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"vendor_id\": 2,\n  \"order_id\": 10,\n  \"product_id\": 5,\n  \"review_id\": 3,\n  \"coupon_id\": 7,\n  \"admin_id\": 1,\n  \"title\": \"Special Promotion\",\n  \"message\": \"Get 20% off on your next purchase using code SAVE20\",\n  \"type\": \"Promotion\",\n  \"priority\": \"High\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Get Notifications",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/{{notification_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/customer/{{customer_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "customer", "{{customer_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Vendor Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/vendor/{{vendor_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "vendor", "{{vendor_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/order/{{order_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "order", "{{order_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get by Product ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/product/{{product_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "product", "{{product_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Unread Tracking",
+      "item": [
+        {
+          "name": "Get Unread for Customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/customer/{{customer_id}}/unread",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "customer", "{{customer_id}}", "unread"]
+            }
+          }
+        },
+        {
+          "name": "Get Unread for Vendor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/vendor/{{vendor_id}}/unread",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "vendor", "{{vendor_id}}", "unread"]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/customer/{{customer_id}}/unread-count",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "customer", "{{customer_id}}", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count (Vendor)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/vendor/{{vendor_id}}/unread-count",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "vendor", "{{vendor_id}}", "unread-count"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Filtering",
+      "item": [
+        {
+          "name": "Get by Type (Order)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/type/Order",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "type", "Order"]
+            }
+          }
+        },
+        {
+          "name": "Get by Type (Promotion)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/type/Promotion",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "type", "Promotion"]
+            }
+          }
+        },
+        {
+          "name": "Get by Priority (High)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/priority/High",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "priority", "High"]
+            }
+          }
+        },
+        {
+          "name": "Get by Priority (Urgent)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/priority/Urgent",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "priority", "Urgent"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Update Operations",
+      "item": [
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Mark Multiple as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notification_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/read/multiple",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "read", "multiple"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"message\": \"Updated message\",\n  \"type\": \"Order\",\n  \"priority\": \"Normal\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/{{notification_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "{{notification_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Delete Operations",
+      "item": [
+        {
+          "name": "Delete Single",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/{{notification_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Multiple",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notification_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/delete/multiple",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "delete", "multiple"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Error Testing",
+      "item": [
+        {
+          "name": "Missing Required Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"title\": \"Missing message field\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Missing Recipient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"No recipient\",\n  \"message\": \"This has no customer or vendor\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Invalid ID Format",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/abc",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "abc"]
+            }
+          }
+        },
+        {
+          "name": "Resource Not Found",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/999999",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "999999"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "api_version",
+      "value": "/api"
+    },
+    {
+      "key": "customer_id",
+      "value": "1"
+    },
+    {
+      "key": "vendor_id",
+      "value": "1"
+    },
+    {
+      "key": "notification_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "10"
+    },
+    {
+      "key": "product_id",
+      "value": "1"
+    }
+  ]
+}

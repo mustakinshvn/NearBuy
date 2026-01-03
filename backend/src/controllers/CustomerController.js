@@ -1,6 +1,45 @@
 import Customer from "../models/Customer.js";
 import bcrypt from "bcrypt";
 
+// Login customer
+export const loginCustomer = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Check if customer exists
+    const customer = await Customer.getByEmail(email);
+    if (!customer) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, customer.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Return customer data (excluding password)
+    res.status(200).json({
+      message: "Login successful",
+      customer: {
+        customer_id: customer.customer_id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        created_at: customer.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Register a new customer
 export const registerCustomer = async (req, res) => {
   try {
