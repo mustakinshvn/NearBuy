@@ -11,8 +11,15 @@ import notificationRoutes from './routes/notificationRoutes.js';
 const port = process.env.PORT;
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Vite default port
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/customers', customerRoutes);

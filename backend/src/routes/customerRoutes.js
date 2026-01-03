@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  loginCustomer,
   registerCustomer,
   getAllCustomers,
   getCustomerById,
@@ -15,7 +16,7 @@ import {
 
 const router = express.Router();
 
-// Customer routes
+router.post('/login', loginCustomer);
 router.post('/register', validateCustomerRegister, registerCustomer);   
 
 router.get('/', getAllCustomers);        

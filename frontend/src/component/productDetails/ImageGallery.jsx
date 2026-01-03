@@ -27,8 +27,8 @@ const ImageGallery = ({ product, selectedImage, onSelectImage }) => {
   };
 
   return (
-    <div className="space-y-2 sm:space-y-4">
-      <div className="relative aspect-square bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl sm:rounded-2xl overflow-hidden">
+    <div className="space-y-2 sm:space-y-3">
+      <div className="relative aspect-[4/3] sm:aspect-[3/2] bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl overflow-hidden">
         {allImages.length > 0 ? (
           <img
             key={`main-${internalIndex}`}
@@ -60,7 +60,7 @@ const ImageGallery = ({ product, selectedImage, onSelectImage }) => {
               key={idx}
               type="button"
               onClick={() => handleImageSelect(idx)}
-              className={`shrink-0 w-14 h-14 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-md overflow-hidden border-2 transition-all ${
                 internalIndex === idx
                   ? 'border-blue-600 scale-105'
                   : 'border-slate-200 hover:border-slate-300'
