@@ -16,7 +16,7 @@ class Product {
                 stock_quantity = 0,
                 is_available = true,
                 main_image_url = null,
-                image_urls = null, // expect JS array or null
+                image_urls = null, 
                 average_rating = 0.0,
                 total_reviews = 0,
                 weight = null,
@@ -24,7 +24,7 @@ class Product {
                 color = null,
                 material = null,
                 seller_id = null,
-                keywords = null // expect JS array or null
+                keywords = null 
             } = data;
 
             const query = `
@@ -108,7 +108,6 @@ class Product {
 
     static async update(productId, data) {
         try {
-            // Build a dynamic update to avoid forcing all fields
             const allowed = [
                 'title','description','brand','model_number','category_id','subcategory_id','price','discount_price','currency','stock_quantity','is_available','main_image_url','image_urls','average_rating','total_reviews','weight','dimensions','color','material','seller_id','keywords'
             ];
@@ -126,11 +125,9 @@ class Product {
             }
 
             if (setClauses.length === 0) {
-                // Nothing to update
                 return await Product.getById(productId);
             }
 
-            // Always update updated_at
             setClauses.push(`updated_at = CURRENT_TIMESTAMP`);
 
             const query = `
@@ -149,10 +146,8 @@ class Product {
         }
     }
 
-    // Reduce stock quantity for a product
     static async reduceStock(productId, quantityToReduce) {
         try {
-            // Check if product exists and has sufficient stock
             const product = await Product.getById(productId);
             if (!product) {
                 throw new Error(`Product with ID ${productId} not found`);

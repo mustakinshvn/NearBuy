@@ -1,29 +1,24 @@
 import Customer from "../models/Customer.js";
 import bcrypt from "bcrypt";
 
-// Login customer
 export const loginCustomer = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check if customer exists
     const customer = await Customer.getByEmail(email);
     if (!customer) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Return customer data (excluding password)
     res.status(200).json({
       message: "Login successful",
       customer: {
@@ -40,26 +35,21 @@ export const loginCustomer = async (req, res) => {
   }
 };
 
-// Register a new customer
 export const registerCustomer = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
 
-    // Validation
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if email already exists
     const existingCustomer = await Customer.getByEmail(email);
     if (existingCustomer) {
       return res.status(409).json({ message: "Email already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create customer
     const customer = await Customer.create({
       name,
       email,
@@ -83,7 +73,6 @@ export const registerCustomer = async (req, res) => {
   }
 };
 
-// Get all customers
 export const getAllCustomers = async (req, res) => {
   try {
     const customers = await Customer.getAll();
@@ -98,7 +87,6 @@ export const getAllCustomers = async (req, res) => {
   }
 };
 
-// Get customer by ID
 export const getCustomerById = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -123,7 +111,6 @@ export const getCustomerById = async (req, res) => {
   }
 };
 
-// Update customer
 export const updateCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -137,13 +124,11 @@ export const updateCustomer = async (req, res) => {
       return res.status(400).json({ message: "Name, email, and phone are required" });
     }
 
-    // Check if customer exists
     const existingCustomer = await Customer.getById(customerId);
     if (!existingCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    // Check if new email is already taken by another customer
     if (email !== existingCustomer.email) {
       const emailExists = await Customer.emailExists(email);
       if (emailExists) {
@@ -163,7 +148,6 @@ export const updateCustomer = async (req, res) => {
   }
 };
 
-// Delete customer
 export const deleteCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -172,7 +156,6 @@ export const deleteCustomer = async (req, res) => {
       return res.status(400).json({ message: "Customer ID is required" });
     }
 
-    // Check if customer exists
     const customer = await Customer.getById(customerId);
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });

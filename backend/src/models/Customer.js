@@ -1,7 +1,6 @@
 import pool from '../config/db.js';
 
 class Customer {
-  // Create a new customer
   static async create(data) {
     const { name, email, phone, password } = data;
     try {
@@ -17,7 +16,6 @@ class Customer {
     }
   }
 
-  // Get all customers
   static async getAll() {
     try {
       const result = await pool.query(
@@ -29,7 +27,6 @@ class Customer {
     }
   }
 
-  // Get customer by ID
   static async getById(customerId) {
     try {
       const result = await pool.query(
@@ -42,7 +39,6 @@ class Customer {
     }
   }
 
-  // Get customer by email
   static async getByEmail(email) {
     try {
       const result = await pool.query(
@@ -55,7 +51,6 @@ class Customer {
     }
   }
 
-  // Update customer
   static async update(customerId, data) {
     const { name, email, phone } = data;
     try {
@@ -71,7 +66,6 @@ class Customer {
     }
   }
 
-  // Delete customer
   static async delete(customerId) {
     try {
       const result = await pool.query(
@@ -84,7 +78,6 @@ class Customer {
     }
   }
 
-  // Check if email exists
   static async emailExists(email) {
     try {
       const result = await pool.query(

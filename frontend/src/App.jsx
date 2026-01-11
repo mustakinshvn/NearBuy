@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/homePage.jsx';
 import ShopsPage from './pages/ShopsPage';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
@@ -12,6 +11,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './component/ProtectedRoute';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
