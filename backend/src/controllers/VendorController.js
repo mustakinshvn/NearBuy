@@ -1,15 +1,12 @@
 import Vendor from "../models/Vendor.js";
 
-// Register a new vendor
 export const registerVendor = async (req, res) => {
     try {
         const { name, email, phone, password, shop_name, shop_type, description, street, area, city, country, postal_code } = req.body;
 
-        // Validation
         if (!name || !email || !password || !shop_name || !shop_type || !street || !area || !city || !country) {
             return res.status(400).json({ message: "All required fields must be provided (name, email, password, shop_name, shop_type, street, area, city, country)" });
         }
-        // Check if phone already exists
         if (phone) {
             const existingVendorByPhone = await Vendor.getByPhone(phone);
             if (existingVendorByPhone) {
@@ -17,12 +14,10 @@ export const registerVendor = async (req, res) => {
             }
         }
 
-        // Check if email already exists
         const existingVendorByEmail = await Vendor.getByEmail(email);
         if (existingVendorByEmail) {
             return res.status(409).json({ message: "Email already exists" });
         }
-        // Create vendor
         const vendor = await Vendor.create({
             name,
             email,
@@ -62,7 +57,6 @@ export const registerVendor = async (req, res) => {
 };
 
 
-// Get vendor by ID
 export const getVendorById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -81,7 +75,6 @@ export const getVendorById = async (req, res) => {
 };
 
 
-// Get vendor by phone
 export const getVendorByPhone = async (req, res) => {
     try {
         const { phone } = req.params;
@@ -101,7 +94,6 @@ export const getVendorByPhone = async (req, res) => {
 
 
 
-// Get vendor by email
 export const getVendorByEmail = async (req, res) => {
     try {
         const { email } = req.params;
@@ -120,7 +112,6 @@ export const getVendorByEmail = async (req, res) => {
 };
 
 
-// Get all vendors
 export const getAllVendors = async (req, res) => {
     try {
         const vendors = await Vendor.getAll();
@@ -135,7 +126,6 @@ export const getAllVendors = async (req, res) => {
 };
 
 
-// Get vendors by shop type
 export const getVendorsByType = async (req, res) => {
     try {
         const { type } = req.params;
@@ -154,7 +144,6 @@ export const getVendorsByType = async (req, res) => {
 };
 
 
-// Update vendor
 export const updateVendor = async (req, res) => {
     try {
         const { id } = req.params;
@@ -175,7 +164,6 @@ export const updateVendor = async (req, res) => {
     
 
 
-// Delete vendor
 export const deleteVendor = async (req, res) => {
     try {
         const { id } = req.params;
