@@ -21,7 +21,6 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error(data.message || 'Something went wrong');
     }
 
-    console.log('API Success:', endpoint, data);
     return data;
   } catch (error) {
     console.error('API Error:', endpoint, error);

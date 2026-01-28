@@ -11,14 +11,23 @@ import notificationRoutes from './routes/notificationRoutes.js';
 const port = process.env.PORT;
 const app = express();
 
-// CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_DEV,
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Vite default port
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
-// Middlewares
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -40,8 +49,8 @@ async function initDb() {
     console.log("✅ Connected to the Neon database successfully.");
     client.release();
   } catch (error) {
-    console.error("❌ Error connecting to the Neon database:", error.message);
-    console.warn("⚠️  Continuing without database connection for development.");
+    console.error(" Error connecting to the Neon database:", error.message);
+    console.warn("⚠️ Continuing without database connection for development.");
   }
 }
 
