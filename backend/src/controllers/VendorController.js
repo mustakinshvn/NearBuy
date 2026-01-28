@@ -1,15 +1,54 @@
 import Vendor from "../models/Vendor.js";
+import bcrypt from "bcrypt";
 
-// Register a new vendor
+export const loginVendor = async (req, res) => {
+    try{
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+        const vendor = await Vendor.getByEmail(email);
+        if (!vendor) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+        const isPasswordValid = await bcrypt.compare(password, vendor.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        res.status(200).json({
+            message: "Vendor Login successful",
+            vendor: {
+                vendor_id: vendor.vendor_id,
+                name: vendor.name,
+                email: vendor.email,
+                phone: vendor.phone,
+                shop_name: vendor.shop_name,
+                shop_type: vendor.shop_type,
+                description: vendor.description,
+                street: vendor.street,
+                area: vendor.area,
+                city: vendor.city,
+                country: vendor.country,
+                postal_code: vendor.postal_code,
+                created_at: vendor.created_at
+            }
+        });
+
+    }catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export const registerVendor = async (req, res) => {
     try {
         const { name, email, phone, password, shop_name, shop_type, description, street, area, city, country, postal_code } = req.body;
 
-        // Validation
         if (!name || !email || !password || !shop_name || !shop_type || !street || !area || !city || !country) {
             return res.status(400).json({ message: "All required fields must be provided (name, email, password, shop_name, shop_type, street, area, city, country)" });
         }
-        // Check if phone already exists
         if (phone) {
             const existingVendorByPhone = await Vendor.getByPhone(phone);
             if (existingVendorByPhone) {
@@ -17,12 +56,10 @@ export const registerVendor = async (req, res) => {
             }
         }
 
-        // Check if email already exists
         const existingVendorByEmail = await Vendor.getByEmail(email);
         if (existingVendorByEmail) {
             return res.status(409).json({ message: "Email already exists" });
         }
-        // Create vendor
         const vendor = await Vendor.create({
             name,
             email,
@@ -62,7 +99,6 @@ export const registerVendor = async (req, res) => {
 };
 
 
-// Get vendor by ID
 export const getVendorById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -81,7 +117,6 @@ export const getVendorById = async (req, res) => {
 };
 
 
-// Get vendor by phone
 export const getVendorByPhone = async (req, res) => {
     try {
         const { phone } = req.params;
@@ -101,7 +136,6 @@ export const getVendorByPhone = async (req, res) => {
 
 
 
-// Get vendor by email
 export const getVendorByEmail = async (req, res) => {
     try {
         const { email } = req.params;
@@ -120,7 +154,6 @@ export const getVendorByEmail = async (req, res) => {
 };
 
 
-// Get all vendors
 export const getAllVendors = async (req, res) => {
     try {
         const vendors = await Vendor.getAll();
@@ -135,7 +168,6 @@ export const getAllVendors = async (req, res) => {
 };
 
 
-// Get vendors by shop type
 export const getVendorsByType = async (req, res) => {
     try {
         const { type } = req.params;
@@ -154,7 +186,6 @@ export const getVendorsByType = async (req, res) => {
 };
 
 
-// Update vendor
 export const updateVendor = async (req, res) => {
     try {
         const { id } = req.params;
@@ -175,7 +206,6 @@ export const updateVendor = async (req, res) => {
     
 
 
-// Delete vendor
 export const deleteVendor = async (req, res) => {
     try {
         const { id } = req.params;

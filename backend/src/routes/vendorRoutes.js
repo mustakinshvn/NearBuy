@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { registerVendor, getAllVendors, getVendorByEmail, getVendorById, getVendorByPhone, getVendorsByType, deleteVendor, updateVendor } from '../controllers/VendorController.js';
+import { loginVendor, registerVendor, getAllVendors, getVendorByEmail, getVendorById, getVendorByPhone, getVendorsByType, deleteVendor, updateVendor } from '../controllers/VendorController.js';
 
 const router = Router();
 
 const asyncHandler = (fn) => (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next);
 
+router.post('/login', asyncHandler(loginVendor));
 router.post('/', asyncHandler(registerVendor));
 router.get('/', asyncHandler(getAllVendors));
 router.get('/email/:email', asyncHandler(getVendorByEmail));

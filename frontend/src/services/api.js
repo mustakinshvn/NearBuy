@@ -1,3 +1,4 @@
+
 const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 const apiRequest = async (endpoint, options = {}) => {
@@ -12,7 +13,6 @@ const apiRequest = async (endpoint, options = {}) => {
   };
 
   try {
-    console.log('API Request:', url);
     const response = await fetch(url, config);
     const data = await response.json();
 
@@ -108,6 +108,14 @@ export const productAPI = {
 
 
 export const vendorAPI = {
+
+  vendorLogin: async (email, password) => {
+    return apiRequest('/vendors/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
   getAll: async () => {
     return apiRequest('/vendors');
   },
