@@ -69,7 +69,6 @@ export const productAPI = {
   getAll: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString ? `/products?${queryString}` : '/products';
-    console.log('Fetching products with endpoint:', endpoint);
     return apiRequest(endpoint);
   },
 
