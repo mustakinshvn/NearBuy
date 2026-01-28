@@ -21,7 +21,6 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error(data.message || 'Something went wrong');
     }
 
-    console.log('API Success:', endpoint, data);
     return data;
   } catch (error) {
     console.error('API Error:', endpoint, error);
@@ -70,6 +69,7 @@ export const productAPI = {
   getAll: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString ? `/products?${queryString}` : '/products';
+    console.log('Fetching products with endpoint:', endpoint);
     return apiRequest(endpoint);
   },
 
