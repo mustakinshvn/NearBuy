@@ -13,6 +13,8 @@ import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./component/ProtectedRoute";
 import HomePage from "./pages/HomePage";
 import AdminVendorLoginPage from "./pages/AdminVendorLoginPage";
+import VendorDashBoard from "./vendorPages/VendorDashBoard";
+import ProtectedVendorsRoutes from "./component/ProtectedVendorsRoutes";
 
 function App() {
   return (
@@ -25,6 +27,15 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/admin-vendor-login" element={<AdminVendorLoginPage />} />
+
+      <Route
+        path="/vendor-dashboard"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorDashBoard />
+          </ProtectedVendorsRoutes>
+        }
+      />
 
       <Route
         path="/profile"
