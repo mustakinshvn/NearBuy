@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, UsersRound } from "lucide-react";
 import ButtonCard from "../component/sharingComponents/Button";
 import { useVendorAuth } from "../hooks/useVendorAuthContext";
 
 const AdminVendorLoginPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { vendorLogin } = useVendorAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,8 +14,6 @@ const AdminVendorLoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loginError, setLoginError] = useState("");
-
-  const from = location.state?.from?.pathname || "/";
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,7 +41,7 @@ const AdminVendorLoginPage = () => {
         const result = await vendorLogin(formData.email, formData.password);
 
         if (result.success) {
-          navigate(from, { replace: true });
+          navigate("/vendor-dashboard", { replace: true });
         } else {
           setLoginError(result.error || "Login failed. Please try again.");
         }
