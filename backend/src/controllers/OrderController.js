@@ -1,17 +1,14 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
 
-// Create a new order
 export const createOrder = async (req, res) => {
   try {
     const { customer_id, vendor_id, total_amount, discount_amount, payment_method, items } = req.body;
 
-    // Validation
     if (!customer_id || !total_amount || !items || items.length === 0) {
       return res.status(400).json({ message: "customer_id, total_amount, and items are required" });
     }
 
-    // Create order
     const order = await Order.create({
       customer_id,
       vendor_id,
@@ -20,7 +17,6 @@ export const createOrder = async (req, res) => {
       payment_method: payment_method || 'Cash on Delivery',
     });
 
-    // Create order items
     const orderItemsData = [];
     for (const item of items) {
       if (!item.product_id || !item.quantity || !item.unit_price) {
@@ -62,7 +58,6 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Get all orders
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.getAll();
@@ -77,7 +72,6 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-// Get order by ID with items
 export const getOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -102,7 +96,6 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// Get orders by customer ID
 export const getOrdersByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -120,7 +113,6 @@ export const getOrdersByCustomer = async (req, res) => {
   }
 };
 
-// Get orders by vendor ID
 export const getOrdersByVendor = async (req, res) => {
   try {
     const { vendorId } = req.params;
