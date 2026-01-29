@@ -1,37 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AllOrders } from "../component/vendor/AllOrders";
+import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
+import { orderAPI } from "../services/api";
+
+const stats = {
+  totalSales: 45230,
+  totalOrders: 128,
+  pendingOrders: 12,
+  totalProducts: 45,
+  revenue: 32450,
+};
 
 const VendorDashBoard = () => {
-  const [stats] = useState({
-    totalSales: 45230,
-    totalOrders: 128,
-    pendingOrders: 12,
-    totalProducts: 45,
-    revenue: 32450,
-  });
+  const { vendor } = useVendorAuthContext();
+  const [vendorOrders, setVendorOrders] = useState([]);
 
-  const [recentOrders] = useState([
-    {
-      id: 1,
-      product: "Laptop Stand",
-      customer: "John Doe",
-      amount: 250,
-      status: "Pending",
-    },
-    {
-      id: 2,
-      product: "USB Cable",
-      customer: "Jane Smith",
-      amount: 15,
-      status: "Shipped",
-    },
-    {
-      id: 3,
-      product: "Monitor",
-      customer: "Mike Brown",
-      amount: 450,
-      status: "Delivered",
-    },
-  ]);
+  useEffect(() => {
+    async function fetchVendorOrders() {
+      setVendorOrders(await orderAPI.getByVendor(vendor.vendor_id));
+    }
+    fetchVendorOrders();
+  }, [vendor]);
+
+  console.log("Vendor Orders:", vendorOrders.orders);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -72,61 +63,7 @@ const VendorDashBoard = () => {
           <h2 className="text-2xl font-bold text-gray-900">Recent Orders</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    #{order.id}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {order.product}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    ${order.amount}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                        order.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : order.status === "Shipped"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <AllOrders orders={vendorOrders.orders} />
         </div>
       </section>
     </div>

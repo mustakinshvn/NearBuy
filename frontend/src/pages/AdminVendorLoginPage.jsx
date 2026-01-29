@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, UsersRound } from "lucide-react";
 import ButtonCard from "../component/sharingComponents/Button";
-import { useVendorAuth } from "../hooks/useVendorAuthContext";
+import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 
 const AdminVendorLoginPage = () => {
   const navigate = useNavigate();
-  const { vendorLogin } = useVendorAuth();
+  const { vendorLogin } = useVendorAuthContext();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",

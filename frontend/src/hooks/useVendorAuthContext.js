@@ -1,10 +1,10 @@
 import { useContext } from 'react';
 import { VendorAuthContext } from '../context/VendorAuthContextObject';
 
-export const useVendorAuth = () => {
+export const useVendorAuthContext = () => {
   const context = useContext(VendorAuthContext);
   if (!context) {
-    throw new Error('useVendorAuth must be used within a VendorAuthProvider');
+    throw new Error('useVendorAuthContext must be used within a VendorAuthProvider');
   }
   return context;
 };

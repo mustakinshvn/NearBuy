@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useVendorAuth } from "../hooks/useVendorAuthContext";
+import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 
 const ProtectedVendorsRoutes = ({ children }) => {
-  const { isAuthenticated } = useVendorAuth();
+  const { isAuthenticated } = useVendorAuthContext();
   const location = useLocation();
 
   if (!isAuthenticated) {

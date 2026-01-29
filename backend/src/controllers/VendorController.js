@@ -12,7 +12,8 @@ export const loginVendor = async (req, res) => {
         if (!vendor) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
-        const isPasswordValid = await bcrypt.compare(password, vendor.password);
+        // const isPasswordValid = await bcrypt.compare(password, vendor.password);
+        const isPasswordValid = password === vendor.password;
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
