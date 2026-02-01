@@ -123,7 +123,7 @@ export const getOrdersByVendor = async (req, res) => {
 
     res.status(200).json({
       message: "Orders retrieved successfully",
-      count: orders.length,
+      orderCount: mergedOrders.length,
       orders: mergedOrders,
     });
   } catch (error) {
