@@ -22,8 +22,6 @@ const VendorDashBoard = () => {
     fetchVendorOrders();
   }, [vendor]);
 
-  console.log("Vendor Orders:", vendorOrders.orders);
-
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <header className="mb-8">
@@ -63,7 +61,7 @@ const VendorDashBoard = () => {
           <h2 className="text-2xl font-bold text-gray-900">Recent Orders</h2>
         </div>
         <div className="overflow-x-auto">
-          <AllOrders orders={vendorOrders.orders} />
+          <AllOrders orders={vendorOrders.orders || []} />
         </div>
       </section>
     </div>

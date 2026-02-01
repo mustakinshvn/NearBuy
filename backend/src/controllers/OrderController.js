@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
+import { mergeOrdersByOrderId } from "../lib/utils.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -118,11 +119,12 @@ export const getOrdersByVendor = async (req, res) => {
     const { vendorId } = req.params;
 
     const orders = await Order.getByVendorId(vendorId);
+    const mergedOrders = await mergeOrdersByOrderId(orders);
 
     res.status(200).json({
       message: "Orders retrieved successfully",
       count: orders.length,
-      orders,
+      orders: mergedOrders,
     });
   } catch (error) {
     console.error("Get orders by vendor error:", error);
@@ -130,7 +132,6 @@ export const getOrdersByVendor = async (req, res) => {
   }
 };
 
-// Update order status
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -160,7 +161,6 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-// Update payment status
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -190,7 +190,6 @@ export const updatePaymentStatus = async (req, res) => {
   }
 };
 
-// Get past orders by customer (delivered orders)
 export const getPastOrdersByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -208,12 +207,10 @@ export const getPastOrdersByCustomer = async (req, res) => {
   }
 };
 
-// Get all past orders (delivered orders) with pagination
 export const getAllPastOrders = async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
     
-    // Validate pagination parameters
     const validLimit = Math.min(Math.max(parseInt(limit) || 50, 1), 100);
     const validOffset = Math.max(parseInt(offset) || 0, 0);
 
@@ -232,15 +229,12 @@ export const getAllPastOrders = async (req, res) => {
   }
 };
 
-// Delete order
 export const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // Delete associated order items first
     await OrderItem.deleteByOrderId(orderId);
 
-    // Delete the order
     const deletedOrder = await Order.delete(orderId);
     if (!deletedOrder) {
       return res.status(404).json({ message: "Order not found" });

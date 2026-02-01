@@ -1,9 +1,11 @@
 const enumVendorOrderTable = {
   order_id: "Order ID",
-  product_title: "Product",
+  product_title: "Products",
   name: "Customer",
   amount: "Amount",
-  status: "Status",
+  payment_status: "Payment Status",
+  order_status: "Order Status",
+  phone: "Mobile",
 };
 
 export const AllOrders = (props) => {
@@ -13,22 +15,28 @@ export const AllOrders = (props) => {
   return (
     <div>
       <table className="w-full">
-        <thead className="bg-gray-100 border-b border-gray-200">
+        <thead className="bg-gray-100 border-b border-gray-200 ">
           <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
               {enumVendorOrderTable.order_id}
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
               {enumVendorOrderTable.product_title}
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
               {enumVendorOrderTable.name}
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
+              {enumVendorOrderTable.phone}
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
               {enumVendorOrderTable.amount}
             </th>
-            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-              {enumVendorOrderTable.status}
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
+              {enumVendorOrderTable.payment_status}
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-bold text-gray-700">
+              {enumVendorOrderTable.order_status}
             </th>
           </tr>
         </thead>
@@ -42,15 +50,33 @@ export const AllOrders = (props) => {
                 <td className="px-6 py-4 text-sm text-gray-900">
                   #{order.order_id}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {order.product_title}
+                <td className="px-6 py-4 text-sm text-gray-900 font-semibold">
+                  {order.items.map((item) => item.product_title).join(", ")}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  {order.name}
+                  {order.customer.name}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  ${order.unit_price}
+                  {order.customer.phone}
                 </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  ${order.total_amount}
+                </td>
+
+                <td className="px-6 py-4 text-sm">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      order.payment_status === "Pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : order.payment_status === "Shipped"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {order.payment_status}
+                  </span>
+                </td>
+
                 <td className="px-6 py-4 text-sm">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
