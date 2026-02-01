@@ -126,6 +126,7 @@ export const getOrdersByVendor = async (req, res) => {
     const deliveredCount = await deliveredOrdersCount(mergedOrders);
     const totalSales = await totalSalesAmount(mergedOrders);
     const totalAvaibleProducts = (await Product.getBySeller(vendorId)).length;
+    mergedOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     res.status(200).json({
       message: "Orders retrieved successfully",
