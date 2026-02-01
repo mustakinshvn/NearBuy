@@ -8,11 +8,11 @@ const Header = () => {
     <>
       <div className="py-2 mt-2 w-full shadow-lg p-4 sticky top-0 z-50 bg-white rounded-md ">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex w-full items-center gap-3">
+          <div className="flex w-full items-center lg:justify-between gap-3">
             <div className="order-0 lg:order-1">
               <Navbar />
             </div>
-            <div className="order-1 lg:order-0">
+            <div className="order-1 lg:order-0  ">
               <Logo />
             </div>
           </div>

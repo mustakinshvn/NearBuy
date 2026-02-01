@@ -20,7 +20,7 @@ const SearchBar = () => {
   return (
     <form onSubmit={handleSearch} className="relative w-full ">
       <div
-        className={`relative lg:min-w-110 flex items-center transition-all duration-300 ${
+        className={`relative lg:min-w-90 flex items-center transition-all duration-300 ${
           isFocused ? "ring-2 ring-blue-400 shadow-lg" : "ring-1 ring-slate-200"
         } rounded-full bg-slate-50 hover:bg-slate-100`}
       >
