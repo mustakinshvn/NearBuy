@@ -50,8 +50,18 @@ export const AllOrders = (props) => {
                 <td className="px-6 py-4 text-sm text-gray-900">
                   #{order.order_id}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 font-semibold">
-                  {order.items.map((item) => item.product_title).join(", ")}
+                <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                  {order.items.map((item) => (
+                    <div key={item.product_id} className="flex  gap-2">
+                      <img
+                        src={item.product_image}
+                        alt={item.product_title}
+                        className="w-10 h-10 object-cover rounded-md"
+                      />
+                      {item.product_title}
+                      <h1 className="font-bold"> (x{item.quantity})</h1>
+                    </div>
+                  ))}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {order.customer.name}
@@ -60,7 +70,7 @@ export const AllOrders = (props) => {
                   {order.customer.phone}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                  ${order.total_amount}
+                  ${order.final_amount}
                 </td>
 
                 <td className="px-6 py-4 text-sm">
