@@ -1,27 +1,29 @@
-import React, { useState } from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Search, X } from "lucide-react";
 
 const SearchBar = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
+      console.log("Searching for:", searchQuery);
       // logic to perform search will be added here
     }
   };
 
   const clearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative w-full max-w-md">
-      <div className={`relative flex items-center transition-all duration-300 ${
-        isFocused ? 'ring-2 ring-blue-400 shadow-lg' : 'ring-1 ring-slate-200'
-      } rounded-full bg-slate-50 hover:bg-slate-100`}>
+    <form onSubmit={handleSearch} className="relative w-full ">
+      <div
+        className={`relative lg:min-w-110 flex items-center transition-all duration-300 ${
+          isFocused ? "ring-2 ring-blue-400 shadow-lg" : "ring-1 ring-slate-200"
+        } rounded-full bg-slate-50 hover:bg-slate-100`}
+      >
         <Search className="absolute left-4 w-5 h-5 text-slate-400" />
         <input
           type="text"

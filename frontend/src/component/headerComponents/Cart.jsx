@@ -1,7 +1,7 @@
-import { ShoppingCart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from '../../hooks/useCart';
-import { useAuth } from '../../hooks/useAuth';
+import { ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../../hooks/useCart";
+import { useAuth } from "../../hooks/useAuth";
 
 const Cart = () => {
   const { getCartCount } = useCart();
@@ -9,27 +9,27 @@ const Cart = () => {
   const navigate = useNavigate();
   let cartCount = 0;
 
-  if(getCartCount) {
-    cartCount = getCartCount()
+  if (getCartCount) {
+    cartCount = getCartCount();
   }
 
   const handleCartClick = () => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: '/cart' } } });
+      navigate("/login", { state: { from: { pathname: "/cart" } } });
     } else {
-      navigate('/cart');
+      navigate("/cart");
     }
   };
 
   return (
-    <button 
+    <button
       onClick={handleCartClick}
-      className='relative text-yellow-400 font-extrabold cursor-pointer hover:text-yellow-600 transition-colors'
+      className="relative text-yellow-400 font-extrabold cursor-pointer hover:text-yellow-600 transition-colors"
     >
-      <ShoppingCart size={24} />
+      <ShoppingCart size={30} />
       {cartCount > 0 && (
-        <span className='absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse'>
-          {cartCount > 99 ? '99+' : cartCount}
+        <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+          {cartCount > 99 ? "99+" : cartCount}
         </span>
       )}
     </button>
