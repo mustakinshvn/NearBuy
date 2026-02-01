@@ -51,7 +51,7 @@ export const AllOrders = (props) => {
                 <td className="px-6 py-4 text-sm text-gray-900 font-medium flex flex-col gap-2">
                   {order.items.map((item) => (
                     <div
-                      key={item.product_id}
+                      key={item.product_id + " " + order.order_id}
                       className="flex items-center gap-2"
                     >
                       <img
