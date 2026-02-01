@@ -40,6 +40,15 @@ function App() {
       <Route
         path="/profile"
         element={
+          <ProtectedVendorsRoutes>
+            <ProfilePage />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
