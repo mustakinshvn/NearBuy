@@ -1,6 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Link } from "react-router-dom";
-export const LinksProps = (props) => {
+export const LinksTo = (props) => {
   return (
     <Link
       to={props.to}

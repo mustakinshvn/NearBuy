@@ -1,6 +1,15 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Home, ShoppingBag, Package, Bell, Info, Menu, X, Store } from 'lucide-react';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Home,
+  ShoppingBag,
+  Package,
+  Bell,
+  Info,
+  Menu,
+  X,
+  Store,
+} from "lucide-react";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -8,19 +17,18 @@ const Navbar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-const navLinks = [
-    { name: 'Home', icon: Home, href: '/' },
-    { name: 'Shops', icon: Store, href: '/shops' },
-    { name: 'Products', icon: ShoppingBag, href: '/products' },
-    { name: 'Orders', icon: Package, href: '/orders' },
-    { name: 'Notifications', icon: Bell, href: '/notifications' },
-    { name: 'About', icon: Info, href: '/about' },
+  const navLinks = [
+    { name: "Home", icon: Home, href: "/" },
+    { name: "Shops", icon: Store, href: "/shops" },
+    { name: "Products", icon: ShoppingBag, href: "/products" },
+    { name: "Orders", icon: Package, href: "/orders" },
+    { name: "Notifications", icon: Bell, href: "/notifications" },
+    { name: "About", icon: Info, href: "/about" },
   ];
 
   return (
-    
-    <>    
-      <nav className="hidden  lg:flex  flex-row items-center space-x-10">
+    <>
+      <nav className="hidden  lg:flex  items-center gap-4 ">
         {navLinks.map((link) => {
           const IconComponent = link.icon;
           return (
@@ -39,7 +47,6 @@ const navLinks = [
         })}
       </nav>
 
-      
       <button
         onClick={toggleMobileMenu}
         className="lg:hidden relative text-slate-700 hover:text-blue-600 transition-all duration-300 p-2 hover:bg-blue-50 rounded-lg active:scale-95"
@@ -52,22 +59,18 @@ const navLinks = [
         )}
       </button>
 
-   
-
-      
       {isMobileMenuOpen && (
         <>
-          
           <div
             className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
             onClick={toggleMobileMenu}
           />
-          
-         
+
           <div className="lg:hidden fixed top-0 left-0 w-80 h-full bg-linear-to-b from-white to-slate-50 shadow-2xl z-50 transform transition-transform duration-300 ease-out animate-slideInLeft">
-           
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <h2 className="text-xl font-bold text-slate-800 tracking-wide">Menu</h2>
+              <h2 className="text-xl font-bold text-slate-800 tracking-wide">
+                Menu
+              </h2>
               <button
                 onClick={toggleMobileMenu}
                 className="text-slate-500 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg"
@@ -75,9 +78,8 @@ const navLinks = [
               >
                 <X className="w-6 h-6" />
               </button>
-             </div>
-            
-            
+            </div>
+
             <nav className="flex flex-col p-4 space-y-2 mt-4">
               {navLinks.map((link, index) => {
                 const IconComponent = link.icon;

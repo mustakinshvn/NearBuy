@@ -7,14 +7,14 @@ export const VendorAuthProvider = ({ children }) => {
     const storedVendor = localStorage.getItem("vendor");
     return storedVendor ? JSON.parse(storedVendor) : null;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+  const [isVendorAuthenticated, setIsVendorAuthenticated] = useState(() => {
     return localStorage.getItem("vendor") !== null;
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setIsAuthenticated(vendor !== null);
+    setIsVendorAuthenticated(vendor !== null);
   }, [vendor]);
 
   const vendorLogin = async (email, password) => {
@@ -26,7 +26,7 @@ export const VendorAuthProvider = ({ children }) => {
 
       const vendorData = response.vendor;
       setVendor(vendorData);
-      setIsAuthenticated(true);
+      setIsVendorAuthenticated((prev) => !prev);
       localStorage.setItem("vendor", JSON.stringify(vendorData));
 
       return { success: true, vendor: vendorData };
@@ -40,7 +40,7 @@ export const VendorAuthProvider = ({ children }) => {
 
   const vendorLogout = () => {
     setVendor(null);
-    setIsAuthenticated(false);
+    setIsVendorAuthenticated(false);
     localStorage.removeItem("vendor");
   };
 
@@ -53,7 +53,7 @@ export const VendorAuthProvider = ({ children }) => {
 
       const newVendor = response.vendor;
       setVendor(newVendor);
-      setIsAuthenticated(true);
+      setIsVendorAuthenticated(true);
       localStorage.setItem("vendor", JSON.stringify(newVendor));
 
       return { success: true, vendor: newVendor };
@@ -69,7 +69,7 @@ export const VendorAuthProvider = ({ children }) => {
     <VendorAuthContext.Provider
       value={{
         vendor,
-        isAuthenticated,
+        isVendorAuthenticated,
         vendorLogin,
         vendorLogout,
         vendorSignup,

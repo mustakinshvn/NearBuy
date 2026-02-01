@@ -1,16 +1,28 @@
-import { Edit2, Save, X } from 'lucide-react';
+import { Edit2, Save, X } from "lucide-react";
 
-const ProfileInformationCard = ({ user, isEditing, setIsEditing, formData, setFormData, setSuccess, onUserUpdate }) => {
+const ProfileInformationCard = ({
+  user,
+  vendor,
+  isEditing,
+  setIsEditing,
+  formData,
+  setFormData,
+  setSuccess,
+  onUserUpdate,
+}) => {
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/customers/${user?.customer_id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+      const response = await fetch(
+        `http://localhost:5000/api/customers/${user?.customer_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData)
-      });
+      );
 
       if (response.ok) {
         const updatedData = await response.json();
@@ -22,11 +34,11 @@ const ProfileInformationCard = ({ user, isEditing, setIsEditing, formData, setFo
         }
         setTimeout(() => setSuccess(false), 3000);
       } else {
-        console.error('Failed to update profile');
+        console.error("Failed to update profile");
         setSuccess(false);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
       setSuccess(false);
     }
   };
@@ -50,16 +62,28 @@ const ProfileInformationCard = ({ user, isEditing, setIsEditing, formData, setFo
         {!isEditing ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Name</label>
-              <p className="text-lg text-white mt-2 font-medium">{user?.name || 'Not provided'}</p>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Name
+              </label>
+              <p className="text-lg text-white mt-2 font-medium">
+                {user?.name || vendor?.name || "Not provided"}
+              </p>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
-              <p className="text-lg text-white mt-2 font-medium">{user?.email || 'Not provided'}</p>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Email Address
+              </label>
+              <p className="text-lg text-white mt-2 font-medium">
+                {user?.email || vendor?.email || "Not provided"}
+              </p>
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
-              <p className="text-lg text-white mt-2 font-medium">{user?.phone || 'Not provided'}</p>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Phone Number
+              </label>
+              <p className="text-lg text-white mt-2 font-medium">
+                {user?.phone || vendor?.phone || "Not provided"}
+              </p>
             </div>
           </div>
         ) : (
@@ -67,17 +91,23 @@ const ProfileInformationCard = ({ user, isEditing, setIsEditing, formData, setFo
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Name</label>
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">
+                    Name
+                  </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-4 py-3 bg-slate-600 border border-slate-500 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Email</label>
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">
+                    Email
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -85,15 +115,21 @@ const ProfileInformationCard = ({ user, isEditing, setIsEditing, formData, setFo
                     disabled
                     className="w-full px-4 py-3 bg-slate-500 border border-slate-500 rounded-lg text-slate-300 cursor-not-allowed opacity-60"
                   />
-                  <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Email cannot be changed
+                  </p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">Phone Number</label>
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="w-full px-4 py-3 bg-slate-600 border border-slate-500 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
                 </div>

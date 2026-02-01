@@ -1,17 +1,16 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
+import { mergeOrdersByOrderId, pendingOrdersCount, totalSalesAmount, deliveredOrdersCount } from "../lib/utils.js";
+import Product from "../models/Product.js";
 
-// Create a new order
 export const createOrder = async (req, res) => {
   try {
     const { customer_id, vendor_id, total_amount, discount_amount, payment_method, items } = req.body;
 
-    // Validation
     if (!customer_id || !total_amount || !items || items.length === 0) {
       return res.status(400).json({ message: "customer_id, total_amount, and items are required" });
     }
 
-    // Create order
     const order = await Order.create({
       customer_id,
       vendor_id,
@@ -20,7 +19,6 @@ export const createOrder = async (req, res) => {
       payment_method: payment_method || 'Cash on Delivery',
     });
 
-    // Create order items
     const orderItemsData = [];
     for (const item of items) {
       if (!item.product_id || !item.quantity || !item.unit_price) {
@@ -62,7 +60,6 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Get all orders
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.getAll();
@@ -77,7 +74,6 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-// Get order by ID with items
 export const getOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -102,7 +98,6 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// Get orders by customer ID
 export const getOrdersByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -120,17 +115,27 @@ export const getOrdersByCustomer = async (req, res) => {
   }
 };
 
-// Get orders by vendor ID
 export const getOrdersByVendor = async (req, res) => {
   try {
     const { vendorId } = req.params;
 
     const orders = await Order.getByVendorId(vendorId);
+    const mergedOrders = await mergeOrdersByOrderId(orders);
+    const orderCount = mergedOrders.length;
+    const pendingCount = await pendingOrdersCount(mergedOrders);
+    const deliveredCount = await deliveredOrdersCount(mergedOrders);
+    const totalSales = await totalSalesAmount(mergedOrders);
+    const totalAvaibleProducts = (await Product.getBySeller(vendorId)).length;
+    mergedOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     res.status(200).json({
       message: "Orders retrieved successfully",
-      count: orders.length,
-      orders,
+      orderCount,
+      pendingCount,
+      deliveredCount,
+      totalSales,
+      orders: mergedOrders,
+      totalAvaibleProducts
     });
   } catch (error) {
     console.error("Get orders by vendor error:", error);
@@ -138,7 +143,6 @@ export const getOrdersByVendor = async (req, res) => {
   }
 };
 
-// Update order status
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -168,7 +172,6 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-// Update payment status
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -198,7 +201,6 @@ export const updatePaymentStatus = async (req, res) => {
   }
 };
 
-// Get past orders by customer (delivered orders)
 export const getPastOrdersByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -216,12 +218,10 @@ export const getPastOrdersByCustomer = async (req, res) => {
   }
 };
 
-// Get all past orders (delivered orders) with pagination
 export const getAllPastOrders = async (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
     
-    // Validate pagination parameters
     const validLimit = Math.min(Math.max(parseInt(limit) || 50, 1), 100);
     const validOffset = Math.max(parseInt(offset) || 0, 0);
 
@@ -240,15 +240,12 @@ export const getAllPastOrders = async (req, res) => {
   }
 };
 
-// Delete order
 export const deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // Delete associated order items first
     await OrderItem.deleteByOrderId(orderId);
 
-    // Delete the order
     const deletedOrder = await Order.delete(orderId);
     if (!deletedOrder) {
       return res.status(404).json({ message: "Order not found" });

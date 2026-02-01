@@ -2,7 +2,6 @@ import pool from '../config/db.js';
 import Product from './Product.js';
 
 class Order {
-  // Create a new order
   static async create(data) {
     const { customer_id, vendor_id, total_amount, discount_amount, payment_method } = data;
     try {
@@ -17,8 +16,6 @@ class Order {
       throw new Error(`Error creating order: ${error.message}`);
     }
   }
-
-  // Get all orders
   static async getAll() {
     try {
       const result = await pool.query(
@@ -32,7 +29,6 @@ class Order {
     }
   }
 
-  // Get order by ID
   static async getById(orderId) {
     try {
       const result = await pool.query(
@@ -47,7 +43,6 @@ class Order {
     }
   }
 
-  // Get orders by customer ID
   static async getByCustomerId(customerId) {
     try {
       const result = await pool.query(
@@ -63,14 +58,17 @@ class Order {
     }
   }
 
-  // Get orders by vendor ID
   static async getByVendorId(vendorId) {
     try {
       const result = await pool.query(
-        `SELECT order_id, customer_id, vendor_id, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, created_at, updated_at 
-         FROM orders 
-         WHERE vendor_id = $1 
-         ORDER BY created_at DESC`,
+        `SELECT o.order_id, o.customer_id, o.vendor_id, o.total_amount, o.discount_amount, o.final_amount, o.payment_method, o.payment_status, o.order_status, o.created_at, o.updated_at,
+        c.customer_id, c.name, c.email, c.phone,
+        oi.order_item_id, oi.product_id, oi.quantity, oi.unit_price, oi.discount_price, oi.total_price, oi.product_title, oi.product_image
+         FROM orders o
+         JOIN customers c ON o.customer_id = c.customer_id
+         JOIN order_items oi ON o.order_id = oi.order_id
+         WHERE o.vendor_id = $1
+         ORDER BY o.created_at DESC`,
         [vendorId]
       );
       return result.rows;
@@ -79,7 +77,6 @@ class Order {
     }
   }
 
-  // Get past orders by customer (delivered orders)
   static async getPastOrdersByCustomerId(customerId) {
     try {
       const result = await pool.query(
@@ -95,7 +92,6 @@ class Order {
     }
   }
 
-  // Get all past orders (delivered orders) with pagination
   static async getAllPastOrders(limit = 50, offset = 0) {
     try {
       const result = await pool.query(
@@ -112,7 +108,6 @@ class Order {
     }
   }
 
-  // Update order status
   static async updateOrderStatus(orderId, orderStatus) {
     try {
       const result = await pool.query(
@@ -125,10 +120,8 @@ class Order {
       
       const order = result.rows[0];
       
-      // If order status is set to 'Confirmed', reduce product stock
       if (orderStatus === 'Confirmed') {
         try {
-          // Get order items for this order
           const itemsResult = await pool.query(
             `SELECT product_id, quantity FROM order_items WHERE order_id = $1`,
             [orderId]
@@ -136,7 +129,6 @@ class Order {
           
           const items = itemsResult.rows;
           
-          // Reduce stock for each product
           for (const item of items) {
             await Product.reduceStock(item.product_id, item.quantity);
           }
@@ -151,7 +143,6 @@ class Order {
     }
   }
 
-  // Update payment status
   static async updatePaymentStatus(orderId, paymentStatus) {
     try {
       const result = await pool.query(
@@ -167,7 +158,6 @@ class Order {
     }
   }
 
-  // Delete order
   static async delete(orderId) {
     try {
       const result = await pool.query(
