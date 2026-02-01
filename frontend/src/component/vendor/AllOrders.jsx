@@ -50,12 +50,15 @@ export const AllOrders = (props) => {
                 <td className="px-6 py-4 text-sm text-gray-900">
                   #{order.order_id}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                <td className="px-6 py-4 text-sm text-gray-900 font-medium flex flex-col gap-2">
                   {order.items.map((item) => (
-                    <div key={item.product_id} className="flex  gap-2">
+                    <div
+                      key={item.product_id}
+                      className="flex items-center gap-2"
+                    >
                       <img
                         src={item.product_image}
-                        alt={item.product_title}
+                        alt={""}
                         className="w-10 h-10 object-cover rounded-md"
                       />
                       {item.product_title}

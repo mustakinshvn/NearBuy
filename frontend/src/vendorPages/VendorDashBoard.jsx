@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { AllOrders } from "../component/vendor/AllOrders";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { orderAPI } from "../services/api";
@@ -61,7 +61,9 @@ const VendorDashBoard = () => {
           <h2 className="text-2xl font-bold text-gray-900">Recent Orders</h2>
         </div>
         <div className="overflow-x-auto">
-          <AllOrders orders={vendorOrders.orders || []} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AllOrders orders={vendorOrders.orders || []} />
+          </Suspense>
         </div>
       </section>
     </div>
