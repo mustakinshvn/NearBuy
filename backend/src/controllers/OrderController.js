@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
-import { mergeOrdersByOrderId } from "../lib/utils.js";
+import { mergeOrdersByOrderId, pendingOrdersCount, totalSalesAmount, deliveredOrdersCount } from "../lib/utils.js";
+import Product from "../models/Product.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -120,11 +121,20 @@ export const getOrdersByVendor = async (req, res) => {
 
     const orders = await Order.getByVendorId(vendorId);
     const mergedOrders = await mergeOrdersByOrderId(orders);
+    const orderCount = mergedOrders.length;
+    const pendingCount = await pendingOrdersCount(mergedOrders);
+    const deliveredCount = await deliveredOrdersCount(mergedOrders);
+    const totalSales = await totalSalesAmount(mergedOrders);
+    const totalAvaibleProducts = (await Product.getBySeller(vendorId)).length;
 
     res.status(200).json({
       message: "Orders retrieved successfully",
-      orderCount: mergedOrders.length,
+      orderCount,
+      pendingCount,
+      deliveredCount,
+      totalSales,
       orders: mergedOrders,
+      totalAvaibleProducts
     });
   } catch (error) {
     console.error("Get orders by vendor error:", error);

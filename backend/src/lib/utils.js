@@ -39,3 +39,23 @@ export const mergeOrdersByOrderId = async (data) => {
 
   return Object.values(merged);
 }
+
+export const pendingOrdersCount = async(orders) => {
+  return orders.reduce((count, order) => {
+    return order.order_status === 'Pending' ? count + 1 : count;
+  }, 0);
+}
+
+export const deliveredOrdersCount = async(orders) => {
+  return orders.reduce((count, order) => {
+    return order.order_status === 'Delivered' ? count + 1 : count;
+  }, 0);    
+}
+
+export const totalSalesAmount =async (orders) => {
+ const deliveredOrder = orders.filter(order => order.order_status === 'Delivered');
+  return deliveredOrder.reduce((total, order) => {
+    return total + parseFloat(order.final_amount);
+  }, 0);
+}
+
