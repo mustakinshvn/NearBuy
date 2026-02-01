@@ -12,12 +12,17 @@ export const loginVendor = async (req, res) => {
         if (!vendor) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
+
+        const isPassValid = password === vendor.password;
         // const isPasswordValid = await bcrypt.compare(password, vendor.password);
-        const isPasswordValid = password === vendor.password;
-        if (!isPasswordValid) {
+        // if(!isPassWordValid){
+        //     return res.status(401).json({ message: "Invalid email or password" });
+        // }
+
+        //this is for plain text password comparison, will be replaced with bcrypt later
+        if (!isPassValid) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
-
         res.status(200).json({
             message: "Vendor Login successful",
             vendor: {

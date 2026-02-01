@@ -15,7 +15,6 @@ const VendorDashBoard = () => {
     fetchVendorOrders();
   }, [vendor]);
 
-  console.log("VendorDashBoard vendorOrders:", vendorOrders);
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <header className="mb-8">
