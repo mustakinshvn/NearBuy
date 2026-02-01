@@ -10,8 +10,6 @@ const enumVendorOrderTable = {
 
 export const AllOrders = (props) => {
   const orders = Array.isArray(props.orders) ? props.orders : [];
-  console.log("AllOrders received orders:", orders);
-
   return (
     <div>
       <table className="w-full">
