@@ -42,7 +42,7 @@ class Customer {
   static async getByEmail(email) {
     try {
       const result = await pool.query(
-        `SELECT * FROM customers WHERE email = $1`,
+        `SELECT customer_id, name  FROM customers WHERE email = $1`,
         [email]
       );
       return result.rows[0];
@@ -52,13 +52,13 @@ class Customer {
   }
 
   static async update(customerId, data) {
-    const { name, email, phone } = data;
+    const { name, email, phone, password } = data;
     try {
       const result = await pool.query(
-        `UPDATE customers SET name = $1, email = $2, phone = $3 
-         WHERE customer_id = $4 
+        `UPDATE customers SET name = $1, email = $2, phone = $3 , password = $4
+         WHERE customer_id = $5 
          RETURNING customer_id, name, email, phone, created_at`,
-        [name, email, phone, customerId]
+        [name, email, phone, password, customerId]
       );
       return result.rows[0];
     } catch (error) {

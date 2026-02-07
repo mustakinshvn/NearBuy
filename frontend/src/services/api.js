@@ -181,7 +181,7 @@ export const orderAPI = {
     return apiRequest(`/orders/vendor/${vendorId}`);
   },
 
-  updateStatus: async (orderId, order_status) => {
+  updateOrderStatus: async (orderId, order_status) => {
     return apiRequest(`/orders/${orderId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ order_status }),
