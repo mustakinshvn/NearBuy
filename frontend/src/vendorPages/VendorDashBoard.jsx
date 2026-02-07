@@ -5,6 +5,8 @@ import { orderAPI } from "../services/api";
 import { VendorStat } from "../component/vendor/VendorStat";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
+import { Link } from "react-router-dom";
+import { PlusIcon } from "lucide-react";
 
 const VendorDashBoard = () => {
   const { vendor } = useVendorAuthContext();
@@ -41,10 +43,19 @@ const VendorDashBoard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-2 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Vendor Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back!</p>
+    <div className=" bg-gray-50 px-2 lg:p-8">
+      <header className="my-4 flex flex-col md:flex-row md:justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Vendor Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome back!</p>
+        </div>
+        <Link
+          to="/vendor/add-products"
+          className="mt-4 inline-flex bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors font-semibold items-center"
+        >
+          <PlusIcon className="inline-block w-4 h-4 mr-2" />
+          Add New Product
+        </Link>
       </header>
 
       <Suspense fallback={<div>Loading stats...</div>}>
