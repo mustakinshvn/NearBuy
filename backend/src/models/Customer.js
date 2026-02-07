@@ -30,7 +30,7 @@ class Customer {
   static async getById(customerId) {
     try {
       const result = await pool.query(
-        `SELECT customer_id, name, email, phone, created_at FROM customers WHERE customer_id = $1`,
+        `SELECT * FROM customers WHERE customer_id = $1`,
         [customerId]
       );
       return result.rows[0];
@@ -42,7 +42,7 @@ class Customer {
   static async getByEmail(email) {
     try {
       const result = await pool.query(
-        `SELECT customer_id, name  FROM customers WHERE email = $1`,
+        `SELECT * FROM customers WHERE email = $1`,
         [email]
       );
       return result.rows[0];
