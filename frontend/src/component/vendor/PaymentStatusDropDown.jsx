@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { notificationAPI, orderAPI } from "../../services/api";
 import { useTransition } from "react";
 import { cn } from "../../lib/utils";
@@ -37,8 +37,26 @@ export const PaymentStatusDropDown = (props) => {
     }
   };
 
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         className={cn(
           "inline-block px-3 py-1 rounded-full text-sm font-medium cursor-pointer",
