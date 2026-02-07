@@ -1,3 +1,4 @@
+import { ChangeOrderStatusDropDown } from "./ChangeOrderStatusDropDown";
 import { PaymentStatusDropDown } from "./PaymentStatusDropDown";
 
 const enumVendorOrderTable = {
@@ -86,17 +87,12 @@ export const AllOrders = (props) => {
                 </td>
 
                 <td className="px-6 py-4 text-sm">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                      order.order_status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : order.order_status === "Shipped"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {order.order_status}
-                  </span>
+                  <ChangeOrderStatusDropDown
+                    order_status={order.order_status}
+                    order_id={order.order_id}
+                    vendor_id={order.vendor_id}
+                    customer_id={order.customer_id}
+                  />
                 </td>
               </tr>
             ))}

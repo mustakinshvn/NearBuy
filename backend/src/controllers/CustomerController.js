@@ -13,7 +13,6 @@ export const loginCustomer = async (req, res) => {
     if (!customer) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -114,8 +113,7 @@ export const getCustomerById = async (req, res) => {
 export const updateCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
-    const { name, email, phone } = req.body;
-
+    const { name, email, phone, password } = req.body;
     if (!customerId) {
       return res.status(400).json({ message: "Customer ID is required" });
     }
@@ -136,7 +134,9 @@ export const updateCustomer = async (req, res) => {
       }
     }
 
-    const updatedCustomer = await Customer.update(customerId, { name, email, phone });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedCustomer = await Customer.update(customerId, { name, email, phone, password: hashedPassword });
 
     res.status(200).json({
       message: "Customer updated successfully",
