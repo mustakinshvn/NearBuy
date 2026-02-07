@@ -1,6 +1,5 @@
 import Notification from '../models/Notification.js';
 
-// Create a new notification
 export const createNotification = async (req, res) => {
   try {
     const {
@@ -51,7 +50,6 @@ export const createNotification = async (req, res) => {
   }
 };
 
-// Get all notifications
 export const getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.getAll();
@@ -66,7 +64,6 @@ export const getAllNotifications = async (req, res) => {
   }
 };
 
-// Get notification by ID
 export const getNotificationById = async (req, res) => {
   try {
     const { notificationId } = req.params;
@@ -86,7 +83,6 @@ export const getNotificationById = async (req, res) => {
   }
 };
 
-// Get notifications by customer ID
 export const getNotificationsByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -103,7 +99,6 @@ export const getNotificationsByCustomer = async (req, res) => {
   }
 };
 
-// Get notifications by vendor ID
 export const getNotificationsByVendor = async (req, res) => {
   try {
     const { vendorId } = req.params;
@@ -120,7 +115,6 @@ export const getNotificationsByVendor = async (req, res) => {
   }
 };
 
-// Get unread notifications by customer ID
 export const getUnreadByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -137,7 +131,6 @@ export const getUnreadByCustomer = async (req, res) => {
   }
 };
 
-// Get unread notifications by vendor ID
 export const getUnreadByVendor = async (req, res) => {
   try {
     const { vendorId } = req.params;
@@ -154,7 +147,6 @@ export const getUnreadByVendor = async (req, res) => {
   }
 };
 
-// Get notifications by type
 export const getNotificationsByType = async (req, res) => {
   try {
     const { type } = req.params;
@@ -171,7 +163,6 @@ export const getNotificationsByType = async (req, res) => {
   }
 };
 
-// Get notifications by priority
 export const getNotificationsByPriority = async (req, res) => {
   try {
     const { priority } = req.params;
@@ -188,7 +179,6 @@ export const getNotificationsByPriority = async (req, res) => {
   }
 };
 
-// Mark notification as read
 export const markAsRead = async (req, res) => {
   try {
     const { notificationId } = req.params;
@@ -208,7 +198,6 @@ export const markAsRead = async (req, res) => {
   }
 };
 
-// Mark multiple notifications as read
 export const markMultipleAsRead = async (req, res) => {
   try {
     const { notification_ids } = req.body;
@@ -230,7 +219,6 @@ export const markMultipleAsRead = async (req, res) => {
   }
 };
 
-// Delete notification (soft delete)
 export const deleteNotification = async (req, res) => {
   try {
     const { notificationId } = req.params;
@@ -250,7 +238,6 @@ export const deleteNotification = async (req, res) => {
   }
 };
 
-// Delete multiple notifications (soft delete)
 export const deleteMultipleNotifications = async (req, res) => {
   try {
     const { notification_ids } = req.body;
@@ -272,7 +259,6 @@ export const deleteMultipleNotifications = async (req, res) => {
   }
 };
 
-// Get unread count by customer ID
 export const getUnreadCountByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
@@ -288,7 +274,6 @@ export const getUnreadCountByCustomer = async (req, res) => {
   }
 };
 
-// Get unread count by vendor ID
 export const getUnreadCountByVendor = async (req, res) => {
   try {
     const { vendorId } = req.params;
@@ -304,7 +289,6 @@ export const getUnreadCountByVendor = async (req, res) => {
   }
 };
 
-// Update notification
 export const updateNotification = async (req, res) => {
   try {
     const { notificationId } = req.params;
@@ -331,7 +315,6 @@ export const updateNotification = async (req, res) => {
   }
 };
 
-// Get notifications by order ID
 export const getNotificationsByOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -348,7 +331,6 @@ export const getNotificationsByOrder = async (req, res) => {
   }
 };
 
-// Get notifications by product ID
 export const getNotificationsByProduct = async (req, res) => {
   try {
     const { productId } = req.params;

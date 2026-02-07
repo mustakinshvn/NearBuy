@@ -183,14 +183,14 @@ export const orderAPI = {
 
   updateStatus: async (orderId, order_status) => {
     return apiRequest(`/orders/${orderId}/status`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ order_status }),
     });
   },
 
   updatePaymentStatus: async (orderId, payment_status) => {
     return apiRequest(`/orders/${orderId}/payment-status`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ payment_status }),
     });
   },
@@ -242,6 +242,12 @@ export const orderItemAPI = {
 
 
 export const notificationAPI = {
+  createNotification: async (notificationData) => {
+    return apiRequest('/notifications', {
+      method: 'POST',
+      body: JSON.stringify(notificationData),
+    });
+  },
   getByCustomer: async (customerId) => {
     return apiRequest(`/notifications/customer/${customerId}`);
   },
