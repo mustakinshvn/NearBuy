@@ -1,6 +1,22 @@
 import Product from '../models/Product.js';
+import ProductVariant from '../models/ProductVariant.js';
 
 // Create a new product
+//
+// Request body may optionally include a `variants` array. Base product
+// fields are stored in the products table, while each variant object is
+// inserted into the product_variants table with the created product_id.
+//
+// Example payload:
+// {
+//   "title": "T-Shirt",
+//   "price": 1000,
+//   ...other product fields,
+//   "variants": [
+//     { "sku": "TS-RED-M", "variant_name": "Red / M", "color": "Red", "size": "M", "stock_quantity": 10 },
+//     { "sku": "TS-BLK-L", "variant_name": "Black / L", "color": "Black", "size": "L", "stock_quantity": 5 }
+//   ]
+// }
 export const createProduct = async (req, res) => {
     try {
         const payload = req.body;
@@ -9,8 +25,30 @@ export const createProduct = async (req, res) => {
             return res.status(400).json({ message: 'title and price are required' });
         }
 
-        const product = await Product.create(payload);
-        res.status(201).json({ message: 'Product created successfully', product });
+        const { variants, ...productData } = payload;
+
+        // Create base product row
+        const product = await Product.create(productData);
+
+        // Optionally create variants if provided
+        let createdVariants = [];
+        if (Array.isArray(variants) && variants.length > 0) {
+            const productId = product.product_id;
+            const promises = variants.map((variant) =>
+                ProductVariant.create({ ...variant, product_id: productId })
+            );
+            createdVariants = await Promise.all(promises);
+        }
+
+        // Refetch with aggregated variants so the response shape
+        // is consistent with other read endpoints
+        const productWithVariants = await Product.getById(product.product_id);
+
+        res.status(201).json({
+            message: 'Product created successfully',
+            product: productWithVariants || product,
+            variants: createdVariants,
+        });
     } catch (error) {
         console.error('Error creating product:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });

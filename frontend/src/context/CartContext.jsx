@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { CartContext } from './CartContextObject';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../hooks/useToast';
+import React, { useState, useEffect } from "react";
+import { CartContext } from "./CartContextObject";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/useToast";
 
 export const CartProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const { success, warning } = useToast();
   const [cartItems, setCartItems] = useState(() => {
-    if (typeof window !== 'undefined' && isAuthenticated) {
-      const storedCart = localStorage.getItem('cart');
+    if (typeof window !== "undefined" && isAuthenticated) {
+      const storedCart = localStorage.getItem("cart");
       return storedCart ? JSON.parse(storedCart) : [];
     }
     return [];
@@ -16,63 +16,84 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && cartItems.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
+      localStorage.setItem("cart", JSON.stringify(cartItems));
     } else if (!isAuthenticated) {
-      localStorage.removeItem('cart');
+      localStorage.removeItem("cart");
     }
   }, [cartItems, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated && cartItems.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
+      localStorage.setItem("cart", JSON.stringify(cartItems));
     }
   }, [cartItems, isAuthenticated]);
 
   const addToCart = (product, quantity = 1) => {
-    const existingItem = cartItems.find(item => item.product_id === product.product_id);
-    
+    const variantId = product.variant_id ?? null;
+
+    const existingItem = cartItems.find(
+      (item) =>
+        item.product_id === product.product_id &&
+        (item.variant_id ?? null) === variantId,
+    );
+
     if (existingItem) {
       warning(
         `"${product.title}" is already in your cart. Please update the quantity from the cart page.`,
-        'Already in Cart'
+        "Already in Cart",
       );
       return false;
     }
-    
-    setCartItems(prevItems => [...prevItems, { ...product, quantity }]);
-    success(
-      `"${product.title}" has been added to your cart!`,
-      'Added to Cart'
-    );
+
+    setCartItems((prevItems) => [
+      ...prevItems,
+      { ...product, variant_id: variantId, quantity },
+    ]);
+    success(`"${product.title}" has been added to your cart!`, "Added to Cart");
     return true;
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.product_id !== productId));
+  const removeFromCart = (productId, variantId = null) => {
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => {
+        if (variantId !== null && variantId !== undefined) {
+          return !(
+            item.product_id === productId &&
+            (item.variant_id ?? null) === variantId
+          );
+        }
+        return item.product_id !== productId;
+      }),
+    );
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (productId, quantity, variantId = null) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, variantId);
       return;
     }
-    
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.product_id === productId ? { ...item, quantity } : item
-      )
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) => {
+        const isMatch =
+          item.product_id === productId &&
+          (variantId === null || variantId === undefined
+            ? true
+            : (item.variant_id ?? null) === variantId);
+        return isMatch ? { ...item, quantity } : item;
+      }),
     );
   };
 
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem('cart');
+    localStorage.removeItem("cart");
   };
 
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => {
       const price = item.discount_price || item.price;
-      return total + (price * item.quantity);
+      return total + price * item.quantity;
     }, 0);
   };
 
@@ -81,16 +102,18 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{
-      cart: cartItems,
-      cartItems,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      getCartTotal,
-      getCartCount
-    }}>
+    <CartContext.Provider
+      value={{
+        cart: cartItems,
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        getCartTotal,
+        getCartCount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

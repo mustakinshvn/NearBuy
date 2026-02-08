@@ -1,5 +1,6 @@
 import pool from '../config/db.js';
 import Product from './Product.js';
+import ProductVariant from './ProductVariant.js';
 
 class Order {
   static async create(data) {
@@ -61,9 +62,31 @@ class Order {
   static async getByVendorId(vendorId) {
     try {
       const result = await pool.query(
-        `SELECT o.order_id, o.customer_id, o.vendor_id, o.total_amount, o.discount_amount, o.final_amount, o.payment_method, o.payment_status, o.order_status, o.created_at, o.updated_at,
-        c.customer_id, c.name, c.email, c.phone,
-        oi.order_item_id, oi.product_id, oi.quantity, oi.unit_price, oi.discount_price, oi.total_price, oi.product_title, oi.product_image
+        `SELECT 
+          o.order_id,
+          o.customer_id,
+          o.vendor_id,
+          o.total_amount,
+          o.discount_amount,
+          o.final_amount,
+          o.payment_method,
+          o.payment_status,
+          o.order_status,
+          o.created_at,
+          o.updated_at,
+          c.customer_id,
+          c.name,
+          c.email,
+          c.phone,
+          oi.order_item_id,
+          oi.product_id,
+          oi.variant_id,
+          oi.quantity,
+          oi.unit_price,
+          oi.discount_price,
+          (COALESCE(oi.discount_price, oi.unit_price) * oi.quantity) AS total_price,
+          oi.product_title,
+          oi.product_image
          FROM orders o
          JOIN customers c ON o.customer_id = c.customer_id
          JOIN order_items oi ON o.order_id = oi.order_id
@@ -123,14 +146,18 @@ class Order {
       if (orderStatus === 'Confirmed') {
         try {
           const itemsResult = await pool.query(
-            `SELECT product_id, quantity FROM order_items WHERE order_id = $1`,
+            `SELECT product_id, variant_id, quantity FROM order_items WHERE order_id = $1`,
             [orderId]
           );
           
           const items = itemsResult.rows;
           
           for (const item of items) {
-            await Product.reduceStock(item.product_id, item.quantity);
+            if (item.variant_id) {
+              await ProductVariant.reduceStock(item.variant_id, item.quantity);
+            } else if (item.product_id) {
+              await Product.reduceStock(item.product_id, item.quantity);
+            }
           }
         } catch (error) {
           throw new Error(`Error reducing stock during order confirmation: ${error.message}`);

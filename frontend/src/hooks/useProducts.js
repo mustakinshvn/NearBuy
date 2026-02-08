@@ -40,7 +40,11 @@ export const useProduct = (productId) => {
         setLoading(true);
         setError(null);
         const response = await productAPI.getById(productId);
-        setProduct(response.product);
+        const loaded = response.product || response;
+        if (loaded && !loaded.variants) {
+          loaded.variants = [];
+        }
+        setProduct(loaded);
       } catch (err) {
         setError(err.message);
         console.error('Error fetching product:', err);

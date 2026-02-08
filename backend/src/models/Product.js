@@ -1,6 +1,23 @@
 import pool from '../config/db.js';
 
+/**
+ * Product model
+ *
+ * Represents rows in the products table.
+ *
+ * NOTE ABOUT VARIANTS
+ * --------------------
+ * Products can optionally have one or more rows in the product_variants table.
+ * Methods that return products (getById, getAll, searchByTitle, getBySeller)
+ * now also include a `variants` array aggregated from product_variants.
+ */
 class Product {
+    /**
+     * Create a new product (base-level data only).
+     *
+     * Variant records, if any, should be created separately using the
+     * ProductVariant model or dedicated controller endpoints.
+     */
     static async create(data) {
         try {
             const {
@@ -16,7 +33,7 @@ class Product {
                 stock_quantity = 0,
                 is_available = true,
                 main_image_url = null,
-                image_urls = null, 
+                image_urls = null,
                 average_rating = 0.0,
                 total_reviews = 0,
                 weight = null,
@@ -24,7 +41,7 @@ class Product {
                 color = null,
                 material = null,
                 seller_id = null,
-                keywords = null 
+                keywords = null
             } = data;
 
             const query = `
@@ -65,9 +82,24 @@ class Product {
         }
     }
 
+    /**
+     * Fetch a single product by ID, including its variants array.
+     */
     static async getById(productId) {
         try {
-            const query = `SELECT * FROM products WHERE product_id = $1`;
+            const query = `
+                SELECT
+                    p.*,
+                    COALESCE(
+                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                        '[]'::json
+                    ) AS variants
+                FROM products p
+                LEFT JOIN product_variants v ON v.product_id = p.product_id
+                WHERE p.product_id = $1
+                GROUP BY p.product_id
+            `;
+
             const { rows } = await pool.query(query, [productId]);
             return rows[0];
         } catch (error) {
@@ -75,9 +107,25 @@ class Product {
         }
     }
 
+    /**
+     * Fetch a paginated list of products, each with a variants array.
+     */
     static async getAll({ limit = 100, offset = 0 } = {}) {
         try {
-            const query = `SELECT * FROM products ORDER BY created_at DESC LIMIT $1 OFFSET $2`;
+            const query = `
+                SELECT
+                    p.*,
+                    COALESCE(
+                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                        '[]'::json
+                    ) AS variants
+                FROM products p
+                LEFT JOIN product_variants v ON v.product_id = p.product_id
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT $1 OFFSET $2
+            `;
+
             const { rows } = await pool.query(query, [limit, offset]);
             return rows;
         } catch (error) {
@@ -85,9 +133,26 @@ class Product {
         }
     }
 
+    /**
+     * Search products by title (ILIKE), including variants array.
+     */
     static async searchByTitle(title, { limit = 100, offset = 0 } = {}) {
         try {
-            const query = `SELECT * FROM products WHERE title ILIKE $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`;
+            const query = `
+                SELECT
+                    p.*,
+                    COALESCE(
+                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                        '[]'::json
+                    ) AS variants
+                FROM products p
+                LEFT JOIN product_variants v ON v.product_id = p.product_id
+                WHERE p.title ILIKE $1
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT $2 OFFSET $3
+            `;
+
             const titleParam = `%${title}%`;
             const { rows } = await pool.query(query, [titleParam, limit, offset]);
             return rows;
@@ -96,9 +161,25 @@ class Product {
         }
     }
 
+    /**
+     * Fetch all products for a given seller, including variants array.
+     */
     static async getBySeller(sellerId) {
         try {
-            const query = `SELECT * FROM products WHERE seller_id = $1 ORDER BY created_at DESC`;
+            const query = `
+                SELECT
+                    p.*,
+                    COALESCE(
+                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                        '[]'::json
+                    ) AS variants
+                FROM products p
+                LEFT JOIN product_variants v ON v.product_id = p.product_id
+                WHERE p.seller_id = $1
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+            `;
+
             const { rows } = await pool.query(query, [sellerId]);
             return rows;
         } catch (error) {

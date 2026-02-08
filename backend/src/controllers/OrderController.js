@@ -28,6 +28,7 @@ export const createOrder = async (req, res) => {
       const orderItem = await OrderItem.create({
         order_id: order.order_id,
         product_id: item.product_id,
+        variant_id: item.variant_id || null,
         quantity: item.quantity,
         unit_price: item.unit_price,
         discount_price: item.discount_price || null,
