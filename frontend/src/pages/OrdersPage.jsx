@@ -347,7 +347,7 @@ const OrdersPage = () => {
                             return (
                               <div
                                 key={item.order_item_id}
-                                className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg"
+                                className="flex flex-wrap justify-center md:justify-between items-center gap-4 p-3 bg-slate-50 rounded-lg"
                               >
                                 {item.product_image ? (
                                   <img
