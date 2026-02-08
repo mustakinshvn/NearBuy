@@ -50,7 +50,7 @@ const ProductDetailsPage = () => {
   }, [pid]);
 
   const variants = useMemo(() => product?.variants || [], [product]);
-  const requiresVariantSelection = variants.length > 1;
+  const requiresVariantSelection = variants.length > 0;
   const hasSelectedVariant =
     selectedVariantId !== null && selectedVariantId !== undefined;
 
@@ -177,7 +177,7 @@ const ProductDetailsPage = () => {
                       )
                     }
                   >
-                    {variants.length > 1 && (
+                    {variants.length > 0 && (
                       <option value="" disabled>
                         -- Select a variant --
                       </option>
