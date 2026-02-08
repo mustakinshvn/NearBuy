@@ -15,6 +15,7 @@ import HomePage from "./pages/HomePage";
 import AdminVendorLoginPage from "./pages/AdminVendorLoginPage";
 import VendorDashBoard from "./vendorPages/VendorDashBoard";
 import ProtectedVendorsRoutes from "./component/ProtectedVendorsRoutes";
+import VendorAddProducts from "./vendorPages/VendorAddProducts";
 
 function App() {
   return (
@@ -33,6 +34,15 @@ function App() {
         element={
           <ProtectedVendorsRoutes>
             <VendorDashBoard />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/vendor/add-products"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorAddProducts />
           </ProtectedVendorsRoutes>
         }
       />

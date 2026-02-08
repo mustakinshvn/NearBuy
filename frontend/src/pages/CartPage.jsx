@@ -1,17 +1,18 @@
-import React, { useEffect } from 'react';
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useCart } from '../hooks/useCart';
-import { useAuth } from '../hooks/useAuth';
+import React, { useEffect } from "react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
+import { useAuth } from "../hooks/useAuth";
 
 const CartPage = () => {
-  const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } =
+    useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
     }
   }, [isAuthenticated, navigate]);
 
@@ -28,10 +29,14 @@ const CartPage = () => {
       <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <ShoppingCart className="w-32 h-32 text-slate-300 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-slate-700 mb-4">Your cart is empty</h2>
-          <p className="text-slate-500 mb-8">Add some products to get started!</p>
+          <h2 className="text-3xl font-bold text-slate-700 mb-4">
+            Your cart is empty
+          </h2>
+          <p className="text-slate-500 mb-8">
+            Add some products to get started!
+          </p>
           <button
-            onClick={() => navigate('/products')}
+            onClick={() => navigate("/products")}
             className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
           >
             Browse Products
@@ -58,9 +63,15 @@ const CartPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => (
-              <div key={item.product_id} className="bg-white rounded-lg shadow-md p-6">
+              <div
+                key={`${item.product_id}-${item.variant_id ?? "base"}`}
+                className="bg-white rounded-lg shadow-md p-6"
+              >
                 <div className="flex gap-6">
-                  <Link to={`/products/${item.product_id}`} className="shrink-0 hover:opacity-90 transition-all">
+                  <Link
+                    to={`/products/${item.product_id}`}
+                    className="shrink-0 hover:opacity-90 transition-all"
+                  >
                     {item.main_image_url || item.image_urls?.[0] ? (
                       <img
                         src={item.main_image_url || item.image_urls?.[0]}
@@ -73,52 +84,87 @@ const CartPage = () => {
                       </div>
                     )}
                   </Link>
-                  
+
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-xl font-semibold text-slate-800">
-                          <Link to={`/products/${item.product_id}`} className="hover:underline">{item.title}</Link>
+                          <Link
+                            to={`/products/${item.product_id}`}
+                            className="hover:underline"
+                          >
+                            {item.title}
+                          </Link>
                         </h3>
+                        {item.variant_name && (
+                          <p className="text-sm text-slate-600">
+                            Variant: {item.variant_name}
+                          </p>
+                        )}
                         {item.brand && (
-                          <p className="text-sm text-blue-600 font-medium">{item.brand}</p>
+                          <p className="text-sm text-blue-600 font-medium">
+                            {item.brand}
+                          </p>
                         )}
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.product_id)}
+                        onClick={() =>
+                          removeFromCart(item.product_id, item.variant_id)
+                        }
                         className="text-red-500 hover:text-red-700 p-2"
                       >
                         <Trash2 size={20} />
                       </button>
                     </div>
-                    
-                    <p className="text-slate-600 mb-4 line-clamp-2">{item.description}</p>
-                    
+
+                    <p className="text-slate-600 mb-4 line-clamp-2">
+                      {item.description}
+                    </p>
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <button
-                          onClick={() => updateQuantity(item.product_id, Math.max(1, item.quantity - 1))}
+                          onClick={() =>
+                            updateQuantity(
+                              item.product_id,
+                              Math.max(1, item.quantity - 1),
+                              item.variant_id ?? null,
+                            )
+                          }
                           className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
                         >
                           <Minus size={16} />
                         </button>
-                        <span className="text-lg font-semibold w-12 text-center">{item.quantity}</span>
+                        <span className="text-lg font-semibold w-12 text-center">
+                          {item.quantity}
+                        </span>
                         <button
-                          onClick={() => updateQuantity(item.product_id, Math.min(item.stock_quantity, item.quantity + 1))}
+                          onClick={() =>
+                            updateQuantity(
+                              item.product_id,
+                              Math.min(item.stock_quantity, item.quantity + 1),
+                              item.variant_id ?? null,
+                            )
+                          }
                           className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
                           disabled={item.quantity >= item.stock_quantity}
                         >
                           <Plus size={16} />
                         </button>
                       </div>
-                      
+
                       <div className="text-right">
                         <div className="text-2xl font-bold text-blue-600">
-                          ৳{((parseFloat(item.discount_price) || parseFloat(item.price)) * item.quantity).toFixed(2)}
+                          ৳
+                          {(
+                            (parseFloat(item.discount_price) ||
+                              parseFloat(item.price)) * item.quantity
+                          ).toFixed(2)}
                         </div>
                         {item.discount_price && (
                           <div className="text-sm text-slate-400">
-                            ৳{parseFloat(item.price).toFixed(2)} × {item.quantity}
+                            ৳{parseFloat(item.price).toFixed(2)} ×{" "}
+                            {item.quantity}
                           </div>
                         )}
                       </div>
@@ -131,31 +177,42 @@ const CartPage = () => {
 
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6">Order Summary</h2>
-              
+              <h2 className="text-2xl font-bold text-slate-800 mb-6">
+                Order Summary
+              </h2>
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-slate-600">
-                  <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                  <span>
+                    Subtotal (
+                    {cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+                  </span>
                   <span className="font-semibold">৳{cartTotal.toFixed(2)}</span>
                 </div>
-                
+
                 <div className="flex justify-between text-slate-600">
                   <span>Shipping</span>
                   <span className="font-semibold">
-                    {shippingCost === 0 ? 'FREE' : `৳${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0
+                      ? "FREE"
+                      : `৳${shippingCost.toFixed(2)}`}
                   </span>
                 </div>
-                
+
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-slate-800">Total</span>
-                    <span className="text-2xl font-bold text-blue-600">৳{finalTotal.toFixed(2)}</span>
+                    <span className="text-xl font-bold text-slate-800">
+                      Total
+                    </span>
+                    <span className="text-2xl font-bold text-blue-600">
+                      ৳{finalTotal.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
 
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={() => navigate("/checkout")}
                 className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 Proceed to Checkout
@@ -163,7 +220,7 @@ const CartPage = () => {
               </button>
 
               <button
-                onClick={() => navigate('/products')}
+                onClick={() => navigate("/products")}
                 className="w-full mt-4 border-2 border-blue-600 text-blue-600 py-3 rounded-lg font-medium hover:bg-blue-50 transition-all"
               >
                 Continue Shopping
