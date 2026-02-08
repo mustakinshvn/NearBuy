@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
+import { ConfirmAlert } from "../component/sharingComponents/ConfirmAlert";
 
 const ProductsPage = () => {
   const { products: allProducts, loading, error } = useProducts();
@@ -24,16 +25,32 @@ const ProductsPage = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [minRating, setMinRating] = useState(0);
 
-  const { addToCart } = useCart();
+  const { cart, addToCart, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  const [pendingProduct, setPendingProduct] = useState(null);
+  const [showVendorConfirm, setShowVendorConfirm] = useState(false);
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-    addToCart(product, 1);
+    const existingVendorId = cart[0]?.seller_id ?? null;
+    const newVendorId = product.seller_id ?? null;
+
+    if (
+      !existingVendorId ||
+      cart.length === 0 ||
+      existingVendorId === newVendorId
+    ) {
+      addToCart(product, 1);
+      return;
+    }
+
+    setPendingProduct(product);
+    setShowVendorConfirm(true);
   };
 
   const categories = useMemo(() => {
@@ -370,6 +387,21 @@ const ProductsPage = () => {
           </div>
         )}
       </div>
+      <ConfirmAlert
+        isOpen={showVendorConfirm}
+        onClose={() => {
+          setShowVendorConfirm(false);
+          setPendingProduct(null);
+        }}
+        onConfirm={() => {
+          if (!pendingProduct) return;
+          clearCart();
+          addToCart(pendingProduct, 1);
+          setPendingProduct(null);
+        }}
+        title="Start a new cart with this shop?"
+        message="Your cart currently contains items from another shop. If you continue, we'll clear your existing cart and add this product from the new vendor."
+      />
     </div>
   );
 };
