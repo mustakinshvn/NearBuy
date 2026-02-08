@@ -1,8 +1,8 @@
-# NearBuy Backend API - Customer Management
+# NearBuy Backend API - Customer & Product Management
 
 ## Overview
 
-This is the backend API for the NearBuy platform, built with Express.js and PostgreSQL. Currently, it includes complete CRUD operations for the customers table.
+This is the backend API for the NearBuy platform, built with Express.js and PostgreSQL. It includes complete CRUD operations for the customers table and product catalog (products and product variants).
 
 ## Project Structure
 
@@ -12,11 +12,16 @@ backend/
 │   ├── config/
 │   │   └── db.js              # PostgreSQL connection using Neon
 │   ├── models/
-│   │   └── Customer.js         # Customer data model with database queries
+│   │   ├── Customer.js         # Customer data model with database queries
+│   │   ├── Product.js          # Product data model (base product fields)
+│   │   └── ProductVariant.js   # Product variant data model
 │   ├── controllers/
-│   │   └── customerController.js   # Business logic for customer operations
+│   │   ├── CustomerController.js   # Business logic for customer operations
+│   │   ├── ProductController.js    # Business logic for product operations
+│   │   └── ProductVariantController.js # Business logic for product variant operations
 │   ├── routes/
-│   │   └── customerRoutes.js   # API endpoints for customers
+│   │   ├── customerRoutes.js   # API endpoints for customers
+│   │   └── productRoutes.js    # API endpoints for products and variants
 │   ├── middleware/             # Authentication, validation middleware
 │   ├── app.js                  # Main Express app setup (if needed)
 │   └── index.js                # Server entry point
@@ -49,7 +54,7 @@ backend/
 3. **Run database setup:**
    - Log in to your Neon console
    - Execute the following SQL to create the customers table:
-   ```sql
+  ```sql
    CREATE TABLE customers (
        customer_id SERIAL PRIMARY KEY,
        name VARCHAR(100) NOT NULL,
@@ -60,6 +65,56 @@ backend/
    );
    ```
 
+     And the base products and product_variants tables (simplified example):
+
+     ```sql
+     CREATE TABLE products (
+       product_id SERIAL PRIMARY KEY,
+       title VARCHAR(255) NOT NULL,
+       description TEXT,
+       brand VARCHAR(100),
+       model_number VARCHAR(100),
+       category_id INT,
+       subcategory_id INT,
+       price DECIMAL(10,2) NOT NULL,
+       discount_price DECIMAL(10,2),
+       currency VARCHAR(10) DEFAULT 'BDT',
+       stock_quantity INT DEFAULT 0,
+       is_available BOOLEAN DEFAULT TRUE,
+       main_image_url TEXT,
+       image_urls TEXT,
+       average_rating DECIMAL(3,2) DEFAULT 0.0,
+       total_reviews INT DEFAULT 0,
+       weight DECIMAL(10,2),
+       dimensions VARCHAR(100),
+       color VARCHAR(50),
+       material VARCHAR(100),
+       seller_id INT,
+       keywords TEXT,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     );
+
+     CREATE TABLE product_variants (
+       variant_id SERIAL PRIMARY KEY,
+       product_id INT NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
+       sku VARCHAR(100) UNIQUE,
+       variant_name VARCHAR(150),
+       color VARCHAR(50),
+       size VARCHAR(50),
+       material VARCHAR(100),
+       price DECIMAL(10,2),
+       discount_price DECIMAL(10,2),
+       stock_quantity INT DEFAULT 0,
+       is_available BOOLEAN DEFAULT TRUE,
+       image_url TEXT,
+       weight DECIMAL(10,2),
+       dimensions VARCHAR(100),
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     );
+     ```
+
 4. **Start the development server:**
    ```bash
    npm run dev
@@ -69,7 +124,7 @@ backend/
 
 ## API Endpoints
 
-### Base URL
+### Base URL (Customers)
 ```
 http://localhost:5000/api/customers
 ```
@@ -186,6 +241,61 @@ http://localhost:5000/api/customers
 {
   "message": "Customer deleted successfully",
   "customer_id": 1
+}
+```
+
+### Products & Variants Overview
+
+Base URL for products:
+
+```
+http://localhost:5000/api/products
+```
+
+- **GET** `/api/products` – List products. Each product includes a `variants` array aggregated from `product_variants`.
+- **GET** `/api/products/:id` – Get single product by ID (also includes `variants`).
+- **GET** `/api/products/search?title=...` – Search products by title.
+- **GET** `/api/products/seller/:sellerId` – Get all products for a seller (each with `variants`).
+- **POST** `/api/products` – Create a product. The request body may optionally contain a `variants` array; each object is created in `product_variants` with the new `product_id`.
+- **PUT/PATCH** `/api/products/:id` – Update base product fields.
+- **DELETE** `/api/products/:id` – Delete a product (its variants are cascaded by FK).
+
+Nested routes for variants under a specific product:
+
+- **POST** `/api/products/:productId/variants` – Create a new variant for a product.
+- **GET** `/api/products/:productId/variants` – List all variants for a product.
+- **GET** `/api/products/:productId/variants/:variantId` – Get a single variant.
+- **PUT/PATCH** `/api/products/:productId/variants/:variantId` – Update a variant.
+- **DELETE** `/api/products/:productId/variants/:variantId` – Delete a variant.
+
+Example payload for creating a product with variants:
+
+```json
+{
+  "title": "T-Shirt",
+  "price": 1000,
+  "description": "Comfortable cotton t-shirt",
+  "variants": [
+    { "sku": "TS-RED-M", "variant_name": "Red / M", "color": "Red", "size": "M", "stock_quantity": 10 },
+    { "sku": "TS-BLK-L", "variant_name": "Black / L", "color": "Black", "size": "L", "stock_quantity": 5 }
+  ]
+}
+```
+
+Response for `GET /api/products/:id` includes:
+
+```json
+{
+  "message": "Product fetched successfully",
+  "product": {
+    "product_id": 1,
+    "title": "T-Shirt",
+    "price": "1000.00",
+    "variants": [
+      { "variant_id": 1, "product_id": 1, "sku": "TS-RED-M", ... },
+      { "variant_id": 2, "product_id": 1, "sku": "TS-BLK-L", ... }
+    ]
+  }
 }
 ```
 
