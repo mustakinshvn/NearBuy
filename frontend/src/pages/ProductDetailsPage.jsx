@@ -8,6 +8,7 @@ import PrimaryActions from "../component/productDetails/PrimaryActions";
 import SecondaryActions from "../component/productDetails/SecondaryActions";
 import StockStatus from "../component/productDetails/StockStatus";
 import TrustIndicators from "../component/productDetails/TrustIndicators";
+import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 
 import { productAPI } from "../services/api";
 import { useCart } from "../hooks/useCart";
@@ -144,7 +145,7 @@ const ProductDetailsPage = () => {
   };
 
   if (!product || !displayProduct) {
-    return <div className="p-6">Loading...</div>;
+    return <ShowLoading message="Loading product details..." />;
   }
 
   return (
