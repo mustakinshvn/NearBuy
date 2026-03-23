@@ -1,5 +1,8 @@
 import Product from '../models/Product.js';
 import ProductVariant from '../models/ProductVariant.js';
+import { getUploadedProductImagePaths } from '../middleware/upload.js';
+import { toPublicUrl } from '../lib/publicUrl.js';
+import { normalizeProductPayload } from '../lib/requestCoercion.js';
 
 // Create a new product
 //
@@ -19,7 +22,33 @@ import ProductVariant from '../models/ProductVariant.js';
 // }
 export const createProduct = async (req, res) => {
     try {
-        const payload = req.body;
+        const payload = normalizeProductPayload(req.body);
+
+        // Merge optional uploaded images
+        const { mainImagePath, imagePaths, variantImagePaths } = getUploadedProductImagePaths(req);
+        if (mainImagePath) {
+            payload.main_image_url = toPublicUrl(req, mainImagePath);
+        }
+        if (imagePaths.length > 0) {
+            const uploadedUrls = imagePaths.map((p) => toPublicUrl(req, p));
+            const existing = Array.isArray(payload.image_urls) ? payload.image_urls : null;
+            payload.image_urls = existing ? [...existing, ...uploadedUrls] : uploadedUrls;
+            if (!payload.main_image_url) {
+                payload.main_image_url = uploadedUrls[0];
+            }
+        }
+
+        if (Array.isArray(payload.variants) && payload.variants.length > 0 && variantImagePaths.length > 0) {
+            const variantUrls = variantImagePaths.map((p) => toPublicUrl(req, p));
+            payload.variants = payload.variants.map((variant) => {
+                if (!variant || typeof variant !== 'object') return variant;
+                const idx = variant.__imageFileIndex;
+                if (idx === undefined || idx === null || idx === '') return variant;
+                const n = parseInt(String(idx), 10);
+                if (Number.isNaN(n) || n < 0 || n >= variantUrls.length) return variant;
+                return { ...variant, image_url: variantUrls[n] };
+            });
+        }
 
         if (!payload.title || payload.price == null) {
             return res.status(400).json({ message: 'title and price are required' });
@@ -116,7 +145,26 @@ export const searchProducts = async (req, res) => {
 export const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const payload = req.body;
+        const payload = normalizeProductPayload(req.body);
+
+        // Merge optional uploaded images
+        const { mainImagePath, imagePaths } = getUploadedProductImagePaths(req);
+        if (mainImagePath) {
+            payload.main_image_url = toPublicUrl(req, mainImagePath);
+        }
+        if (imagePaths.length > 0) {
+            const uploadedUrls = imagePaths.map((p) => toPublicUrl(req, p));
+            const existing = Array.isArray(payload.image_urls)
+                ? payload.image_urls
+                : payload.image_urls
+                  ? [payload.image_urls]
+                  : null;
+            payload.image_urls = existing ? [...existing, ...uploadedUrls] : uploadedUrls;
+            if (!payload.main_image_url) {
+                payload.main_image_url = uploadedUrls[0];
+            }
+        }
+
         const updated = await Product.update(id, payload);
         if (!updated) {
             return res.status(404).json({ message: 'Product not found' });

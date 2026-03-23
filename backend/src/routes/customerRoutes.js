@@ -6,6 +6,8 @@ import {
   getCustomerById,
   updateCustomer,
   deleteCustomer,
+  uploadCustomerProfilePhoto,
+  customerProfileUploadMiddleware,
 } from '../controllers/CustomerController.js';
 
 import {
@@ -22,6 +24,13 @@ router.post('/register', validateCustomerRegister, registerCustomer);
 router.get('/', getAllCustomers);        
 
 router.get('/:customerId', validateCustomerId, getCustomerById);    
+
+router.post(
+  '/:customerId/profile-photo',
+  validateCustomerId,
+  customerProfileUploadMiddleware,
+  uploadCustomerProfilePhoto,
+);
 
 router.put('/:customerId', validateCustomerId, validateCustomerUpdate, updateCustomer);    
 

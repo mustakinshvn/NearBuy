@@ -1,12 +1,14 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import customerRoutes from './routes/customerRoutes.js';
 import vendorRoutes from './routes/vendorRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import orderItemRoutes from './routes/orderItemRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 const port = process.env.PORT;
 const app = express();
@@ -31,6 +33,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Serve uploaded files (e.g. product images)
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+
 app.use('/api/customers', customerRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
@@ -41,6 +46,9 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/', (req, res) => {
     res.send('Welcome to the NearBuy API');
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 async function initDb() {
   try {

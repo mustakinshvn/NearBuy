@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { AuthContext } from './AuthContextObject';
-import { customerAPI } from '../services/api';
+import React, { useState, useEffect } from "react";
+import { AuthContext } from "./AuthContextObject";
+import { customerAPI } from "../services/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('user') !== null;
+    return localStorage.getItem("user") !== null;
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,14 +21,14 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await customerAPI.login(email, password);
-      
+
       const userData = response.customer;
       setUser(userData);
       setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
+      localStorage.setItem("user", JSON.stringify(userData));
+
       return { success: true, user: userData };
     } catch (err) {
       setError(err.message);
@@ -41,22 +41,30 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('user');
-    localStorage.removeItem('cart');
+    localStorage.removeItem("user");
+    localStorage.removeItem("cart");
+  };
+
+  const updateUser = (patch) => {
+    setUser((prev) => {
+      const next = { ...(prev || {}), ...(patch || {}) };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
   };
 
   const signup = async (userData) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await customerAPI.register(userData);
-      
+
       const newUser = response.customer;
       setUser(newUser);
       setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      
+      localStorage.setItem("user", JSON.stringify(newUser));
+
       return { success: true, user: newUser };
     } catch (err) {
       setError(err.message);
@@ -67,7 +75,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout, signup, loading, error }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        login,
+        logout,
+        signup,
+        updateUser,
+        loading,
+        error,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

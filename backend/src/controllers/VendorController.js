@@ -1,5 +1,8 @@
 import Vendor from "../models/Vendor.js";
 import bcrypt from "bcrypt";
+import { vendorProfileImageUpload, getUploadedSingleImagePath } from '../middleware/upload.js';
+import { toPublicUrl } from '../lib/publicUrl.js';
+import { updateOneColumnIfExists } from '../lib/dbColumns.js';
 
 export const loginVendor = async (req, res) => {
     try{
@@ -38,6 +41,14 @@ export const loginVendor = async (req, res) => {
                 city: vendor.city,
                 country: vendor.country,
                 postal_code: vendor.postal_code,
+                profile_image_url:
+                    vendor.profile_image_url ||
+                    vendor.avatar_url ||
+                    vendor.logo_url ||
+                    vendor.logo ||
+                    vendor.image_url ||
+                    vendor.image ||
+                    null,
                 created_at: vendor.created_at
             }
         });
@@ -227,4 +238,53 @@ export const deleteVendor = async (req, res) => {
         console.error("Error deleting vendor:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
+};
+
+export const uploadVendorProfilePhoto = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Vendor ID is required' });
+        }
+
+        const relPath = getUploadedSingleImagePath(req, 'profiles/vendors');
+        if (!relPath) {
+            return res.status(400).json({ message: 'No profile image uploaded' });
+        }
+
+        const url = toPublicUrl(req, relPath);
+
+        const result = await updateOneColumnIfExists({
+            tableName: 'vendors',
+            idColumn: 'vendor_id',
+            idValue: Number(id),
+            candidateColumns: [
+                'profile_image_url',
+                'avatar_url',
+                'logo_url',
+                'logo',
+                'image_url',
+                'image',
+            ],
+            value: url,
+        });
+
+        return res.status(200).json({
+            message: 'Profile photo uploaded successfully',
+            profile_image_url: url,
+            persisted: result.updated,
+            vendor: result.row,
+        });
+    } catch (error) {
+        console.error('Vendor profile photo upload error:', error);
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+};
+
+export const vendorProfileUploadMiddleware = (req, res, next) => {
+    vendorProfileImageUpload(req, res, (err) => {
+        if (!err) return next();
+        const status = err.status || (err.code === 'LIMIT_FILE_SIZE' ? 413 : 400);
+        return res.status(status).json({ message: err.message || 'File upload failed' });
+    });
 };

@@ -1,5 +1,8 @@
 import Customer from "../models/Customer.js";
 import bcrypt from "bcrypt";
+import { customerProfileImageUpload, getUploadedSingleImagePath } from '../middleware/upload.js';
+import { toPublicUrl } from '../lib/publicUrl.js';
+import { updateOneColumnIfExists } from '../lib/dbColumns.js';
 
 export const loginCustomer = async (req, res) => {
   try {
@@ -31,6 +34,12 @@ export const loginCustomer = async (req, res) => {
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
+        profile_image_url:
+          customer.profile_image_url ||
+          customer.avatar_url ||
+          customer.photo_url ||
+          customer.image_url ||
+          null,
         created_at: customer.created_at,
       },
     });
@@ -38,6 +47,49 @@ export const loginCustomer = async (req, res) => {
     console.error("Login error:", error);
     res.status(500).json({ message: error.message });
   }
+};
+
+export const uploadCustomerProfilePhoto = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    if (!customerId) {
+      return res.status(400).json({ message: 'Customer ID is required' });
+    }
+
+    // Multer already ran; ensure file exists
+    const relPath = getUploadedSingleImagePath(req, 'profiles/customers');
+    if (!relPath) {
+      return res.status(400).json({ message: 'No profile image uploaded' });
+    }
+
+    const url = toPublicUrl(req, relPath);
+
+    const result = await updateOneColumnIfExists({
+      tableName: 'customers',
+      idColumn: 'customer_id',
+      idValue: Number(customerId),
+      candidateColumns: ['profile_image_url', 'avatar_url', 'photo_url', 'image_url'],
+      value: url,
+    });
+
+    return res.status(200).json({
+      message: 'Profile photo uploaded successfully',
+      profile_image_url: url,
+      persisted: result.updated,
+      customer: result.row,
+    });
+  } catch (error) {
+    console.error('Profile photo upload error:', error);
+    return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+export const customerProfileUploadMiddleware = (req, res, next) => {
+  customerProfileImageUpload(req, res, (err) => {
+    if (!err) return next();
+    const status = err.status || (err.code === 'LIMIT_FILE_SIZE' ? 413 : 400);
+    return res.status(status).json({ message: err.message || 'File upload failed' });
+  });
 };
 
 export const registerCustomer = async (req, res) => {

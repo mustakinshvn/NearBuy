@@ -1,11 +1,38 @@
+import { useMemo, useState } from "react";
+
 const ProfileCard = ({ user, vendor, getInitials }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const profileImageUrl = useMemo(() => {
+    const obj = user || vendor || {};
+    return (
+      obj.profile_image_url ||
+      obj.avatar_url ||
+      obj.photo_url ||
+      obj.image_url ||
+      obj.logo_url ||
+      obj.logo ||
+      obj.image ||
+      null
+    );
+  }, [user, vendor]);
+
   return (
     <div className="bg-linear-to-b from-slate-700 to-slate-800 rounded-2xl p-6 mb-6 border border-slate-600/50 backdrop-blur">
       <div className="flex flex-col items-center text-center mb-6">
         <div className="w-24 h-24 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-          <span className="text-white text-3xl font-bold">
-            {getInitials(user?.name || vendor?.name || "U")}
-          </span>
+          {profileImageUrl && !imgError ? (
+            <img
+              src={profileImageUrl}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-2 border-white"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <span className="text-white text-3xl font-bold">
+              {getInitials(user?.name || vendor?.name || "U")}
+            </span>
+          )}
         </div>
         <h2 className="text-2xl font-bold text-white">
           {user?.name || vendor?.name || "User"}

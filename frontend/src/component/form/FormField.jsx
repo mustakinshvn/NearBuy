@@ -235,3 +235,44 @@ export function CheckboxField({ name, registerOptions, ...props }) {
     />
   );
 }
+
+export function FileField({
+  label,
+  required,
+  hint,
+  error,
+  className,
+  inputClassName,
+  id,
+  name,
+  ...props
+}) {
+  const fieldId = id ?? name;
+
+  return (
+    <div className={cn("space-y-1", className)}>
+      {label ? (
+        <label
+          htmlFor={fieldId}
+          className="block text-sm font-medium text-slate-700"
+        >
+          {label}
+          {required ? <span className="text-red-500">*</span> : null}
+        </label>
+      ) : null}
+
+      <input
+        id={fieldId}
+        name={name}
+        required={required}
+        type="file"
+        aria-invalid={!!error}
+        {...props}
+        className={cn(inputBase, inputSizes.md, inputClassName)}
+      />
+
+      {hint ? <p className="text-xs text-slate-500">{hint}</p> : null}
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+    </div>
+  );
+}

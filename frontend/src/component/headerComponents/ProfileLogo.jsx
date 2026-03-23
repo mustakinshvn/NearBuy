@@ -45,6 +45,21 @@ const ProfileLogo = () => {
     setShowDropdown(!showDropdown);
   };
 
+  const profileImageUrl =
+    (isAuthenticated
+      ? user?.profile_image_url ||
+        user?.avatar_url ||
+        user?.photo_url ||
+        user?.image_url
+      : isVendorAuthenticated
+        ? vendor?.profile_image_url ||
+          vendor?.avatar_url ||
+          vendor?.logo_url ||
+          vendor?.logo ||
+          vendor?.image_url ||
+          vendor?.image
+        : null) || null;
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -54,7 +69,7 @@ const ProfileLogo = () => {
         <div className="relative flex items-center justify-center size-8 rounded-full bg-linear-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl curosor-pointer">
           {isAuthenticated || isVendorAuthenticated ? (
             <img
-              src={profileAvatar}
+              src={profileImageUrl || profileAvatar}
               alt="Profile"
               className="w-8 h-8 rounded-full object-cover border-2 border-white"
             />

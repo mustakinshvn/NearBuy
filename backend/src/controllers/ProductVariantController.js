@@ -1,11 +1,19 @@
 import Product from '../models/Product.js';
 import ProductVariant from '../models/ProductVariant.js';
+import { getUploadedSingleImagePath } from '../middleware/upload.js';
+import { toPublicUrl } from '../lib/publicUrl.js';
+import { normalizeVariantPayload } from '../lib/requestCoercion.js';
 
 // Create a new variant for a specific product
 export const createProductVariant = async (req, res) => {
   try {
     const { productId } = req.params;
-    const payload = req.body || {};
+    const payload = normalizeVariantPayload(req.body || {});
+
+    const uploadedPath = getUploadedSingleImagePath(req, 'products/variants');
+    if (uploadedPath) {
+      payload.image_url = toPublicUrl(req, uploadedPath);
+    }
 
     // Ensure parent product exists
     const product = await Product.getById(productId);
@@ -88,7 +96,12 @@ export const getProductVariantById = async (req, res) => {
 export const updateProductVariant = async (req, res) => {
   try {
     const { productId, variantId } = req.params;
-    const payload = req.body || {};
+    const payload = normalizeVariantPayload(req.body || {});
+
+    const uploadedPath = getUploadedSingleImagePath(req, 'products/variants');
+    if (uploadedPath) {
+      payload.image_url = toPublicUrl(req, uploadedPath);
+    }
 
     const product = await Product.getById(productId);
     if (!product) {

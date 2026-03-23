@@ -3,18 +3,41 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
+  const isFormData =
+    typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  if (!isFormData) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  } else {
+    // Let the browser set the multipart boundary
+    delete headers['Content-Type'];
+  }
+
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   };
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
+
+    let data = null;
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+    }
 
     if (!response.ok) {
       console.error('API Error Response:', data);
@@ -32,7 +55,10 @@ export const customerAPI = {
   register: async (customerData) => {
     return apiRequest('/customers/register', {
       method: 'POST',
-      body: JSON.stringify(customerData),
+      body:
+        typeof FormData !== 'undefined' && customerData instanceof FormData
+          ? customerData
+          : JSON.stringify(customerData),
     });
   },
 
@@ -54,7 +80,10 @@ export const customerAPI = {
   update: async (customerId, updateData) => {
     return apiRequest(`/customers/${customerId}`, {
       method: 'PUT',
-      body: JSON.stringify(updateData),
+      body:
+        typeof FormData !== 'undefined' && updateData instanceof FormData
+          ? updateData
+          : JSON.stringify(updateData),
     });
   },
 
@@ -88,14 +117,20 @@ export const productAPI = {
   create: async (productData) => {
     return apiRequest('/products', {
       method: 'POST',
-      body: JSON.stringify(productData),
+      body:
+        typeof FormData !== 'undefined' && productData instanceof FormData
+          ? productData
+          : JSON.stringify(productData),
     });
   },
 
   update: async (productId, updateData) => {
     return apiRequest(`/products/${productId}`, {
       method: 'PUT',
-      body: JSON.stringify(updateData),
+      body:
+        typeof FormData !== 'undefined' && updateData instanceof FormData
+          ? updateData
+          : JSON.stringify(updateData),
     });
   },
 
@@ -139,14 +174,20 @@ export const vendorAPI = {
   register: async (vendorData) => {
     return apiRequest('/vendors', {
       method: 'POST',
-      body: JSON.stringify(vendorData),
+      body:
+        typeof FormData !== 'undefined' && vendorData instanceof FormData
+          ? vendorData
+          : JSON.stringify(vendorData),
     });
   },
 
   update: async (vendorId, updateData) => {
     return apiRequest(`/vendors/${vendorId}`, {
       method: 'PUT',
-      body: JSON.stringify(updateData),
+      body:
+        typeof FormData !== 'undefined' && updateData instanceof FormData
+          ? updateData
+          : JSON.stringify(updateData),
     });
   },
 

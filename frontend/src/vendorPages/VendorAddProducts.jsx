@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { useToast } from "../hooks/useToast";
@@ -11,8 +11,11 @@ import {
   CheckboxField,
   TextAreaField,
   TextField,
+  FileField,
 } from "../component/form/FormField";
 import { vendorAddProductSchema } from "../lib/validation/schemas";
+import { productPayloadToFormData } from "../lib/formData";
+import { TrashIcon } from "lucide-react";
 
 const VendorAddProducts = () => {
   const navigate = useNavigate();
@@ -64,6 +67,49 @@ const VendorAddProducts = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
+  const [variantImageFiles, setVariantImageFiles] = useState([]);
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState("");
+  const [additionalImagePreviewUrls, setAdditionalImagePreviewUrls] = useState(
+    [],
+  );
+  const [variantImagePreviewUrls, setVariantImagePreviewUrls] = useState([]);
+
+  useEffect(() => {
+    if (!mainImageFile) {
+      setMainImagePreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(mainImageFile);
+    setMainImagePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [mainImageFile]);
+
+  useEffect(() => {
+    const urls = (additionalImageFiles || []).map((f) =>
+      URL.createObjectURL(f),
+    );
+    setAdditionalImagePreviewUrls(urls);
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, [additionalImageFiles]);
+
+  useEffect(() => {
+    const urls = (variantImageFiles || []).map((f) =>
+      f ? URL.createObjectURL(f) : "",
+    );
+    setVariantImagePreviewUrls(urls);
+    return () => {
+      for (const url of urls) {
+        if (url) URL.revokeObjectURL(url);
+      }
+    };
+  }, [variantImageFiles]);
 
   const handleReset = () => {
     reset(defaultValues);
@@ -71,6 +117,13 @@ const VendorAddProducts = () => {
     success("Cancelled: Product form reset");
 
     setFormError("");
+    setMainImageFile(null);
+    setAdditionalImageFiles([]);
+    setVariantImageFiles([]);
+    setMainImagePreviewUrl("");
+    setAdditionalImagePreviewUrls([]);
+    setVariantImagePreviewUrls([]);
+    setFileInputKey((k) => k + 1);
   };
 
   const handleAddVariant = () => {
@@ -88,10 +141,17 @@ const VendorAddProducts = () => {
       weight: "",
       dimensions: "",
     });
+
+    setVariantImageFiles((prev) => [...(prev || []), null]);
   };
 
   const handleRemoveVariant = (index) => {
     remove(index);
+    setVariantImageFiles((prev) => {
+      const list = Array.isArray(prev) ? [...prev] : [];
+      list.splice(index, 1);
+      return list;
+    });
   };
 
   const getFirstErrorMessage = (errors) => {
@@ -152,13 +212,8 @@ const VendorAddProducts = () => {
         currency: "BDT",
         stock_quantity: toIntOrZero(values.stock_quantity),
         is_available: !!values.is_available,
-        main_image_url: toTrimmedOrNull(values.main_image_url),
-        image_urls: values.image_urls
-          ? values.image_urls
-              .split(",")
-              .map((url) => url.trim())
-              .filter(Boolean)
-          : null,
+        main_image_url: null,
+        image_urls: null,
         weight: toFloatOrNull(values.weight),
         dimensions: toTrimmedOrNull(values.dimensions),
         color: toTrimmedOrNull(values.color),
@@ -175,39 +230,79 @@ const VendorAddProducts = () => {
       const sourceVariants = values.variants ?? getValues("variants") ?? [];
 
       const normalizedVariants = sourceVariants
-        .map((v) => ({
-          sku: toTrimmedOrNull(v.sku),
-          variant_name: toTrimmedOrNull(v.variant_name),
-          color: toTrimmedOrNull(v.color),
-          size: toTrimmedOrNull(v.size),
-          material: toTrimmedOrNull(v.material),
-          price: toFloatOrNull(v.price),
-          discount_price: toFloatOrNull(v.discount_price),
-          stock_quantity: toIntOrZero(v.stock_quantity),
-          is_available: v.is_available ?? true,
-          image_url: toTrimmedOrNull(v.image_url),
-          weight: toFloatOrNull(v.weight),
-          dimensions: toTrimmedOrNull(v.dimensions),
-        }))
-        .filter(
-          (v) =>
-            v.sku ||
-            v.variant_name ||
-            v.color ||
-            v.size ||
-            v.material ||
-            v.price !== null ||
-            v.discount_price !== null,
-        );
+        .map((v, index) => {
+          const variant = {
+            sku: toTrimmedOrNull(v.sku),
+            variant_name: toTrimmedOrNull(v.variant_name),
+            color: toTrimmedOrNull(v.color),
+            size: toTrimmedOrNull(v.size),
+            material: toTrimmedOrNull(v.material),
+            price: toFloatOrNull(v.price),
+            discount_price: toFloatOrNull(v.discount_price),
+            stock_quantity: toIntOrZero(v.stock_quantity),
+            is_available: v.is_available ?? true,
+            image_url: null,
+            weight: toFloatOrNull(v.weight),
+            dimensions: toTrimmedOrNull(v.dimensions),
+          };
 
+          const hasAny =
+            variant.sku ||
+            variant.variant_name ||
+            variant.color ||
+            variant.size ||
+            variant.material ||
+            variant.price !== null ||
+            variant.discount_price !== null ||
+            !!variantImageFiles?.[index];
+
+          if (!hasAny) return null;
+
+          return { variant, index };
+        })
+        .filter(Boolean);
+
+      let variantUploadFiles = [];
       if (normalizedVariants.length > 0) {
-        payload.variants = normalizedVariants;
+        payload.variants = normalizedVariants.map(({ variant, index }) => {
+          const file = variantImageFiles?.[index] || null;
+          if (!file) return variant;
+          const fileIndex = variantUploadFiles.length;
+          variantUploadFiles.push(file);
+          return { ...variant, __imageFileIndex: fileIndex };
+        });
       }
 
       try {
         setSubmitting(true);
-        await productAPI.create(payload);
+        const hasFiles =
+          !!mainImageFile ||
+          (additionalImageFiles?.length ?? 0) > 0 ||
+          (variantImageFiles?.filter(Boolean)?.length ?? 0) > 0;
+
+        if (hasFiles) {
+          const formData = productPayloadToFormData(payload);
+          if (mainImageFile) {
+            formData.append("mainImage", mainImageFile);
+          }
+          for (const file of additionalImageFiles) {
+            formData.append("images", file);
+          }
+
+          for (const file of variantUploadFiles) {
+            formData.append("variantImages", file);
+          }
+
+          await productAPI.create(formData);
+        } else {
+          await productAPI.create(payload);
+        }
+
         success("Product created successfully");
+        setMainImageFile(null);
+        setAdditionalImageFiles([]);
+        setVariantImageFiles([]);
+        setFileInputKey((k) => k + 1);
         navigate("/vendor-dashboard");
       } catch (err) {
         console.error("Error creating product", err);
@@ -262,13 +357,6 @@ const VendorAddProducts = () => {
                       label="Model Number"
                       name="model_number"
                       placeholder="e.g. A3108"
-                    />
-
-                    <TextField
-                      label="Main Image URL"
-                      type="url"
-                      name="main_image_url"
-                      placeholder="https://..."
                     />
 
                     <TextAreaField
@@ -333,24 +421,121 @@ const VendorAddProducts = () => {
                       label="Stock Quantity"
                       type="number"
                       name="stock_quantity"
-                      min="0"
+                      min="1"
                     />
                   </div>
                 </FormSection>
 
                 <FormSection title="Inventory & Images">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <CheckboxField
-                      name="is_available"
-                      label="Available for sale"
-                      className="sm:pt-7"
-                    />
-                    <TextField
-                      label="Additional Image URLs"
-                      name="image_urls"
-                      placeholder="https://..., https://..."
-                      hint="Comma separated"
-                    />
+                  <CheckboxField
+                    name="is_available"
+                    label="Available for sale"
+                  />
+
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <FileField
+                        key={`main-${fileInputKey}`}
+                        label="Main Image"
+                        name="main_image_file"
+                        accept="image/*"
+                        hint="Upload the main product photo. Max 5MB."
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setMainImageFile(file);
+
+                          // Allow selecting the same file again later
+                          e.target.value = "";
+                        }}
+                        disabled={submitting || isSubmitting}
+                      />
+                      {mainImagePreviewUrl ? (
+                        <div className="relative mt-2 rounded-lg border border-slate-200 bg-white p-2">
+                          <button
+                            type="button"
+                            onClick={() => setMainImageFile(null)}
+                            className="absolute right-2 top-2 rounded-md bg-slate-900/70 px-2 py-1 text-xs font-medium text-white hover:bg-slate-900/80"
+                            aria-label="Remove main image"
+                          >
+                            Remove
+                          </button>
+                          <img
+                            src={mainImagePreviewUrl}
+                            alt="Main preview"
+                            className="h-32 w-full rounded-md object-contain"
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <FileField
+                        key={`additional-${fileInputKey}`}
+                        label="Additional Images"
+                        name="additional_image_files"
+                        accept="image/*"
+                        multiple
+                        hint="Optional. Upload extra photos (up to 10), max 5MB each. You can select multiple times."
+                        onChange={(e) => {
+                          const picked = Array.from(e.target.files || []);
+                          setAdditionalImageFiles((prev) => {
+                            const existing = Array.isArray(prev) ? prev : [];
+                            const merged = [...existing, ...picked];
+
+                            const unique = [];
+                            const seen = new Set();
+                            for (const file of merged) {
+                              const key = `${file.name}|${file.size}|${file.lastModified}`;
+                              if (seen.has(key)) continue;
+                              seen.add(key);
+                              unique.push(file);
+                              if (unique.length >= 10) break;
+                            }
+
+                            return unique;
+                          });
+
+                          // Allow selecting the same file again later
+                          e.target.value = "";
+                        }}
+                        disabled={submitting || isSubmitting}
+                      />
+
+                      {additionalImagePreviewUrls.length > 0 ? (
+                        <div className="mt-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            {additionalImagePreviewUrls.map((src, i) => (
+                              <div
+                                key={src}
+                                className="relative rounded-lg border border-slate-200 bg-white p-1"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAdditionalImageFiles((prev) => {
+                                      const list = Array.isArray(prev)
+                                        ? [...prev]
+                                        : [];
+                                      list.splice(i, 1);
+                                      return list;
+                                    });
+                                  }}
+                                  className="absolute cursor-pointer right-0 top-1 rounded-md  px-2 py-1 font-medium text-red-500 hover:text-red-700"
+                                  aria-label={`Remove additional image ${i + 1}`}
+                                >
+                                  <TrashIcon size={18} />
+                                </button>
+                                <img
+                                  src={src}
+                                  alt={`Additional preview ${i + 1}`}
+                                  className="h-20  w-full  rounded-md object-contain"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </FormSection>
 
@@ -431,14 +616,58 @@ const VendorAddProducts = () => {
                             name={`variants.${index}.sku`}
                             placeholder="e.g. TS-RED-M"
                           />
-                          <TextField
-                            size="sm"
-                            label="Image URL"
-                            id={`variant-${index}-image_url`}
-                            name={`variants.${index}.image_url`}
-                            type="url"
-                            placeholder="https://..."
-                          />
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <div>
+                            <FileField
+                              key={`variant-file-${fileInputKey}-${index}`}
+                              label="Variant Image"
+                              name={`variant_image_file_${index}`}
+                              accept="image/*"
+                              hint="Optional. Upload a photo for this variant. Max 5MB."
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                setVariantImageFiles((prev) => {
+                                  const list = Array.isArray(prev)
+                                    ? [...prev]
+                                    : [];
+                                  list[index] = file;
+                                  return list;
+                                });
+
+                                // Allow selecting the same file again later
+                                e.target.value = "";
+                              }}
+                              disabled={submitting || isSubmitting}
+                            />
+
+                            {variantImagePreviewUrls?.[index] ? (
+                              <div className="relative mt-2 rounded-lg border border-slate-200 bg-white p-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setVariantImageFiles((prev) => {
+                                      const list = Array.isArray(prev)
+                                        ? [...prev]
+                                        : [];
+                                      list[index] = null;
+                                      return list;
+                                    });
+                                  }}
+                                  className="absolute right-2 top-2 rounded-md bg-slate-900/70 px-2 py-1 text-xs font-medium text-white hover:bg-slate-900/80"
+                                  aria-label={`Remove variant ${index + 1} image`}
+                                >
+                                  Remove
+                                </button>
+                                <img
+                                  src={variantImagePreviewUrls[index]}
+                                  alt={`Variant ${index + 1} preview`}
+                                  className="h-24 w-full rounded-md object-contain"
+                                />
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

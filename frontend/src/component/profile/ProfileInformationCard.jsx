@@ -1,4 +1,5 @@
 import { Edit2, Save, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const ProfileInformationCard = ({
   user,
@@ -10,28 +11,116 @@ const ProfileInformationCard = ({
   setSuccess,
   onUserUpdate,
 }) => {
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState("");
+
+  const currentProfileImageUrl = useMemo(() => {
+    const entity = user || vendor || null;
+    if (!entity) return "";
+    return (
+      entity.profile_image_url ||
+      entity.avatar_url ||
+      entity.photo_url ||
+      entity.logo_url ||
+      entity.image_url ||
+      ""
+    );
+  }, [user, vendor]);
+
+  useEffect(() => {
+    if (!profileImageFile) {
+      setProfilePreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(profileImageFile);
+    setProfilePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [profileImageFile]);
+
+  const apiBaseUrl = useMemo(() => {
+    return import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  }, []);
+
+  const target = useMemo(() => {
+    if (user?.customer_id) {
+      return { type: "customer", id: user.customer_id };
+    }
+    if (vendor?.vendor_id) {
+      return { type: "vendor", id: vendor.vendor_id };
+    }
+    return null;
+  }, [user, vendor]);
+
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/customers/${user?.customer_id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formData),
+      if (!target) {
+        console.error("No user/vendor selected for profile update");
+        setSuccess(false);
+        return;
+      }
+
+      // 1) Upload profile photo if selected
+      if (profileImageFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("profileImage", profileImageFile);
+        const uploadUrl =
+          target.type === "customer"
+            ? `${apiBaseUrl}/customers/${target.id}/profile-photo`
+            : `${apiBaseUrl}/vendors/${target.id}/profile-photo`;
+
+        const uploadRes = await fetch(uploadUrl, {
+          method: "POST",
+          body: uploadForm,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) {
+          throw new Error(
+            uploadData?.message || "Failed to upload profile photo",
+          );
+        }
+
+        const uploadedUrl =
+          uploadData?.profile_image_url ||
+          uploadData?.vendor?.profile_image_url ||
+          uploadData?.customer?.profile_image_url ||
+          null;
+
+        if (uploadedUrl && onUserUpdate) {
+          onUserUpdate({ profile_image_url: uploadedUrl });
+        }
+
+        setProfileImageFile(null);
+      }
+
+      // 2) Save profile info (existing behavior: JSON PUT)
+      const updateUrl =
+        target.type === "customer"
+          ? `${apiBaseUrl}/customers/${target.id}`
+          : `${apiBaseUrl}/vendors/${target.id}`;
+
+      const response = await fetch(updateUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+        body: JSON.stringify(formData),
+      });
 
       if (response.ok) {
         const updatedData = await response.json();
-        setFormData(updatedData);
+        const updatedEntity =
+          updatedData?.customer || updatedData?.vendor || updatedData;
+        if (updatedEntity && typeof updatedEntity === "object") {
+          setFormData((prev) => ({ ...prev, ...updatedEntity }));
+          if (onUserUpdate) {
+            onUserUpdate(updatedEntity);
+          }
+        }
         setSuccess(true);
         setIsEditing(false);
-        if (onUserUpdate) {
-          onUserUpdate(updatedData);
-        }
         setTimeout(() => setSuccess(false), 3000);
       } else {
         console.error("Failed to update profile");
@@ -132,6 +221,50 @@ const ProfileInformationCard = ({
                     }
                     className="w-full px-4 py-3 bg-slate-600 border border-slate-500 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-2">
+                    Profile Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setProfileImageFile(e.target.files?.[0] || null)
+                    }
+                    className="w-full px-4 py-3 bg-slate-600 border border-slate-500 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                  {profilePreviewUrl || currentProfileImageUrl ? (
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="h-16 w-16 overflow-hidden rounded-lg border border-slate-500 bg-slate-700">
+                        <img
+                          src={profilePreviewUrl || currentProfileImageUrl}
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-xs text-slate-300">
+                          {profilePreviewUrl
+                            ? "New photo preview"
+                            : "Current photo"}
+                        </p>
+                        {profilePreviewUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => setProfileImageFile(null)}
+                            className="w-fit rounded-md bg-slate-900/60 px-2 py-1 text-xs font-medium text-white hover:bg-slate-900/75"
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+                  <p className="text-xs text-slate-400 mt-1">
+                    Optional. Upload a new profile photo.
+                  </p>
                 </div>
               </div>
 
