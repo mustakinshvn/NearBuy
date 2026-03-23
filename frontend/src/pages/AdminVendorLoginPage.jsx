@@ -3,63 +3,41 @@ import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, UsersRound } from "lucide-react";
 import ButtonCard from "../component/sharingComponents/Button";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { vendorLoginSchema } from "../lib/validation/schemas";
 
 const AdminVendorLoginPage = () => {
   const navigate = useNavigate();
   const { vendorLogin } = useVendorAuthContext();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState({});
   const [loginError, setLoginError] = useState("");
 
-  const validateForm = () => {
-    const newErrors = {};
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: "", password: "" },
+    resolver: zodResolver(vendorLoginSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setLoginError("");
 
-    if (validateForm()) {
-      try {
-        const result = await vendorLogin(formData.email, formData.password);
+    try {
+      const result = await vendorLogin(data.email, data.password);
 
-        if (result.success) {
-          navigate("/vendor-dashboard", { replace: true });
-        } else {
-          setLoginError(result.error || "Login failed. Please try again.");
-        }
-      } catch {
-        setLoginError("An unexpected error occurred. Please try again.");
+      if (result.success) {
+        navigate("/vendor-dashboard", { replace: true });
+      } else {
+        setLoginError(result.error || "Login failed. Please try again.");
       }
+    } catch {
+      setLoginError("An unexpected error occurred. Please try again.");
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
-    setLoginError("");
   };
 
   return (
@@ -84,7 +62,7 @@ const AdminVendorLoginPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Email Address
@@ -94,8 +72,9 @@ const AdminVendorLoginPage = () => {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  {...register("email", {
+                    onChange: () => setLoginError(""),
+                  })}
                   className={`w-full pl-11 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.email ? "border-red-500" : "border-slate-200"
                   }`}
@@ -103,7 +82,9 @@ const AdminVendorLoginPage = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -116,8 +97,9 @@ const AdminVendorLoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  value={formData.password}
-                  onChange={handleChange}
+                  {...register("password", {
+                    onChange: () => setLoginError(""),
+                  })}
                   className={`w-full pl-11 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.password ? "border-red-500" : "border-slate-200"
                   }`}
@@ -136,7 +118,9 @@ const AdminVendorLoginPage = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -156,7 +140,7 @@ const AdminVendorLoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard label="Login" onClick={handleSubmit} type="submit" />
+            <ButtonCard label="Login" type="submit" disabled={isSubmitting} />
           </form>
         </div>
       </div>

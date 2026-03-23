@@ -10,6 +10,9 @@ import ShippingSection from "../component/checkout/ShippingSection";
 import PaymentSection from "../component/checkout/PaymentSection";
 import OrderSummaryCard from "../component/checkout/OrderSummaryCard";
 import ButtonCard from "../component/sharingComponents/Button";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { checkoutSchema } from "../lib/validation/schemas";
 
 const CheckoutPage = () => {
   const { cart, getCartTotal, clearCart } = useCart();
@@ -18,34 +21,49 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderError, setOrderError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    street: "",
-    area: "",
-    city: "",
-    postal_code: "",
-    payment_method: "cash_on_delivery",
-    card_number: "",
-    card_expiry: "",
-    card_cvv: "",
+  const methods = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      street: "",
+      area: "",
+      city: "",
+      postal_code: "",
+      payment_method: "cash_on_delivery",
+      card_number: "",
+      card_expiry: "",
+      card_cvv: "",
+    },
+    resolver: zodResolver(checkoutSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
+
+  const {
+    handleSubmit,
+    getValues,
+    reset,
+    formState: { isSubmitting },
+  } = methods;
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
     } else if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-      }));
+      const current = getValues();
+      reset(
+        {
+          ...current,
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+        },
+        { keepDirtyValues: true },
+      );
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, getValues, reset]);
 
   if (!isAuthenticated) return null;
   if (cart.length === 0 && !orderPlaced) {
@@ -68,7 +86,8 @@ const CheckoutPage = () => {
       document.body.appendChild(s);
     });
 
-  const generatePDF = async () => {
+  const generatePDF = async (snapshotOverride) => {
+    const snapshot = snapshotOverride ?? getValues();
     try {
       await loadScript(
         "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
@@ -128,12 +147,12 @@ const CheckoutPage = () => {
 
         <div style="margin:12px 0;padding:12px;border:1px solid #f1f5f9;border-radius:6px">
           <div style="font-size:13px;font-weight:700;margin-bottom:8px">Customer Information</div>
-          <div style="font-size:12px;color:#0f172a;margin-bottom:4px">${(formData.name || user?.name || "N/A").replace(/</g, "&lt;")}</div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:2px">Email: ${(formData.email || user?.email || "N/A").replace(/</g, "&lt;")}</div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:8px">Phone: ${(formData.phone || user?.phone || "N/A").replace(/</g, "&lt;")}</div>
+          <div style="font-size:12px;color:#0f172a;margin-bottom:4px">${(snapshot.name || user?.name || "N/A").replace(/</g, "&lt;")}</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:2px">Email: ${(snapshot.email || user?.email || "N/A").replace(/</g, "&lt;")}</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">Phone: ${(snapshot.phone || user?.phone || "N/A").replace(/</g, "&lt;")}</div>
           <div style="font-size:12px;color:#64748b;margin-top:6px;margin-bottom:4px">Shipping Address</div>
-          <div style="font-size:12px;color:#0f172a">${((formData.street || "") + (formData.area ? ", " + formData.area : "") + (formData.city ? ", " + formData.city : "")).replace(/</g, "&lt;")}</div>
-          <div style="font-size:12px;color:#0f172a">${(formData.postal_code || "").replace(/</g, "&lt;")}</div>
+          <div style="font-size:12px;color:#0f172a">${((snapshot.street || "") + (snapshot.area ? ", " + snapshot.area : "") + (snapshot.city ? ", " + snapshot.city : "")).replace(/</g, "&lt;")}</div>
+          <div style="font-size:12px;color:#0f172a">${(snapshot.postal_code || "").replace(/</g, "&lt;")}</div>
         </div>
 
         <table style="width:100%;border-collapse:collapse;margin-top:8px">
@@ -199,15 +218,8 @@ const CheckoutPage = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setOrderError("");
-    setIsSubmitting(true);
     try {
       const orderItems = cart.map((item) => ({
         product_id: item.product_id,
@@ -228,25 +240,25 @@ const CheckoutPage = () => {
         vendor_id: vendorId,
         total_amount: cartTotal,
         discount_amount: 0,
-        payment_method: formData.payment_method,
+        payment_method: data.payment_method,
         items: orderItems,
         shipping_address: {
-          street: formData.street,
-          area: formData.area,
-          city: formData.city,
-          postal_code: formData.postal_code,
+          street: data.street,
+          area: data.area,
+          city: data.city,
+          postal_code: data.postal_code,
         },
         billing_info: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
         },
       };
 
       const result = await createOrder(orderData);
       if (result.success) {
         try {
-          await generatePDF();
+          await generatePDF(data);
         } catch (pdfErr) {
           console.error("Auto PDF generation failed", pdfErr);
         }
@@ -260,8 +272,6 @@ const CheckoutPage = () => {
     } catch (error) {
       setOrderError("An unexpected error occurred. Please try again.");
       console.error("Order creation error:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -308,41 +318,34 @@ const CheckoutPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <BillingSection
-                formData={formData}
-                onChange={handleInputChange}
-              />
-              <ShippingSection
-                formData={formData}
-                onChange={handleInputChange}
-              />
-              <PaymentSection
-                formData={formData}
-                onChange={handleInputChange}
-              />
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <BillingSection />
+                <ShippingSection />
+                <PaymentSection />
 
-              {orderError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-                  <p className="text-red-600">{orderError}</p>
-                </div>
-              )}
+                {orderError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                    <p className="text-red-600">{orderError}</p>
+                  </div>
+                )}
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full bg-linear-to-r from-red-600 to-yellow-600 text-white py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl ${
-                  isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:from-red-700 hover:to-yellow-700"
-                }`}
-              >
-                {isSubmitting
-                  ? "Processing..."
-                  : `Place Order - ৳${finalTotal.toFixed(2)}`}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full bg-linear-to-r from-red-600 to-yellow-600 text-white py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl ${
+                    isSubmitting
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:from-red-700 hover:to-yellow-700"
+                  }`}
+                >
+                  {isSubmitting
+                    ? "Processing..."
+                    : `Place Order - ৳${finalTotal.toFixed(2)}`}
+                </button>
+              </form>
+            </FormProvider>
           </div>
 
           <div className="lg:col-span-1">
