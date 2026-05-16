@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useOrders } from "../hooks/useOrders";
 import { orderAPI, orderItemAPI } from "../services/api";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 import { toast } from "react-hot-toast";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 
@@ -107,7 +107,7 @@ const OrdersPage = () => {
             </h2>
             <p className="text-red-600 mb-6">{error}</p>
             <div className="flex gap-4 justify-center">
-              <ButtonCard
+              <Button
                 onClick={() => window.location.reload()}
                 label="Try Again"
               />
@@ -318,7 +318,7 @@ const OrdersPage = () => {
                       )}
                     </button>
                     {order.order_status === "Pending" && (
-                      <ButtonCard
+                      <Button
                         onClick={() => cancelOrder(order.order_id)}
                         label="Cancel Order"
                         loading={Boolean(cancelling[order.order_id])}

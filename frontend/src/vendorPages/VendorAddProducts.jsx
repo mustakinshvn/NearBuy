@@ -16,7 +16,7 @@ import {
 import { vendorAddProductSchema } from "../lib/validation/schemas";
 import { productPayloadToFormData } from "../lib/formData";
 import { TrashIcon } from "lucide-react";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 
 const VendorAddProducts = () => {
   const navigate = useNavigate();
@@ -768,14 +768,14 @@ const VendorAddProducts = () => {
                 </FormSection>
 
                 <div className="flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-center">
-                  <ButtonCard
+                  <Button
                     type="button"
                     onClick={handleReset}
                     label="Cancel"
                     className="w-auto px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50"
                     disabled={submitting || isSubmitting}
                   />
-                  <ButtonCard
+                  <Button
                     type="submit"
                     label="Save Product"
                     loading={submitting || isSubmitting}

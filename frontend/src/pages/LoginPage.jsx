@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../lib/validation/schemas";
@@ -141,7 +141,7 @@ const LoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard
+            <Button
               label="Login"
               type="submit"
               loading={isSubmitting}

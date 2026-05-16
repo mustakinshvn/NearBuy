@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Package, Heart, Star, ShoppingCart, ShoppingBag } from "lucide-react";
-import ButtonCard from "./sharingComponents/Button";
+import Button from "./sharingComponents/Button";
 import { useCart } from "../hooks/useCart";
 
 const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
@@ -183,7 +183,7 @@ const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
             <span className="text-sm text-slate-600">4.5</span>
           </div>
         </div>
-        <ButtonCard
+        <Button
           onClick={handleAdd}
           icon={<ShoppingCart size={16} />}
           label={hasInCart ? "In Cart" : "Add to cart"}

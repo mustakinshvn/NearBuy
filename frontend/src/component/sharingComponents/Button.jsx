@@ -8,7 +8,7 @@ const Button = (Props) => {
       type={Props.type}
       onClick={Props.onClick}
       className={cn(
-        "w-full py-3 bg-linear-to-r from-green-500 to-blue-500 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2",
+        "w-full py-3 cursor-pointer bg-linear-to-r from-green-500 to-blue-500 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2",
         !isLoading && "hover:from-green-600 hover:to-blue-600 hover:shadow-xl transform hover:scale-[1.02] active:scale-95 cursor-pointer",
         isLoading && "cursor-not-allowed opacity-80",
         Props.className,
