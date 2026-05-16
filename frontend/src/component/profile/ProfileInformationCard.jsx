@@ -1,5 +1,7 @@
-import { Edit2, Save, X } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../hooks/useToast";
+import Button from "../sharingComponents/Button";
 
 const ProfileInformationCard = ({
   user,
@@ -13,6 +15,8 @@ const ProfileInformationCard = ({
 }) => {
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profilePreviewUrl, setProfilePreviewUrl] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const { success: showSuccess, error: showError } = useToast();
 
   const currentProfileImageUrl = useMemo(() => {
     const entity = user || vendor || null;
@@ -53,10 +57,12 @@ const ProfileInformationCard = ({
   }, [user, vendor]);
 
   const handleSaveChanges = async () => {
+    setIsSaving(true);
     try {
       if (!target) {
         console.error("No user/vendor selected for profile update");
         setSuccess(false);
+        showError("Profile information is missing. Please log in again.");
         return;
       }
 
@@ -120,15 +126,20 @@ const ProfileInformationCard = ({
           }
         }
         setSuccess(true);
+        showSuccess("Profile updated successfully");
         setIsEditing(false);
         setTimeout(() => setSuccess(false), 3000);
       } else {
         console.error("Failed to update profile");
         setSuccess(false);
+        showError("Failed to update profile");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       setSuccess(false);
+      showError(error.message || "Error updating profile");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -269,20 +280,23 @@ const ProfileInformationCard = ({
               </div>
 
               <div className="flex gap-4 pt-6 border-t border-slate-600">
-                <button
+                <Button
+                  type="button"
                   onClick={handleSaveChanges}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-                >
-                  <Save size={18} />
-                  Save Changes
-                </button>
-                <button
+                  label="Save Changes"
+                  loading={isSaving}
+                  loadingLabel="Saving..."
+                  className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                />
+                <Button
+                  type="button"
                   onClick={() => setIsEditing(false)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors"
-                >
-                  <X size={18} />
-                  Cancel
-                </button>
+                  label="Cancel"
+                  loading={isSaving}
+                  loadingLabel="Please wait..."
+                  disabled={isSaving}
+                  className="flex-1 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors"
+                />
               </div>
             </div>
           </div>

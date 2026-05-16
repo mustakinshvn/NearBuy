@@ -292,15 +292,42 @@ export const notificationAPI = {
   getByCustomer: async (customerId) => {
     return apiRequest(`/notifications/customer/${customerId}`);
   },
+  getUnreadByCustomer: async (customerId) => {
+    return apiRequest(`/notifications/customer/${customerId}/unread`);
+  },
+  getUnreadCountByCustomer: async (customerId) => {
+    return apiRequest(`/notifications/customer/${customerId}/unread-count`);
+  },
+
+  getByVendor: async (vendorId) => {
+    return apiRequest(`/notifications/vendor/${vendorId}`);
+  },
+  getUnreadByVendor: async (vendorId) => {
+    return apiRequest(`/notifications/vendor/${vendorId}/unread`);
+  },
+  getUnreadCountByVendor: async (vendorId) => {
+    return apiRequest(`/notifications/vendor/${vendorId}/unread-count`);
+  },
 
   markAsRead: async (notificationId) => {
     return apiRequest(`/notifications/${notificationId}/read`, {
-      method: 'PATCH',
+      method: 'PUT',
+    });
+  },
+
+  markAsUnread: async (notificationId) => {
+    return apiRequest(`/notifications/${notificationId}/unread`, {
+      method: 'PUT',
     });
   },
 
   markAllAsRead: async (customerId) => {
     return apiRequest(`/notifications/customer/${customerId}/read-all`, {
+      method: 'PATCH',
+    });
+  },
+  markAllAsReadVendor: async (vendorId) => {
+    return apiRequest(`/notifications/vendor/${vendorId}/read-all`, {
       method: 'PATCH',
     });
   },

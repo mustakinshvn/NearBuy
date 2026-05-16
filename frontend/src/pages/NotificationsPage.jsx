@@ -1,20 +1,51 @@
-import { Bell, ShoppingBag, Package, Star, Trash2, Check } from "lucide-react";
+import { useState } from "react";
+import { Bell, ShoppingBag, Package, Star, Trash2, Check, ChevronDown, Undo2 } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
+import NotificationExpandedTemplate from "../component/notificationComponents/NotificationExpandedTemplate";
 
 const NotificationsPage = () => {
+  const [expandedNotificationId, setExpandedNotificationId] = useState(null);
   const {
     notifications,
     loading,
     error,
     markAsRead,
+    markAsUnread,
     markAllAsRead,
     deleteNotification,
     unreadCount,
   } = useNotifications();
 
+  const formatTimeAgo = (dateValue) => {
+    if (!dateValue) return "Time not available";
+
+    const createdDate = new Date(dateValue);
+    if (Number.isNaN(createdDate.getTime())) return "Time not available";
+
+    const now = new Date();
+    const diffMs = Math.max(0, now - createdDate);
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
+    }
+
+    if (diffHours < 24) {
+      return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+    }
+
+    return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
+  };
+
   const handleMarkAsRead = async (notificationId) => {
     await markAsRead(notificationId);
+  };
+
+  const handleMarkAsUnread = async (notificationId) => {
+    await markAsUnread(notificationId);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -25,6 +56,12 @@ const NotificationsPage = () => {
     if (window.confirm("Are you sure you want to delete this notification?")) {
       await deleteNotification(notificationId);
     }
+  };
+
+  const toggleExpanded = (notificationId) => {
+    setExpandedNotificationId((current) =>
+      current === notificationId ? null : notificationId,
+    );
   };
 
   const getNotificationIcon = (type) => {
@@ -94,28 +131,14 @@ const NotificationsPage = () => {
           <div className="space-y-3">
             {notifications.map((notification) => {
               const IconComponent = getNotificationIcon(notification.type);
-              const createdDate = new Date(notification.created_at);
-              const now = new Date();
-              const diffMs = now - createdDate;
-              const diffMins = Math.floor(diffMs / 60000);
-              const diffHours = Math.floor(diffMs / 3600000);
-              const diffDays = Math.floor(diffMs / 86400000);
-
-              let timeAgo;
-              if (diffMins < 60) {
-                timeAgo =
-                  diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
-              } else if (diffHours < 24) {
-                timeAgo =
-                  diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-              } else {
-                timeAgo = diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
-              }
+              const timeAgo = formatTimeAgo(notification.sent_at || notification.created_at || notification.createdAt);
+              const isExpanded = expandedNotificationId === notification.notification_id;
 
               return (
                 <div
                   key={notification.notification_id}
-                  className={`bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-5 ${
+                  onClick={() => toggleExpanded(notification.notification_id)}
+                  className={`cursor-pointer bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-5 ${
                     !notification.is_read ? "border-l-4 border-blue-500" : ""
                   }`}
                 >
@@ -130,27 +153,54 @@ const NotificationsPage = () => {
                       <p className="text-slate-600 mb-2">
                         {notification.message}
                       </p>
-                      <p className="text-slate-500 text-sm">{timeAgo}</p>
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <span>{timeAgo}</span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      </div>
+
+                      {isExpanded && (
+                        <NotificationExpandedTemplate
+                          notification={notification}
+                          timeAgo={timeAgo}
+                        />
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {!notification.is_read && (
+                      {!notification.is_read ? (
                         <>
                           <button
-                            onClick={() =>
-                              handleMarkAsRead(notification.notification_id)
-                            }
-                            className="p-2 hover:bg-green-50 rounded-lg transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsRead(notification.notification_id);
+                            }}
+                            className="cursor-pointer p-2 hover:bg-green-50 rounded-lg transition-colors"
                             title="Mark as read"
+                            type="button"
                           >
                             <Check className="w-5 h-5 text-green-600" />
                           </button>
                           <div className="w-2 h-2 bg-blue-600 rounded-full shrink-0"></div>
                         </>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsUnread(notification.notification_id);
+                          }}
+                          className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                          title="Mark as unread"
+                          type="button"
+                        >
+                          <Undo2 className="w-4 h-4" />
+                          Mark as unread
+                        </button>
                       )}
                       <button
-                        onClick={() =>
-                          handleDelete(notification.notification_id)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(notification.notification_id);
+                        }}
+                        type="button"
                         className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete notification"
                       >

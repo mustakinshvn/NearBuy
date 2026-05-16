@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, UsersRound } from "lucide-react";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -140,7 +140,7 @@ const AdminVendorLoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard
+            <Button
               label="Login"
               type="submit"
               loading={isSubmitting}

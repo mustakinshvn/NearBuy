@@ -9,7 +9,7 @@ import BillingSection from "../component/checkout/BillingSection";
 import ShippingSection from "../component/checkout/ShippingSection";
 import PaymentSection from "../component/checkout/PaymentSection";
 import OrderSummaryCard from "../component/checkout/OrderSummaryCard";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema } from "../lib/validation/schemas";
@@ -288,11 +288,11 @@ const CheckoutPage = () => {
             You will receive a confirmation email shortly
           </p>
           <div className="space-y-3">
-            <ButtonCard
+            <Button
               label="View Orders"
               onClick={() => navigate("/orders")}
             />
-            <ButtonCard
+            <Button
               label="Continue Shopping"
               onClick={() => navigate("/products")}
               className="bg-linear-to-r from-red-600 to-yellow-600 hover:from-red-700 hover:to-yellow-500"
@@ -331,7 +331,7 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
-                <ButtonCard
+                <Button
                   type="submit"
                   label={`Place Order - ৳${finalTotal.toFixed(2)}`}
                   loading={isSubmitting}

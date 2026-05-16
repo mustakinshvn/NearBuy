@@ -1,9 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Store, MapPin,  Search, Mail, Phone, Filter, X, ChevronDown, RefreshCw, XCircle } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Store, MapPin, Search, Mail, Phone, Filter, X, ChevronDown, RefreshCw, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useVendors } from '../hooks/useVendors';
+import ShopVendorCard from '../component/shopsPage/ShopVendorCard';
 
 const ShopsPage = () => {
   const { vendors: allVendors, loading, error } = useVendors();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('All');
   const [selectedArea, setSelectedArea] = useState('All');
@@ -88,6 +91,10 @@ const ShopsPage = () => {
     setShowFilters(false);
   };
 
+  const openVendorShop = (vendorId) => {
+    navigate(`/shops/${vendorId}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
@@ -133,7 +140,6 @@ const ShopsPage = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="container mx-auto px-4 py-12">
-       
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-5xl font-bold text-slate-800 mb-3">
@@ -273,46 +279,7 @@ const ShopsPage = () => {
         ) : filteredVendors.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVendors.map((vendor) => (
-            <div
-              key={vendor.vendor_id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden group"
-            >
-              <div className="h-32 bg-linear-to-r from-blue-500 to-indigo-600 flex items-center justify-center relative overflow-hidden">
-                <Store className="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" />
-              </div>
-
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
-                  {vendor.shop_name}
-                </h3>
-                <p className="text-sm text-slate-500 mb-3">Owner: {vendor.name}</p>
-                <p className="text-slate-600 text-sm mb-4 line-clamp-2">{vendor.description}</p>
-
-                <div className="flex items-start gap-2 mb-3 p-3 bg-slate-50 rounded-lg">
-                  <MapPin className="w-4 h-4 text-blue-600 mt-1 shrink-0" />
-                  <div className="text-sm text-slate-700">
-                    <p className="font-medium">{vendor.area}, {vendor.city}</p>
-                    <p className="text-slate-500">{vendor.street}</p>
-                    <p className="text-slate-500">{vendor.postal_code}, {vendor.country}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Phone className="w-4 h-4 text-green-600" />
-                    <span className="font-medium">{vendor.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Mail className="w-4 h-4 text-red-600" />
-                    <span className="font-medium">{vendor.email}</span>
-                  </div>
-                </div>
-
-                <button className="w-full py-3 bg-linear-to-r from-green-500 to-blue-500 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all text-white font-semibold shadow-md hover:shadow-lg active:scale-95 cursor-pointer">
-                  Visit Shop
-                </button>
-              </div>
-            </div>
+            <ShopVendorCard key={vendor.vendor_id} vendor={vendor} onVisitShop={openVendorShop} />
           ))}
         </div>
         ) : (

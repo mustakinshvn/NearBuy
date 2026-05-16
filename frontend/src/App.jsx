@@ -1,5 +1,6 @@
 import { Navigate, Routes, Route } from "react-router-dom";
 import ShopsPage from "./pages/ShopsPage";
+import ShopDetailsPage from "./pages/ShopDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import OrdersPage from "./pages/OrdersPage";
@@ -16,6 +17,7 @@ import AdminVendorLoginPage from "./pages/AdminVendorLoginPage";
 import VendorDashBoard from "./vendorPages/VendorDashBoard";
 import ProtectedVendorsRoutes from "./component/ProtectedVendorsRoutes";
 import VendorAddProducts from "./vendorPages/VendorAddProducts";
+import VendorProductsPage from "./vendorPages/VendorProductsPage";
 import { useAuth } from "./hooks/useAuth";
 import { useVendorAuthContext } from "./hooks/useVendorAuthContext";
 
@@ -35,6 +37,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/shops" element={<ShopsPage />} />
+      <Route path="/shops/:vendorId" element={<ShopDetailsPage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/:productId" element={<ProductDetailsPage />} />
       <Route path="/about" element={<AboutPage />} />
@@ -47,6 +50,24 @@ function App() {
         element={
           <ProtectedVendorsRoutes>
             <VendorDashBoard />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/vendor/products"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorProductsPage />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/vendor/products/:productId/edit"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorAddProducts />
           </ProtectedVendorsRoutes>
         }
       />
@@ -95,9 +116,9 @@ function App() {
       <Route
         path="/notifications"
         element={
-          <ProtectedRoute>
+          <ProtectedProfileRoute>
             <NotificationsPage />
-          </ProtectedRoute>
+          </ProtectedProfileRoute>
         }
       />
     </Routes>

@@ -16,7 +16,7 @@ const SecuritySettings = ({ handleLogout }) => {
                 <p className="text-slate-400 text-sm mt-1">Update your password regularly to keep your account secure</p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap">
+            <button className="px-4 py-2 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap">
               Change
             </button>
           </div>
@@ -33,7 +33,7 @@ const SecuritySettings = ({ handleLogout }) => {
                 <p className="text-slate-400 text-sm mt-1">Add an extra layer of security to your account</p>
               </div>
             </div>
-            <button className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white font-medium rounded-lg transition-colors whitespace-nowrap">
+            <button className="px-4 py-2 bg-slate-600 cursor-pointer hover:bg-slate-500 text-white font-medium rounded-lg transition-colors whitespace-nowrap">
               Enable
             </button>
           </div>
@@ -52,7 +52,7 @@ const SecuritySettings = ({ handleLogout }) => {
             </div>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors cursor-pointer whitespace-nowrap"
             >
               Logout
             </button>

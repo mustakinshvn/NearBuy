@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { User, LogOut, ShoppingBag, Bell, UserCheck } from "lucide-react";
+import { User, LogOut, ShoppingBag, Bell, UserCheck, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -43,6 +43,13 @@ const ProfileLogo = () => {
       return;
     }
     setShowDropdown(!showDropdown);
+  };
+
+  const isVendor = isVendorAuthenticated && !isAuthenticated;
+
+  const goToRoute = (route) => {
+    navigate(route);
+    setShowDropdown(false);
   };
 
   const profileImageUrl =
@@ -98,11 +105,38 @@ const ProfileLogo = () => {
             </p>
           </div>
 
+              {isVendor ? (
+                <button
+                  onClick={() => goToRoute("/vendor-dashboard")}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <UserCheck size={16} />
+                  Vendor Dashboard
+                </button>
+              ) : null}
+
+              {isVendor ? (
+                <button
+                  onClick={() => goToRoute("/vendor/products")}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <ShoppingBag size={16} />
+                  My Products
+                </button>
+              ) : null}
+
+              {isVendor ? (
+                <button
+                  onClick={() => goToRoute("/vendor/add-products")}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <PlusCircle size={16} />
+                  Add Product
+                </button>
+              ) : null}
+
           <button
-            onClick={() => {
-              navigate("/profile");
-              setShowDropdown(false);
-            }}
+                onClick={() => goToRoute("/profile")}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <User size={16} />
@@ -110,10 +144,7 @@ const ProfileLogo = () => {
           </button>
 
           <button
-            onClick={() => {
-              navigate("/orders");
-              setShowDropdown(false);
-            }}
+                onClick={() => goToRoute("/orders")}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <ShoppingBag size={16} />
@@ -121,10 +152,7 @@ const ProfileLogo = () => {
           </button>
 
           <button
-            onClick={() => {
-              navigate("/notifications");
-              setShowDropdown(false);
-            }}
+                onClick={() => goToRoute("/notifications")}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Bell size={16} />

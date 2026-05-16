@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import ButtonCard from "../component/sharingComponents/Button";
+import Button from "../component/sharingComponents/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "../lib/validation/schemas";
@@ -189,7 +189,7 @@ const SignUpPage = () => {
               )}
             </div>
 
-            <ButtonCard
+            <Button
               label="Create Account"
               type="submit"
               loading={isSubmitting}
