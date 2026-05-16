@@ -28,13 +28,13 @@ const ImageGallery = ({ product, selectedImage, onSelectImage }) => {
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <div className="relative aspect-[4/3] sm:aspect-[3/2] bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl overflow-hidden">
+      <div className="relative aspect-4/3 sm:aspect-3/2 bg-linear-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-xl overflow-hidden">
         {allImages.length > 0 ? (
           <img
             key={`main-${internalIndex}`}
             src={allImages[internalIndex]}
             alt={product.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover "
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
