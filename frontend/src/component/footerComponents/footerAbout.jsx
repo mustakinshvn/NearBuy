@@ -1,8 +1,11 @@
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import Logo from "../sharingComponents/logo";
 import { LinksTo } from "../sharingComponents/LinksTo";
+import { useVendorAuthContext } from "../../hooks/useVendorAuthContext";
 
 const footerAbout = () => {
+  const { isVendorAuthenticated } = useVendorAuthContext();
+
   return (
     <div className="flex flex-col items-center justify-center sm:items-start ">
       <div className="flex items-center gap-2 mb-2">
@@ -38,11 +41,13 @@ const footerAbout = () => {
           <Linkedin className="w-5 h-5" />
         </a>
       </div>
-      <LinksTo
-        to="/admin-vendor-login"
-        label="Admin/Vendor Login"
-        className="w-full py-3 bg-linear-to-r from-gray-500 to-gray-400 rounded-lg hover:from-gray-600 hover:to-gray-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2 mt-4 font-semibold text-gray-200 hover:text-gray-400"
-      />
+      {!isVendorAuthenticated ? (
+        <LinksTo
+          to="/admin-vendor-login"
+          label="Admin/Vendor Login"
+          className="w-full py-3 bg-linear-to-r from-gray-500 to-gray-400 rounded-lg hover:from-gray-600 hover:to-gray-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2 mt-4 font-semibold text-gray-200 hover:text-gray-400"
+        />
+      ) : null}
     </div>
   );
 };
