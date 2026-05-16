@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -10,9 +10,42 @@ import {
   X,
   Store,
 } from "lucide-react";
+import { useAuth } from '../../hooks/useAuth';
+import { useVendorAuthContext } from '../../hooks/useVendorAuthContext';
+import { notificationAPI } from '../../services/api';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const { vendor, isVendorAuthenticated } = useVendorAuthContext();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchCount = async () => {
+      try {
+        if (isAuthenticated && user) {
+          const res = await notificationAPI.getUnreadCountByCustomer(user.customer_id || user.id);
+          if (active) setUnreadCount(res.unread_count || 0);
+        } else if (isVendorAuthenticated && vendor) {
+          const res = await notificationAPI.getUnreadCountByVendor(vendor.vendor_id || vendor.id);
+          if (active) setUnreadCount(res.unread_count || 0);
+        } else {
+          if (active) setUnreadCount(0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch unread count', err);
+      }
+    };
+
+    fetchCount();
+    const t = setInterval(fetchCount, 30000);
+    return () => {
+      active = false;
+      clearInterval(t);
+    };
+  }, [isAuthenticated, user, isVendorAuthenticated, vendor]);
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -37,7 +70,14 @@ const Navbar = () => {
               to={link.href}
               className="relative flex items-center gap-2 px-4 py-2 rounded-lg group transition-all duration-300 hover:bg-linear-to-r hover:from-blue-50 hover:to-indigo-50"
             >
-              <IconComponent className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-110" />
+              <div className="relative">
+                <IconComponent className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-110" />
+                {link.name === 'Notifications' && unreadCount > 0 && (
+                  <span className="absolute -top-3 -right-3 inline-flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 py-0.5 text-[10px] font-semibold leading-none text-white shadow-md ring-2 ring-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-300 tracking-wide">
                 {link.name}
               </span>
@@ -81,7 +121,7 @@ const Navbar = () => {
             </div>
 
             <nav className="flex flex-col p-4 space-y-2 mt-4">
-              {navLinks.map((link, index) => {
+              {navLinks.filter(l => l.name !== 'Notifications').map((link, index) => {
                 const IconComponent = link.icon;
                 return (
                   <Link
@@ -91,8 +131,11 @@ const Navbar = () => {
                     className="flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-linear-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group border border-transparent hover:border-blue-100 hover:shadow-md active:scale-98"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-blue-100 transition-all duration-300">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-blue-100 transition-all duration-300 relative">
                       <IconComponent className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-all duration-300" />
+                      {link.name === 'Notifications' && unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white">{unreadCount}</span>
+                      )}
                     </div>
                     <span className="text-base font-semibold text-slate-700 group-hover:text-blue-600 transition-colors duration-300">
                       {link.name}

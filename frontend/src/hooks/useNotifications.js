@@ -1,23 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationAPI } from '../services/api';
 import { useAuth } from './useAuth';
+import { useVendorAuthContext } from './useVendorAuthContext';
 
 export const useNotifications = () => {
   const { user } = useAuth();
+  const { vendor } = useVendorAuthContext();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchNotifications = useCallback(async () => {
-    if (!user?.customer_id) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
-      const response = await notificationAPI.getByCustomer(user.customer_id);
+      let response;
+
+      if (user?.customer_id) {
+        response = await notificationAPI.getByCustomer(user.customer_id);
+      } else if (vendor?.vendor_id) {
+        response = await notificationAPI.getByVendor(vendor.vendor_id);
+      } else {
+        setNotifications([]);
+        setLoading(false);
+        return;
+      }
+
       setNotifications(response.notifications || []);
     } catch (err) {
       setError(err.message);
@@ -45,7 +53,11 @@ export const useNotifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      await notificationAPI.markAllAsRead(user.customer_id);
+      if (user?.customer_id) {
+        await notificationAPI.markAllAsRead(user.customer_id);
+      } else if (vendor?.vendor_id) {
+        await notificationAPI.markAllAsReadVendor(vendor.vendor_id);
+      }
       setNotifications(notifications.map(n => ({ ...n, is_read: true })));
       return { success: true };
     } catch (err) {
