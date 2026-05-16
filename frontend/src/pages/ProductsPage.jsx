@@ -8,16 +8,20 @@ import {
   Star,
 } from "lucide-react";
 import ProductCard from "../component/ProductCard";
+import ShopVendorCard from "../component/shopsPage/ShopVendorCard";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
+import { useVendors } from "../hooks/useVendors";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
 import { ConfirmAlert } from "../component/sharingComponents/ConfirmAlert";
 
 const ProductsPage = () => {
   const { products: allProducts, loading, error } = useProducts();
+  const { vendors: allVendors } = useVendors();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -28,9 +32,16 @@ const ProductsPage = () => {
   const { cart, addToCart, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [pendingProduct, setPendingProduct] = useState(null);
   const [showVendorConfirm, setShowVendorConfirm] = useState(false);
+  const hasSearchQuery = searchQuery.trim().length > 0;
+
+  React.useEffect(() => {
+    const query = searchParams.get("search") || "";
+    setSearchQuery(query);
+  }, [searchParams]);
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
@@ -111,12 +122,32 @@ const ProductsPage = () => {
     minRating,
   ]);
 
+  const filteredVendors = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    return allVendors.filter((vendor) => {
+      return (
+        vendor.shop_name?.toLowerCase().includes(query) ||
+        vendor.description?.toLowerCase().includes(query) ||
+        vendor.name?.toLowerCase().includes(query) ||
+        vendor.area?.toLowerCase().includes(query) ||
+        vendor.city?.toLowerCase().includes(query) ||
+        vendor.street?.toLowerCase().includes(query)
+      );
+    });
+  }, [allVendors, searchQuery]);
+
+  const showCombinedSearchNoResults =
+    hasSearchQuery && filteredProducts.length === 0 && filteredVendors.length === 0;
+
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
     setPriceRange([0, 20000]);
     setSortBy("featured");
     setMinRating(0);
+    setSearchParams({});
   };
 
   if (loading) {
@@ -163,13 +194,38 @@ const ProductsPage = () => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const nextQuery = e.target.value;
+                setSearchQuery(nextQuery);
+
+                if (nextQuery.trim()) {
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current);
+                    next.set("search", nextQuery.trim());
+                    return next;
+                  });
+                } else {
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current);
+                    next.delete("search");
+                    return next;
+                  });
+                }
+              }}
               placeholder="Search products by name or description..."
               className="w-full pl-12 pr-12 py-4 bg-white rounded-2xl shadow-md focus:shadow-xl focus:ring-2 focus:ring-blue-400 transition-all outline-none text-slate-700 font-medium"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchParams((current) => {
+                    const next = new URLSearchParams(current);
+                    next.delete("search");
+                    return next;
+                  });
+                }}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
@@ -302,7 +358,7 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {allProducts.length === 0 && !loading && !error ? (
+        {!hasSearchQuery && allProducts.length === 0 && !loading && !error ? (
           <div className="bg-white rounded-3xl shadow-xl p-16 text-center max-w-2xl mx-auto">
             <div className="bg-linear-to-br from-blue-100 to-indigo-100 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-16 h-16 text-blue-600" />
@@ -331,60 +387,131 @@ const ProductsPage = () => {
               </a>
             </div>
           </div>
-        ) : filteredProducts.length > 0 ? (
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.product_id}
-                product={product}
-                mode="grid"
-                onAddToCart={handleAddToCart}
-              />
-            ))}
-          </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-xl mx-auto">
-            <div className="bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="w-12 h-12 text-slate-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-700 mb-3">
-              No products match your filters
-            </h3>
-            <p className="text-slate-500 mb-6">
-              Try adjusting your search terms or removing some filters
-            </p>
-            <div className="bg-slate-50 rounded-xl p-4 mb-6">
-              <p className="text-sm text-slate-600 mb-2">Current filters:</p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {searchQuery && (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                    Search: "{searchQuery}"
+          <>
+            {hasSearchQuery && filteredVendors.length > 0 ? (
+              <section className="mb-10 rounded-3xl bg-white p-6 shadow-xl">
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-800">
+                      Vendor matches
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Shops and vendors matching "{searchQuery}"
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+                    {filteredVendors.length}
                   </span>
-                )}
-                {selectedCategory !== "All" && (
-                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                    Category: {selectedCategory}
-                  </span>
-                )}
-                {(priceRange[0] !== 0 || priceRange[1] !== 20000) && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                    Price: ৳{priceRange[0]} - ৳{priceRange[1]}
-                  </span>
-                )}
-                {minRating > 0 && (
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                    Rating: {minRating}+ stars
-                  </span>
-                )}
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredVendors.map((vendor) => (
+                    <ShopVendorCard key={vendor.vendor_id} vendor={vendor} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {showCombinedSearchNoResults ? (
+              <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-xl mx-auto">
+                <div className="bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-12 h-12 text-slate-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-700 mb-3">
+                  No products or vendors match your search
+                </h3>
+                <p className="text-slate-500 mb-6">
+                  Try a different keyword or clear the search field.
+                </p>
+                <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-slate-600 mb-2">Current filters:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {searchQuery && (
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                        Search: "{searchQuery}"
+                      </span>
+                    )}
+                    {selectedCategory !== "All" && (
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                        Category: {selectedCategory}
+                      </span>
+                    )}
+                    {(priceRange[0] !== 0 || priceRange[1] !== 20000) && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                        Price: ৳{priceRange[0]} - ৳{priceRange[1]}
+                      </span>
+                    )}
+                    {minRating > 0 && (
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                        Rating: {minRating}+ stars
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={clearFilters}
+                  className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  Clear All Filters
+                </button>
               </div>
-            </div>
-            <button
-              onClick={clearFilters}
-              className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Clear All Filters
-            </button>
-          </div>
+            ) : filteredProducts.length > 0 ? (
+              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.product_id}
+                    product={product}
+                    mode="grid"
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-xl mx-auto">
+                <div className="bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-12 h-12 text-slate-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-700 mb-3">
+                  No products match your filters
+                </h3>
+                <p className="text-slate-500 mb-6">
+                  Try adjusting your search terms or removing some filters
+                </p>
+                <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-slate-600 mb-2">Current filters:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {searchQuery && (
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                        Search: "{searchQuery}"
+                      </span>
+                    )}
+                    {selectedCategory !== "All" && (
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                        Category: {selectedCategory}
+                      </span>
+                    )}
+                    {(priceRange[0] !== 0 || priceRange[1] !== 20000) && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                        Price: ৳{priceRange[0]} - ৳{priceRange[1]}
+                      </span>
+                    )}
+                    {minRating > 0 && (
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                        Rating: {minRating}+ stars
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={clearFilters}
+                  className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
       <ConfirmAlert

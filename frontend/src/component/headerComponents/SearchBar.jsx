@@ -1,20 +1,32 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 
 const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      // logic to perform search will be added here
+
+    const query = searchQuery.trim();
+    const targetPath = query ? `/products?search=${encodeURIComponent(query)}` : "/products";
+
+    if (location.pathname === "/products") {
+      navigate(targetPath, { replace: true });
+      return;
     }
+
+    navigate(targetPath);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
+    if (location.pathname === "/products") {
+      navigate("/products", { replace: true });
+    }
   };
 
   return (
@@ -31,7 +43,7 @@ const SearchBar = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Search products..."
+          placeholder="Search products or vendors..."
           className="w-full pl-12 pr-12 py-2.5 bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none font-medium"
         />
         {searchQuery && (
