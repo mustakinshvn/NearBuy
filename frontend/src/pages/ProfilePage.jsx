@@ -12,18 +12,16 @@ import SecuritySettings from "../component/profile/SecuritySettings";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 
 const ProfilePage = () => {
-  const { user, logout } = useAuth();
-  const { vendor } = useVendorAuthContext();
+  const { user, logout, updateUser } = useAuth();
+  const { vendor, updateVendor } = useVendorAuthContext();
   const { orders } = useOrders();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [formData, setFormData] = useState({
-    full_name: user?.full_name || vendor?.full_name || "",
+    name: user?.name || vendor?.name || "",
     email: user?.email || vendor?.email || "",
-    phone_number: user?.phone_number || vendor?.phone_number || "",
-    address: user?.address || vendor?.address || "",
-    city: user?.city || vendor?.city || "",
-    postal_code: user?.postal_code || vendor?.postal_code || "",
+    phone: user?.phone || vendor?.phone || "",
+    password: "",
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -83,6 +81,10 @@ const ProfilePage = () => {
                   formData={formData}
                   setFormData={setFormData}
                   setSuccess={setSuccess}
+                  onUserUpdate={(patch) => {
+                    if (user) updateUser(patch);
+                    if (vendor) updateVendor(patch);
+                  }}
                 />
               </div>
             )}

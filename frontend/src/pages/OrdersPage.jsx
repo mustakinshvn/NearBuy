@@ -34,6 +34,7 @@ const OrdersPage = () => {
       setLoadingItems((prev) => ({ ...prev, [orderId]: true }));
       try {
         const response = await orderItemAPI.getByOrderId(orderId);
+        console.log("Fetched order items for order", orderId, response);
         setOrderItems((prev) => ({
           ...prev,
           [orderId]: response.order_items || [],
@@ -265,35 +266,32 @@ const OrdersPage = () => {
 
                   <div className="mt-4 pt-4 border-t border-slate-200 grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">
-                        Payment Method
-                      </p>
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className=" text-slate-500 mb-1">Payment Method</p>
+                      <p className=" font-semibold text-slate-700">
                         {order.payment_method}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">
-                        Payment Status
-                      </p>
+                      <p className=" text-slate-500 mb-1">Payment Status</p>
                       <p
-                        className={`text-sm font-semibold ${getPaymentStatusColor(order.payment_status)}`}
+                        className={` font-semibold ${getPaymentStatusColor(order.payment_status)}`}
                       >
                         {order.payment_status}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">
-                        Shipping Cost
-                      </p>
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className=" text-slate-500 mb-1">Shipping Cost</p>
+                      <p className=" font-semibold text-slate-700">
                         ৳{shippingCost.toFixed(2)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Vendor ID</p>
-                      <p className="text-sm font-semibold text-slate-700">
-                        #{order.vendor_id}
+                      <p className=" text-slate-500 mb-1">Shop Name</p>
+                      <p className="text-sm font-bold text-slate-700">
+                        {order.vendor_name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {order.vendor_area}, {order.vendor_city}
                       </p>
                     </div>
                   </div>
@@ -349,7 +347,7 @@ const OrdersPage = () => {
                             return (
                               <div
                                 key={item.order_item_id}
-                                className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg"
+                                className="flex flex-wrap justify-center md:justify-between items-center gap-4 p-3 bg-slate-50 rounded-lg"
                               >
                                 {item.product_image ? (
                                   <img

@@ -3,66 +3,44 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import ButtonCard from "../component/sharingComponents/Button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../lib/validation/schemas";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState({});
   const [loginError, setLoginError] = useState("");
 
   const from = location.state?.from?.pathname || "/";
 
-  const validateForm = () => {
-    const newErrors = {};
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: { email: "", password: "" },
+    resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setLoginError("");
 
-    if (validateForm()) {
-      try {
-        const result = await login(formData.email, formData.password);
+    try {
+      const result = await login(data.email, data.password);
 
-        if (result.success) {
-          navigate(from, { replace: true });
-        } else {
-          setLoginError(result.error || "Login failed. Please try again.");
-        }
-      } catch {
-        setLoginError("An unexpected error occurred. Please try again.");
+      if (result.success) {
+        navigate(from, { replace: true });
+      } else {
+        setLoginError(result.error || "Login failed. Please try again.");
       }
+    } catch {
+      setLoginError("An unexpected error occurred. Please try again.");
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
-    setLoginError("");
   };
 
   return (
@@ -85,7 +63,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Email Address
@@ -95,8 +73,9 @@ const LoginPage = () => {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  {...register("email", {
+                    onChange: () => setLoginError(""),
+                  })}
                   className={`w-full pl-11 pr-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${
                     errors.email ? "border-red-500" : "border-slate-200"
                   }`}
@@ -104,7 +83,9 @@ const LoginPage = () => {
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -117,8 +98,9 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  value={formData.password}
-                  onChange={handleChange}
+                  {...register("password", {
+                    onChange: () => setLoginError(""),
+                  })}
                   className={`w-full pl-11 pr-12 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                     errors.password ? "border-red-500" : "border-slate-200"
                   }`}
@@ -137,7 +119,9 @@ const LoginPage = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -157,7 +141,7 @@ const LoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard label="Login" onClick={handleSubmit} type="submit" />
+            <ButtonCard label="Login" type="submit" disabled={isSubmitting} />
           </form>
 
           <p className="text-center mt-6 text-slate-600">

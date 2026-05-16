@@ -33,9 +33,10 @@ class Order {
   static async getById(orderId) {
     try {
       const result = await pool.query(
-        `SELECT order_id, customer_id, vendor_id, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, created_at, updated_at 
-         FROM orders 
-         WHERE order_id = $1`,
+        `SELECT o.order_id, o.customer_id, o.vendor_id, o.total_amount, o.discount_amount, o.final_amount, o.payment_method, o.payment_status, o.order_status, o.created_at, o.updated_at, v.name as vendor_name
+         FROM orders o
+         JOIN vendors v ON o.vendor_id = v.vendor_id
+         WHERE o.order_id = $1`,
         [orderId]
       );
       return result.rows[0];
@@ -47,10 +48,11 @@ class Order {
   static async getByCustomerId(customerId) {
     try {
       const result = await pool.query(
-        `SELECT order_id, customer_id, vendor_id, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, created_at, updated_at 
-         FROM orders 
-         WHERE customer_id = $1 
-         ORDER BY created_at DESC`,
+        `SELECT o.order_id, o.customer_id, o.vendor_id, o.total_amount, o.discount_amount, o.final_amount, o.payment_method, o.payment_status, o.order_status, o.created_at, o.updated_at, v.name as vendor_name, v.area as vendor_area, v.city as vendor_city
+         FROM orders o
+         JOIN vendors v ON o.vendor_id = v.vendor_id
+         WHERE o.customer_id = $1 
+         ORDER BY o.created_at DESC`,
         [customerId]
       );
       return result.rows;

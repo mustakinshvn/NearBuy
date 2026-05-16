@@ -109,50 +109,46 @@ class vendor {
 
     static async update(vendorId, data){
         try {
-            const {
-                name,
-                email,
-                phone,
-                shop_name,
-                shop_type,
-                description,
-                street,
-                area,
-                city,
-                country,
-                postal_code
-            } = data;
+            const allowed = [
+                'name',
+                'email',
+                'phone',
+                'shop_name',
+                'shop_type',
+                'description',
+                'street',
+                'area',
+                'city',
+                'country',
+                'postal_code',
+            ];
+
+            const setClauses = [];
+            const values = [];
+            let idx = 1;
+
+            for (const key of allowed) {
+                if (Object.prototype.hasOwnProperty.call(data || {}, key)) {
+                    const value = data[key];
+                    if (value === undefined) continue;
+                    setClauses.push(`${key} = $${idx}`);
+                    values.push(value);
+                    idx++;
+                }
+            }
+
+            if (setClauses.length === 0) {
+                return await vendor.getById(vendorId);
+            }
+
             const query = `
             UPDATE vendors
-            SET name = $1,
-                email = $2,
-                phone = $3,
-                shop_name = $4,
-                shop_type = $5,
-                description = $6,
-                street = $7,
-                area = $8,
-                city = $9,
-                country = $10,
-                postal_code = $11
-            WHERE vendor_id = $12
+            SET ${setClauses.join(', ')}
+            WHERE vendor_id = $${idx}
             RETURNING *;
             `;
 
-            const values = [
-                name,
-                email,
-                phone,
-                shop_name,
-                shop_type,
-                description,
-                street,
-                area,
-                city,
-                country,
-                postal_code,
-                vendorId
-            ];
+            values.push(vendorId);
 
             const { rows } = await pool.query(query, values);
             return rows[0];

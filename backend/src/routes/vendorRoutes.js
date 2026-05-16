@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginVendor, registerVendor, getAllVendors, getVendorByEmail, getVendorById, getVendorByPhone, getVendorsByType, deleteVendor, updateVendor } from '../controllers/VendorController.js';
+import { loginVendor, registerVendor, getAllVendors, getVendorByEmail, getVendorById, getVendorByPhone, getVendorsByType, deleteVendor, updateVendor, uploadVendorProfilePhoto, vendorProfileUploadMiddleware } from '../controllers/VendorController.js';
 
 const router = Router();
 
@@ -13,6 +13,9 @@ router.get('/email/:email', asyncHandler(getVendorByEmail));
 router.get('/phone/:phone', asyncHandler(getVendorByPhone));
 router.get('/type/:type', asyncHandler(getVendorsByType));
 router.get('/:id', asyncHandler(getVendorById));
+
+router.post('/:id/profile-photo', vendorProfileUploadMiddleware, asyncHandler(uploadVendorProfilePhoto));
+
 router.put('/:id', asyncHandler(updateVendor));
 router.patch('/:id', asyncHandler(updateVendor));
 router.delete('/:id', asyncHandler(deleteVendor));

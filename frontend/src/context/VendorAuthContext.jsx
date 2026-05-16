@@ -44,6 +44,14 @@ export const VendorAuthProvider = ({ children }) => {
     localStorage.removeItem("vendor");
   };
 
+  const updateVendor = (patch) => {
+    setVendor((prev) => {
+      const next = { ...(prev || {}), ...(patch || {}) };
+      localStorage.setItem("vendor", JSON.stringify(next));
+      return next;
+    });
+  };
+
   const vendorSignup = async (vendorData) => {
     try {
       setLoading(true);
@@ -73,6 +81,7 @@ export const VendorAuthProvider = ({ children }) => {
         vendorLogin,
         vendorLogout,
         vendorSignup,
+        updateVendor,
         loading,
         error,
       }}

@@ -1,28 +1,37 @@
-import { Link } from 'react-router-dom'
-import { Package, Heart, Star, ShoppingCart, ShoppingBag } from 'lucide-react'
-import ButtonCard from './sharingComponents/Button'
+import { Link } from "react-router-dom";
+import { Package, Heart, Star, ShoppingCart, ShoppingBag } from "lucide-react";
+import ButtonCard from "./sharingComponents/Button";
+import { useCart } from "../hooks/useCart";
 
-const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
+const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
   const price = parseFloat(product.price) || 0;
-  const discountPrice = product.discount_price ? parseFloat(product.discount_price) : null;
+  const discountPrice = product.discount_price
+    ? parseFloat(product.discount_price)
+    : null;
   const displayPrice = discountPrice || price;
   const hasDiscount = discountPrice && discountPrice < price;
+  const { cart } = useCart();
+
+  const hasInCart = cart.some((item) => item.product_id === product.product_id);
 
   const handleAdd = (e) => {
-    if (e && e.preventDefault) { e.preventDefault(); e.stopPropagation(); }
+    if (e && e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (onAddToCart) onAddToCart(product);
-  }
+  };
 
-  if (mode === 'grid') {
+  if (mode === "grid") {
     return (
-      <Link 
+      <Link
         to={`/products/${product.product_id}`}
         className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden block"
       >
         <div className="h-48 bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center relative overflow-hidden">
           {product.main_image_url ? (
-            <img 
-              src={product.main_image_url} 
+            <img
+              src={product.main_image_url}
               alt={product.title}
               className="w-full h-full object-cover"
             />
@@ -48,39 +57,57 @@ const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
               </span>
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-semibold text-slate-700">{product.average_rating}</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  {product.average_rating}
+                </span>
               </div>
             </div>
           )}
-          <h3 className="font-semibold text-slate-800 mb-2 line-clamp-2">{product.title}</h3>
-          <p className="text-slate-600 text-sm mb-2 line-clamp-2">{product.description}</p>
-          <p className="text-xs text-slate-500 mb-3">{product.total_reviews} reviews • Stock: {product.stock_quantity}</p>
+          <h3 className="font-semibold text-slate-800 mb-2 line-clamp-2">
+            {product.title}
+          </h3>
+          <p className="text-slate-600 text-sm mb-2 line-clamp-2">
+            {product.description}
+          </p>
+          <p className="text-xs text-slate-500 mb-3">
+            {product.total_reviews} reviews • Stock: {product.stock_quantity}
+          </p>
           <div className="flex items-center justify-between mb-3">
             <div>
               {hasDiscount ? (
                 <div>
-                  <span className="text-lg font-bold text-blue-600">৳{displayPrice.toFixed(2)}</span>
-                  <span className="text-sm text-slate-400 line-through ml-2">৳{price.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-blue-600">
+                    ৳{displayPrice.toFixed(2)}
+                  </span>
+                  <span className="text-sm text-slate-400 line-through ml-2">
+                    ৳{price.toFixed(2)}
+                  </span>
                 </div>
               ) : (
-                <span className="text-lg font-bold text-blue-600">৳{displayPrice.toFixed(2)}</span>
+                <span className="text-lg font-bold text-blue-600">
+                  ৳{displayPrice.toFixed(2)}
+                </span>
               )}
             </div>
           </div>
-          <button 
+          <button
             onClick={handleAdd}
-            disabled={!product.is_available}
+            disabled={!product.is_available || hasInCart}
             className={`w-full px-4 py-2 rounded-lg transition-all text-sm font-medium ${
-              product.is_available
-                ? 'bg-linear-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700'
-                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              product.is_available && !hasInCart
+                ? "bg-linear-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 cursor-pointer"
+                : "bg-slate-300 text-slate-500 cursor-not-allowed"
             }`}
           >
-            {product.is_available ? 'Add to Cart' : 'Unavailable'}
+            {!product.is_available
+              ? "Unavailable"
+              : hasInCart
+                ? "In Cart"
+                : "Add to Cart"}
           </button>
         </div>
       </Link>
-    )
+    );
   }
 
   return (
@@ -90,7 +117,8 @@ const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
     >
       <div className="relative overflow-hidden">
         <div className="w-full h-48 bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-          {product.main_image_url || (product.image_urls && product.image_urls[0]) ? (
+          {product.main_image_url ||
+          (product.image_urls && product.image_urls[0]) ? (
             <img
               src={product.main_image_url || product.image_urls?.[0]}
               alt={product.title}
@@ -102,11 +130,23 @@ const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
         </div>
         {product.discount_price && (
           <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-semibold">
-            {Math.round(((parseFloat(product.price) - parseFloat(product.discount_price)) / parseFloat(product.price)) * 100)}% OFF
+            {Math.round(
+              ((parseFloat(product.price) -
+                parseFloat(product.discount_price)) /
+                parseFloat(product.price)) *
+                100,
+            )}
+            % OFF
           </div>
         )}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={(e)=>{e.preventDefault(); e.stopPropagation();}} className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="p-2 bg-white/80 hover:bg-white rounded-full shadow-lg"
+          >
             <Heart size={16} className="text-slate-600" />
           </button>
         </div>
@@ -115,7 +155,7 @@ const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
       <div className="p-6">
         <div className="mb-2">
           <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-            {product.brand || 'Brand'}
+            {product.brand || "Brand"}
           </span>
         </div>
 
@@ -143,10 +183,20 @@ const ProductCard = ({ product, mode = 'featured', onAddToCart }) => {
             <span className="text-sm text-slate-600">4.5</span>
           </div>
         </div>
-        <ButtonCard onClick={handleAdd} icon={<ShoppingCart size={16} />} label={"Add to cart"} />
+        <ButtonCard
+          onClick={handleAdd}
+          icon={<ShoppingCart size={16} />}
+          label={hasInCart ? "In Cart" : "Add to cart"}
+          className={
+            hasInCart
+              ? "w-full py-3 bg-linear-to-r from-gray-400 to-gray-500 rounded-lg hover:from-gray-400 hover:to-gray-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 cursor-not-allowed"
+              : ""
+          }
+          disabled={hasInCart}
+        />
       </div>
     </Link>
-  )
-}
+  );
+};
 
-export default ProductCard
+export default ProductCard;

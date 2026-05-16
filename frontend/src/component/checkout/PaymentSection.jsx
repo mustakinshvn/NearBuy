@@ -1,7 +1,19 @@
-import React from 'react';
-import { CreditCard } from 'lucide-react';
+import React from "react";
+import { CreditCard } from "lucide-react";
+import { useFormContext, useWatch } from "react-hook-form";
 
-const PaymentSection = ({ formData, onChange }) => {
+const PaymentSection = () => {
+  const {
+    register,
+    formState: { errors },
+    control,
+  } = useFormContext();
+
+  const paymentMethod = useWatch({
+    control,
+    name: "payment_method",
+  });
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -15,11 +27,15 @@ const PaymentSection = ({ formData, onChange }) => {
             id="cod"
             name="payment_method"
             value="cash_on_delivery"
-            checked={formData.payment_method === 'cash_on_delivery'}
-            onChange={onChange}
+            {...register("payment_method")}
             className="w-4 h-4 text-blue-600"
           />
-          <label htmlFor="cod" className="text-slate-700 font-medium cursor-pointer">Cash on Delivery</label>
+          <label
+            htmlFor="cod"
+            className="text-slate-700 font-medium cursor-pointer"
+          >
+            Cash on Delivery
+          </label>
         </div>
         <div className="flex items-center gap-3">
           <input
@@ -27,11 +43,15 @@ const PaymentSection = ({ formData, onChange }) => {
             id="card"
             name="payment_method"
             value="credit_card"
-            checked={formData.payment_method === 'credit_card'}
-            onChange={onChange}
+            {...register("payment_method")}
             className="w-4 h-4 text-blue-600"
           />
-          <label htmlFor="card" className="text-slate-700 font-medium cursor-pointer">Credit/Debit Card</label>
+          <label
+            htmlFor="card"
+            className="text-slate-700 font-medium cursor-pointer"
+          >
+            Credit/Debit Card
+          </label>
         </div>
         <div className="flex items-center gap-3">
           <input
@@ -39,51 +59,73 @@ const PaymentSection = ({ formData, onChange }) => {
             id="bkash"
             name="payment_method"
             value="bkash"
-            checked={formData.payment_method === 'bkash'}
-            onChange={onChange}
+            {...register("payment_method")}
             className="w-4 h-4 text-blue-600"
           />
-          <label htmlFor="bkash" className="text-slate-700 font-medium cursor-pointer">bKash</label>
+          <label
+            htmlFor="bkash"
+            className="text-slate-700 font-medium cursor-pointer"
+          >
+            bKash
+          </label>
         </div>
 
-        {formData.payment_method === 'credit_card' && (
+        {paymentMethod === "credit_card" && (
           <div className="mt-4 p-4 bg-slate-50 rounded-lg space-y-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Card Number</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Card Number
+              </label>
               <input
                 type="text"
                 name="card_number"
-                value={formData.card_number}
-                onChange={onChange}
+                {...register("card_number")}
                 placeholder="1234 5678 9012 3456"
                 maxLength="19"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+              {errors.card_number?.message && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.card_number.message}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Expiry Date</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Expiry Date
+                </label>
                 <input
                   type="text"
                   name="card_expiry"
-                  value={formData.card_expiry}
-                  onChange={onChange}
+                  {...register("card_expiry")}
                   placeholder="MM/YY"
                   maxLength="5"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.card_expiry?.message && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.card_expiry.message}
+                  </p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">CVV</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  CVV
+                </label>
                 <input
                   type="text"
                   name="card_cvv"
-                  value={formData.card_cvv}
-                  onChange={onChange}
+                  {...register("card_cvv")}
                   placeholder="123"
                   maxLength="3"
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.card_cvv?.message && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.card_cvv.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
