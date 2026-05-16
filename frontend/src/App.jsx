@@ -17,6 +17,7 @@ import AdminVendorLoginPage from "./pages/AdminVendorLoginPage";
 import VendorDashBoard from "./vendorPages/VendorDashBoard";
 import ProtectedVendorsRoutes from "./component/ProtectedVendorsRoutes";
 import VendorAddProducts from "./vendorPages/VendorAddProducts";
+import VendorProductsPage from "./vendorPages/VendorProductsPage";
 import { useAuth } from "./hooks/useAuth";
 import { useVendorAuthContext } from "./hooks/useVendorAuthContext";
 
@@ -49,6 +50,24 @@ function App() {
         element={
           <ProtectedVendorsRoutes>
             <VendorDashBoard />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/vendor/products"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorProductsPage />
+          </ProtectedVendorsRoutes>
+        }
+      />
+
+      <Route
+        path="/vendor/products/:productId/edit"
+        element={
+          <ProtectedVendorsRoutes>
+            <VendorAddProducts />
           </ProtectedVendorsRoutes>
         }
       />

@@ -9,6 +9,8 @@ import {
   Menu,
   X,
   Store,
+  LayoutDashboard,
+  PlusCircle,
 } from "lucide-react";
 import { useAuth } from '../../hooks/useAuth';
 import { useVendorAuthContext } from '../../hooks/useVendorAuthContext';
@@ -50,7 +52,7 @@ const Navbar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const navLinks = [
+  const customerLinks = [
     { name: "Home", icon: Home, href: "/" },
     { name: "Shops", icon: Store, href: "/shops" },
     { name: "Products", icon: ShoppingBag, href: "/products" },
@@ -58,6 +60,16 @@ const Navbar = () => {
     { name: "Notifications", icon: Bell, href: "/notifications" },
     { name: "About", icon: Info, href: "/about" },
   ];
+
+  const vendorLinks = [
+    { name: "Home", icon: Home, href: "/" },
+    { name: "Products", icon: ShoppingBag, href: "/vendor/products" },
+   { name: "Dashboard", icon: LayoutDashboard, href: "/vendor-dashboard" },    
+   { name: "Notifications", icon: Bell, href: "/notifications" },
+    { name: "About", icon: Info, href: "/about" },
+  ];
+
+  const navLinks = isVendorAuthenticated ? vendorLinks : customerLinks;
 
   return (
     <>
@@ -121,7 +133,7 @@ const Navbar = () => {
             </div>
 
             <nav className="flex flex-col p-4 space-y-2 mt-4">
-              {navLinks.filter(l => l.name !== 'Notifications').map((link, index) => {
+              {navLinks.map((link, index) => {
                 const IconComponent = link.icon;
                 return (
                   <Link

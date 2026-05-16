@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { useToast } from "../hooks/useToast";
 import { productAPI } from "../services/api";
@@ -17,9 +17,12 @@ import { vendorAddProductSchema } from "../lib/validation/schemas";
 import { productPayloadToFormData } from "../lib/formData";
 import { TrashIcon } from "lucide-react";
 import Button from "../component/sharingComponents/Button";
+import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 
 const VendorAddProducts = () => {
   const navigate = useNavigate();
+  const { productId } = useParams();
+  const isEditMode = Boolean(productId);
   const { vendor } = useVendorAuthContext();
   const { success, error: showError } = useToast();
 
@@ -68,10 +71,20 @@ const VendorAddProducts = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [productLoading, setProductLoading] = useState(false);
+  const [productLoadError, setProductLoadError] = useState("");
+  const [loadedProduct, setLoadedProduct] = useState(null);
   const [mainImageFile, setMainImageFile] = useState(null);
   const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
   const [variantImageFiles, setVariantImageFiles] = useState([]);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [existingMainImageUrl, setExistingMainImageUrl] = useState("");
+  const [existingAdditionalImageUrls, setExistingAdditionalImageUrls] = useState(
+    [],
+  );
+  const [existingVariantImageUrls, setExistingVariantImageUrls] = useState(
+    [],
+  );
 
   const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState("");
   const [additionalImagePreviewUrls, setAdditionalImagePreviewUrls] = useState(
@@ -79,18 +92,114 @@ const VendorAddProducts = () => {
   );
   const [variantImagePreviewUrls, setVariantImagePreviewUrls] = useState([]);
 
+  const normalizeImageUrls = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (typeof value === "string") {
+      return value
+        .split(",")
+        .map((url) => url.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const mapProductToFormValues = (product) => ({
+    title: product?.title || "",
+    description: product?.description || "",
+    brand: product?.brand || "",
+    model_number: product?.model_number || "",
+    category_id:
+      product?.category_id === null || product?.category_id === undefined
+        ? ""
+        : String(product.category_id),
+    subcategory_id:
+      product?.subcategory_id === null || product?.subcategory_id === undefined
+        ? ""
+        : String(product.subcategory_id),
+    price:
+      product?.price === null || product?.price === undefined
+        ? ""
+        : String(product.price),
+    discount_price:
+      product?.discount_price === null || product?.discount_price === undefined
+        ? ""
+        : String(product.discount_price),
+    currency: product?.currency || "BDT",
+    stock_quantity:
+      product?.stock_quantity === null || product?.stock_quantity === undefined
+        ? "0"
+        : String(product.stock_quantity),
+    is_available:
+      product?.is_available === null || product?.is_available === undefined
+        ? true
+        : Boolean(product.is_available),
+    main_image_url: product?.main_image_url || "",
+    image_urls: normalizeImageUrls(product?.image_urls).join(", "),
+    weight:
+      product?.weight === null || product?.weight === undefined
+        ? ""
+        : String(product.weight),
+    dimensions: product?.dimensions || "",
+    color: product?.color || "",
+    material: product?.material || "",
+    keywords: Array.isArray(product?.keywords)
+      ? product.keywords.join(", ")
+      : product?.keywords || "",
+    variants: Array.isArray(product?.variants)
+      ? product.variants.map((variant) => ({
+          sku: variant?.sku || "",
+          variant_name: variant?.variant_name || "",
+          color: variant?.color || "",
+          size: variant?.size || "",
+          material: variant?.material || "",
+          price:
+            variant?.price === null || variant?.price === undefined
+              ? ""
+              : String(variant.price),
+          discount_price:
+            variant?.discount_price === null ||
+            variant?.discount_price === undefined
+              ? ""
+              : String(variant.discount_price),
+          stock_quantity:
+            variant?.stock_quantity === null ||
+            variant?.stock_quantity === undefined
+              ? "0"
+              : String(variant.stock_quantity),
+          is_available:
+            variant?.is_available === null || variant?.is_available === undefined
+              ? true
+              : Boolean(variant.is_available),
+          image_url: variant?.image_url || "",
+          weight:
+            variant?.weight === null || variant?.weight === undefined
+              ? ""
+              : String(variant.weight),
+          dimensions: variant?.dimensions || "",
+        }))
+      : [],
+  });
+
   useEffect(() => {
     if (!mainImageFile) {
-      setMainImagePreviewUrl("");
+      setMainImagePreviewUrl(isEditMode ? existingMainImageUrl : "");
       return;
     }
 
     const url = URL.createObjectURL(mainImageFile);
     setMainImagePreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [mainImageFile]);
+  }, [existingMainImageUrl, isEditMode, mainImageFile]);
 
   useEffect(() => {
+    if (!(additionalImageFiles || []).length) {
+      setAdditionalImagePreviewUrls(
+        isEditMode ? existingAdditionalImageUrls : [],
+      );
+      return;
+    }
+
     const urls = (additionalImageFiles || []).map((f) =>
       URL.createObjectURL(f),
     );
@@ -98,11 +207,16 @@ const VendorAddProducts = () => {
     return () => {
       for (const url of urls) URL.revokeObjectURL(url);
     };
-  }, [additionalImageFiles]);
+  }, [additionalImageFiles, existingAdditionalImageUrls, isEditMode]);
 
   useEffect(() => {
-    const urls = (variantImageFiles || []).map((f) =>
-      f ? URL.createObjectURL(f) : "",
+    if (!(variantImageFiles || []).length) {
+      setVariantImagePreviewUrls(isEditMode ? existingVariantImageUrls : []);
+      return;
+    }
+
+    const urls = (variantImageFiles || []).map((f, index) =>
+      f ? URL.createObjectURL(f) : existingVariantImageUrls?.[index] || "",
     );
     setVariantImagePreviewUrls(urls);
     return () => {
@@ -110,21 +224,86 @@ const VendorAddProducts = () => {
         if (url) URL.revokeObjectURL(url);
       }
     };
-  }, [variantImageFiles]);
+  }, [existingVariantImageUrls, variantImageFiles]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProduct = async () => {
+      if (!isEditMode) {
+        setLoadedProduct(null);
+        setProductLoading(false);
+        setProductLoadError("");
+        setExistingMainImageUrl("");
+        setExistingAdditionalImageUrls([]);
+        setExistingVariantImageUrls([]);
+        reset(defaultValues);
+        replace([]);
+        return;
+      }
+
+      setProductLoading(true);
+      setProductLoadError("");
+
+      try {
+        const response = await productAPI.getById(productId);
+        const product = response.product || response;
+
+        if (!active) return;
+
+        setLoadedProduct(product);
+        reset(mapProductToFormValues(product));
+        replace(mapProductToFormValues(product).variants || []);
+        setExistingMainImageUrl(product?.main_image_url || "");
+        setExistingAdditionalImageUrls(normalizeImageUrls(product?.image_urls));
+        setExistingVariantImageUrls(
+          Array.isArray(product?.variants)
+            ? product.variants.map((variant) => variant?.image_url || "")
+            : [],
+        );
+      } catch (err) {
+        if (active) {
+          setProductLoadError(err.message || "Failed to load product");
+        }
+      } finally {
+        if (active) setProductLoading(false);
+      }
+    };
+
+    loadProduct();
+
+    return () => {
+      active = false;
+    };
+  }, [defaultValues, isEditMode, productId, replace, reset]);
 
   const handleReset = () => {
-    reset(defaultValues);
-    replace([]);
-    success("Cancelled: Product form reset");
+    const initialValues = isEditMode && loadedProduct
+      ? mapProductToFormValues(loadedProduct)
+      : defaultValues;
+
+    reset(initialValues);
+    replace(initialValues.variants || []);
+
+    success(isEditMode ? "Changes reset to the current product values" : "Cancelled: Product form reset");
 
     setFormError("");
     setMainImageFile(null);
     setAdditionalImageFiles([]);
     setVariantImageFiles([]);
-    setMainImagePreviewUrl("");
-    setAdditionalImagePreviewUrls([]);
-    setVariantImagePreviewUrls([]);
+    setMainImagePreviewUrl(isEditMode ? existingMainImageUrl : "");
+    setAdditionalImagePreviewUrls(
+      isEditMode ? existingAdditionalImageUrls : [],
+    );
+    setVariantImagePreviewUrls(
+      isEditMode ? existingVariantImageUrls : [],
+    );
     setFileInputKey((k) => k + 1);
+    if (!isEditMode) {
+      setExistingMainImageUrl("");
+      setExistingAdditionalImageUrls([]);
+      setExistingVariantImageUrls([]);
+    }
   };
 
   const handleAddVariant = () => {
@@ -228,6 +407,14 @@ const VendorAddProducts = () => {
           : null,
       };
 
+      if (isEditMode && !mainImageFile && existingMainImageUrl) {
+        payload.main_image_url = existingMainImageUrl;
+      }
+
+      if (isEditMode && !additionalImageFiles.length && existingAdditionalImageUrls.length) {
+        payload.image_urls = existingAdditionalImageUrls;
+      }
+
       const sourceVariants = values.variants ?? getValues("variants") ?? [];
 
       const normalizedVariants = sourceVariants
@@ -246,6 +433,10 @@ const VendorAddProducts = () => {
             weight: toFloatOrNull(v.weight),
             dimensions: toTrimmedOrNull(v.dimensions),
           };
+
+          if (isEditMode && !variantImageFiles?.[index]) {
+            variant.image_url = existingVariantImageUrls?.[index] || "";
+          }
 
           const hasAny =
             variant.sku ||
@@ -294,20 +485,28 @@ const VendorAddProducts = () => {
             formData.append("variantImages", file);
           }
 
-          await productAPI.create(formData);
+          if (isEditMode) {
+            await productAPI.update(productId, formData);
+          } else {
+            await productAPI.create(formData);
+          }
         } else {
-          await productAPI.create(payload);
+          if (isEditMode) {
+            await productAPI.update(productId, payload);
+          } else {
+            await productAPI.create(payload);
+          }
         }
 
-        success("Product created successfully");
+        success(isEditMode ? "Product updated successfully" : "Product created successfully");
         setMainImageFile(null);
         setAdditionalImageFiles([]);
         setVariantImageFiles([]);
         setFileInputKey((k) => k + 1);
-        navigate("/vendor-dashboard");
+        navigate("/vendor/products");
       } catch (err) {
-        console.error("Error creating product", err);
-        showError(err.message || "Failed to create product");
+        console.error(isEditMode ? "Error updating product" : "Error creating product", err);
+        showError(err.message || (isEditMode ? "Failed to update product" : "Failed to create product"));
       } finally {
         setSubmitting(false);
       }
@@ -319,16 +518,33 @@ const VendorAddProducts = () => {
     },
   );
 
+  if (productLoading) {
+    return (
+      <div className="bg-slate-50 py-8 w-full">
+        <ShowLoading
+          message={isEditMode ? "Loading product details..." : "Loading form..."}
+          subMessage="Please wait while we prepare the vendor product form"
+        />
+      </div>
+    );
+  }
+
+  if (productLoadError) {
+    return <ShowError message={productLoadError} />;
+  }
+
   return (
     <div className="bg-slate-50 py-8 w-full  ">
       <div className="mx-auto w-full  px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl  border border-slate-200 bg-white shadow-sm">
           <div className="border-b  border-slate-200 px-4 py-5 sm:px-6 text-center">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-              Add New Product
+              {isEditMode ? "Edit Product" : "Add New Product"}
             </h1>
             <p className="mt-1 text-sm text-slate-600">
-              Fill in the details below to add a new product to your shop.
+              {isEditMode
+                ? "Update product details, media, and variants for your shop."
+                : "Fill in the details below to add a new product to your shop."}
             </p>
           </div>
 
@@ -772,7 +988,8 @@ const VendorAddProducts = () => {
                     type="button"
                     onClick={handleReset}
                     label="Cancel"
-                    className="w-auto px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50"
+                    variant="secondary"
+                    className="w-auto px-4 py-2"
                     disabled={submitting || isSubmitting}
                   />
                   <Button
