@@ -192,6 +192,8 @@ const SignUpPage = () => {
             <ButtonCard
               label="Create Account"
               type="submit"
+              loading={isSubmitting}
+              loadingLabel="Creating..."
               disabled={isSubmitting}
             />
           </form>

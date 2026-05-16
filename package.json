@@ -10,6 +10,7 @@
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm run preview",
     "build:frontend": "cd frontend && npm run build",
+    "prepare": "husky",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": ["ecommerce", "nearBuy", "marketplace"],
@@ -19,6 +20,7 @@
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "husky": "^9.1.7"
   }
 }

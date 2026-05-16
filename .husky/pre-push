@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+branch_name=$(git branch --show-current)
+
+if [ "$branch_name" = "main" ]; then
+  echo "Direct pushes from main are blocked. Push a feature branch instead."
+  exit 1
+fi

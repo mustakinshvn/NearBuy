@@ -16,6 +16,7 @@ import {
 import { vendorAddProductSchema } from "../lib/validation/schemas";
 import { productPayloadToFormData } from "../lib/formData";
 import { TrashIcon } from "lucide-react";
+import ButtonCard from "../component/sharingComponents/Button";
 
 const VendorAddProducts = () => {
   const navigate = useNavigate();
@@ -767,21 +768,21 @@ const VendorAddProducts = () => {
                 </FormSection>
 
                 <div className="flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-center">
-                  <button
+                  <ButtonCard
                     type="button"
                     onClick={handleReset}
-                    className=" cursor-pointer inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                    label="Cancel"
+                    className="w-auto px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50"
                     disabled={submitting || isSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
+                  />
+                  <ButtonCard
                     type="submit"
-                    className="cursor-pointer inline-flex items-center justify-center rounded-md bg-linear-to-r from-green-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-green-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                    label="Save Product"
+                    loading={submitting || isSubmitting}
+                    loadingLabel="Saving..."
+                    className="w-auto px-4 py-2"
                     disabled={submitting || isSubmitting}
-                  >
-                    {submitting ? "Saving..." : "Save Product"}
-                  </button>
+                  />
                 </div>
               </form>
             </FormProvider>

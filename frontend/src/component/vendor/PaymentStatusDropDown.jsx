@@ -1,21 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import { notificationAPI, orderAPI } from "../../services/api";
-import { useTransition } from "react";
 import { cn } from "../../lib/utils";
 import { ConfirmAlert } from "../sharingComponents/ConfirmAlert";
 const paymentStatusOptions = ["Pending", "Paid", "Refunded"];
 
 export const PaymentStatusDropDown = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, startTransition] = useTransition(false);
+  const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(props.payment_status);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
 
-  const handleChange = (newStatus) => {
-    startTransition(() => {
-      orderAPI.updatePaymentStatus(props.order_id, newStatus);
-      notificationAPI.createNotification({
+  const handleChange = async (newStatus) => {
+    setLoading(true);
+    try {
+      await orderAPI.updatePaymentStatus(props.order_id, newStatus);
+      await notificationAPI.createNotification({
         type: "Payment Status Update",
         title: "Payment Status Updated",
         message: `Payment status for order ${props.order_id} updated to ${newStatus}`,
@@ -24,9 +24,13 @@ export const PaymentStatusDropDown = (props) => {
         vendor_id: props.vendor_id,
         customer_id: props.customer_id,
       });
-      setIsOpen(false);
       setSelectedStatus(newStatus);
-    });
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Failed to update payment status", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleConfirm = () => {
