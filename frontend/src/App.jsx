@@ -1,5 +1,6 @@
 import { Navigate, Routes, Route } from "react-router-dom";
 import ShopsPage from "./pages/ShopsPage";
+import ShopDetailsPage from "./pages/ShopDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import OrdersPage from "./pages/OrdersPage";
@@ -35,6 +36,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/shops" element={<ShopsPage />} />
+      <Route path="/shops/:vendorId" element={<ShopDetailsPage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/:productId" element={<ProductDetailsPage />} />
       <Route path="/about" element={<AboutPage />} />
