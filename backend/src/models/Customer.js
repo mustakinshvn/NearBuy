@@ -4,11 +4,30 @@ class Customer {
   static async create(data) {
     const { name, email, phone, password } = data;
     try {
+      const sequenceResult = await pool.query(
+        `SELECT pg_get_serial_sequence('customers', 'customer_id') AS sequence_name`
+      );
+
+      let customerId;
+
+      if (sequenceResult.rows[0]?.sequence_name) {
+        const nextIdResult = await pool.query(
+          `SELECT nextval($1::regclass) AS customer_id`,
+          [sequenceResult.rows[0].sequence_name]
+        );
+        customerId = nextIdResult.rows[0].customer_id;
+      } else {
+        const nextIdResult = await pool.query(
+          `SELECT COALESCE(MAX(customer_id), 0) + 1 AS customer_id FROM customers`
+        );
+        customerId = nextIdResult.rows[0].customer_id;
+      }
+
       const result = await pool.query(
-        `INSERT INTO customers (name, email, phone, password) 
-         VALUES ($1, $2, $3, $4) 
+        `INSERT INTO customers (customer_id, name, email, phone, password) 
+         VALUES ($1, $2, $3, $4, $5) 
          RETURNING customer_id, name, email, phone, created_at`,
-        [name, email, phone, password]
+        [customerId, name, email, phone, password]
       );
       return result.rows[0];
     } catch (error) {
