@@ -11,24 +11,27 @@ import { ToastProvider } from "./context/ToastContext.jsx";
 import { Toaster } from "react-hot-toast";
 import { VendorAuthProvider } from "./context/VendorAuthContext.jsx";
 import { VendorOrderProvider } from "./context/VendorOrderContext.jsx";
+import ScrollToTop from "./component/ScrollToTop.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <VendorAuthProvider>
-            <VendorOrderProvider>
-              <CartProvider>
-                <Toaster position="top-center" />
-                <Header />
-                <App />
-                <Footer />
-              </CartProvider>
-            </VendorOrderProvider>
-          </VendorAuthProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <ScrollToTop>
+        <ToastProvider>
+          <AuthProvider>
+            <VendorAuthProvider>
+              <VendorOrderProvider>
+                <CartProvider>
+                  <Toaster position="top-center" />
+                  <Header />
+                  <App />
+                  <Footer />
+                </CartProvider>
+              </VendorOrderProvider>
+            </VendorAuthProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ScrollToTop>
     </BrowserRouter>
   </StrictMode>,
 );

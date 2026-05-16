@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import ShopsPage from "./pages/ShopsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
@@ -16,6 +16,19 @@ import AdminVendorLoginPage from "./pages/AdminVendorLoginPage";
 import VendorDashBoard from "./vendorPages/VendorDashBoard";
 import ProtectedVendorsRoutes from "./component/ProtectedVendorsRoutes";
 import VendorAddProducts from "./vendorPages/VendorAddProducts";
+import { useAuth } from "./hooks/useAuth";
+import { useVendorAuthContext } from "./hooks/useVendorAuthContext";
+
+const ProtectedProfileRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  const { isVendorAuthenticated } = useVendorAuthContext();
+
+  if (!isAuthenticated && !isVendorAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
@@ -50,18 +63,9 @@ function App() {
       <Route
         path="/profile"
         element={
-          <ProtectedVendorsRoutes>
+          <ProtectedProfileRoute>
             <ProfilePage />
-          </ProtectedVendorsRoutes>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
+          </ProtectedProfileRoute>
         }
       />
       <Route
