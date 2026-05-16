@@ -13,6 +13,8 @@ import { useShopDetails } from '../../hooks/useShopDetails';
 import { ShowLoading } from '../sharingComponents/ShowLoading';
 import { useAuth } from '../../hooks/useAuth';
 import { notificationAPI } from '../../services/api';
+import { useCart } from '../../hooks/useCart';
+import { ConfirmAlert } from '../sharingComponents/ConfirmAlert';
 
 const AskForProductForm = ({ vendor }) => {
   const { user } = useAuth();
@@ -124,6 +126,26 @@ const AskForProductForm = ({ vendor }) => {
 const ShopDetailSection = ({ vendor }) => {
   const { products, loading, error } = useShopDetails(vendor?.vendor_id);
   const [searchQuery, setSearchQuery] = useState('');
+  const { cart, addToCart, clearCart } = useCart();
+  const [pendingProduct, setPendingProduct] = useState(null);
+  const [showVendorConfirm, setShowVendorConfirm] = useState(false);
+
+  const handleAddToCart = (product) => {
+    const existingVendorId = cart[0]?.seller_id ?? null;
+    const newVendorId = product.seller_id ?? null;
+
+    if (
+      !existingVendorId ||
+      cart.length === 0 ||
+      existingVendorId === newVendorId
+    ) {
+      addToCart(product, 1);
+      return;
+    }
+
+    setPendingProduct(product);
+    setShowVendorConfirm(true);
+  };
 
   const shopLogo = vendor?.logo || vendor?.image || vendor?.avatar || vendor?.profile_image_url || null;
   const shopInitials = (vendor?.shop_name || vendor?.name || 'Shop')
@@ -279,7 +301,12 @@ const ShopDetailSection = ({ vendor }) => {
           ) : filteredProducts.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.product_id} product={product} mode="grid" />
+                <ProductCard
+                  key={product.product_id}
+                  product={product}
+                  mode="featured"
+                  onAddToCart={handleAddToCart}
+                />
               ))}
             </div>
           ) : (
@@ -291,6 +318,21 @@ const ShopDetailSection = ({ vendor }) => {
           )}
         </div>
       </div>
+      <ConfirmAlert
+        isOpen={showVendorConfirm}
+        onClose={() => {
+          setShowVendorConfirm(false);
+          setPendingProduct(null);
+        }}
+        onConfirm={() => {
+          if (!pendingProduct) return;
+          clearCart();
+          addToCart(pendingProduct, 1);
+          setPendingProduct(null);
+        }}
+        title="Start a new cart with this shop?"
+        message="Your cart currently contains items from another shop. If you continue, we'll clear your existing cart and add this product from the new vendor."
+      />
     </section>
   );
 };
