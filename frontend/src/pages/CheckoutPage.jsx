@@ -331,19 +331,14 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
-                <button
+                <ButtonCard
                   type="submit"
+                  label={`Place Order - ৳${finalTotal.toFixed(2)}`}
+                  loading={isSubmitting}
+                  loadingLabel="Processing..."
                   disabled={isSubmitting}
-                  className={`w-full bg-linear-to-r from-red-600 to-yellow-600 text-white py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl ${
-                    isSubmitting
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:from-red-700 hover:to-yellow-700"
-                  }`}
-                >
-                  {isSubmitting
-                    ? "Processing..."
-                    : `Place Order - ৳${finalTotal.toFixed(2)}`}
-                </button>
+                  className="bg-linear-to-r from-red-600 to-yellow-600 text-white py-4 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl hover:from-red-700 hover:to-yellow-700"
+                />
               </form>
             </FormProvider>
           </div>

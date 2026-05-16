@@ -141,7 +141,13 @@ const LoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard label="Login" type="submit" disabled={isSubmitting} />
+            <ButtonCard
+              label="Login"
+              type="submit"
+              loading={isSubmitting}
+              loadingLabel="Logging in..."
+              disabled={isSubmitting}
+            />
           </form>
 
           <p className="text-center mt-6 text-slate-600">

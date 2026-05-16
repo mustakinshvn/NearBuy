@@ -140,7 +140,13 @@ const AdminVendorLoginPage = () => {
               </a>
             </div>
 
-            <ButtonCard label="Login" type="submit" disabled={isSubmitting} />
+            <ButtonCard
+              label="Login"
+              type="submit"
+              loading={isSubmitting}
+              loadingLabel="Logging in..."
+              disabled={isSubmitting}
+            />
           </form>
         </div>
       </div>

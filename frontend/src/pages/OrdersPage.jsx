@@ -21,6 +21,7 @@ const OrdersPage = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const [orderItems, setOrderItems] = useState({});
   const [loadingItems, setLoadingItems] = useState({});
+  const [cancelling, setCancelling] = useState({});
 
   const toggleOrderExpansion = async (orderId) => {
     const isExpanding = !expandedOrders[orderId];
@@ -125,6 +126,7 @@ const OrdersPage = () => {
 
   const cancelOrder = async (orderId) => {
     console.log("Cancelling order:", orderId);
+    setCancelling((prev) => ({ ...prev, [orderId]: true }));
     try {
       const response = await orderAPI.delete(orderId);
       console.log("Order cancelled:", response);
@@ -142,6 +144,8 @@ const OrdersPage = () => {
     } catch (err) {
       console.error("Error cancelling order:", err);
       toast.error("Failed to cancel order. Please try again.");
+    } finally {
+      setCancelling((prev) => ({ ...prev, [orderId]: false }));
     }
   };
 
@@ -317,7 +321,10 @@ const OrdersPage = () => {
                       <ButtonCard
                         onClick={() => cancelOrder(order.order_id)}
                         label="Cancel Order"
-                        className="px-2 py-2 text-white font-bold"
+                        loading={Boolean(cancelling[order.order_id])}
+                        loadingLabel="Cancelling..."
+                        className="px-2 py-2 text-white font-bold w-auto"
+                        disabled={Boolean(cancelling[order.order_id])}
                       />
                     )}
                   </div>

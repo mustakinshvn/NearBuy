@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { notificationAPI, orderAPI } from "../../services/api";
-import { useTransition } from "react";
 import { cn } from "../../lib/utils";
 import { ConfirmAlert } from "../sharingComponents/ConfirmAlert";
 const orderStatuses = [
@@ -13,15 +12,16 @@ const orderStatuses = [
 
 export const ChangeOrderStatusDropDown = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, startTransition] = useTransition(false);
+  const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(props.order_status);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState(null);
 
-  const handleChange = (newStatus) => {
-    startTransition(() => {
-      orderAPI.updateOrderStatus(props.order_id, newStatus);
-      notificationAPI.createNotification({
+  const handleChange = async (newStatus) => {
+    setLoading(true);
+    try {
+      await orderAPI.updateOrderStatus(props.order_id, newStatus);
+      await notificationAPI.createNotification({
         type: "Order Status Update",
         title: "Order Status Updated",
         message: `Order status for order ${props.order_id} updated to ${newStatus}`,
@@ -30,9 +30,13 @@ export const ChangeOrderStatusDropDown = (props) => {
         vendor_id: props.vendor_id,
         customer_id: props.customer_id,
       });
-      setIsOpen(false);
       setSelectedStatus(newStatus);
-    });
+      setIsOpen(false);
+    } catch (err) {
+      console.error("Failed to update order status", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleConfirm = () => {
