@@ -198,6 +198,25 @@ export const markAsRead = async (req, res) => {
   }
 };
 
+export const markAsUnread = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    const notification = await Notification.markAsUnread(notificationId);
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    res.status(200).json({
+      message: 'Notification marked as unread successfully',
+      notification,
+    });
+  } catch (error) {
+    console.error('Mark as unread error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const markMultipleAsRead = async (req, res) => {
   try {
     const { notification_ids } = req.body;

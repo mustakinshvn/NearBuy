@@ -206,6 +206,24 @@ class Notification {
     }
   }
 
+  // Mark notification as unread
+  static async markAsUnread(notificationId) {
+    try {
+      const result = await pool.query(
+        `UPDATE notifications 
+         SET is_read = FALSE, read_at = NULL 
+         WHERE notification_id = $1 
+         RETURNING notification_id, customer_id, vendor_id, order_id, 
+                   product_id, review_id, coupon_id, admin_id, title, message, 
+                   type, priority, is_read, is_deleted, sent_at, read_at`,
+        [notificationId]
+      );
+      return result.rows[0];
+    } catch (error) {
+      throw new Error(`Error marking notification as unread: ${error.message}`);
+    }
+  }
+
   // Mark multiple notifications as read
   static async markMultipleAsRead(notificationIds) {
     try {

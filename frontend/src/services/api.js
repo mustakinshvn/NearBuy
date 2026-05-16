@@ -311,7 +311,13 @@ export const notificationAPI = {
 
   markAsRead: async (notificationId) => {
     return apiRequest(`/notifications/${notificationId}/read`, {
-      method: 'PATCH',
+      method: 'PUT',
+    });
+  },
+
+  markAsUnread: async (notificationId) => {
+    return apiRequest(`/notifications/${notificationId}/unread`, {
+      method: 'PUT',
     });
   },
 

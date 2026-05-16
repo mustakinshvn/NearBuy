@@ -10,6 +10,7 @@ import {
   getNotificationsByType,
   getNotificationsByPriority,
   markAsRead,
+  markAsUnread,
   markMultipleAsRead,
   deleteNotification,
   deleteMultipleNotifications,
@@ -56,6 +57,8 @@ router.get('/vendor/:vendorId/unread-count', getUnreadCountByVendor);
 router.put('/:notificationId', validateNotificationId, updateNotification);
 
 router.put('/:notificationId/read', validateNotificationId, markAsRead);
+
+router.put('/:notificationId/unread', validateNotificationId, markAsUnread);
 
 router.put('/read/multiple', markMultipleAsRead);
 

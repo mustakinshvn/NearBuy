@@ -35,9 +35,11 @@ const Header = () => {
 
     fetchCount();
     const t = setInterval(fetchCount, 30000);
+    window.addEventListener('notifications:updated', fetchCount);
     return () => {
       active = false;
       clearInterval(t);
+      window.removeEventListener('notifications:updated', fetchCount);
     };
   }, [isAuthenticated, user, isVendorAuthenticated, vendor]);
 

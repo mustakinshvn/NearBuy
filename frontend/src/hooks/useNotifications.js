@@ -10,6 +10,10 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const emitNotificationsUpdated = () => {
+    window.dispatchEvent(new CustomEvent('notifications:updated'));
+  };
+
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
@@ -42,9 +46,31 @@ export const useNotifications = () => {
   const markAsRead = async (notificationId) => {
     try {
       await notificationAPI.markAsRead(notificationId);
-      setNotifications(notifications.map(n => 
-        n.notification_id === notificationId ? { ...n, is_read: true } : n
-      ));
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) =>
+          notification.notification_id === notificationId
+            ? { ...notification, is_read: true }
+            : notification,
+        ),
+      );
+      emitNotificationsUpdated();
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const markAsUnread = async (notificationId) => {
+    try {
+      await notificationAPI.markAsUnread(notificationId);
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) =>
+          notification.notification_id === notificationId
+            ? { ...notification, is_read: false, read_at: null }
+            : notification,
+        ),
+      );
+      emitNotificationsUpdated();
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
@@ -58,7 +84,10 @@ export const useNotifications = () => {
       } else if (vendor?.vendor_id) {
         await notificationAPI.markAllAsReadVendor(vendor.vendor_id);
       }
-      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) => ({ ...notification, is_read: true })),
+      );
+      emitNotificationsUpdated();
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
@@ -68,7 +97,10 @@ export const useNotifications = () => {
   const deleteNotification = async (notificationId) => {
     try {
       await notificationAPI.delete(notificationId);
-      setNotifications(notifications.filter(n => n.notification_id !== notificationId));
+      setNotifications((currentNotifications) =>
+        currentNotifications.filter((notification) => notification.notification_id !== notificationId),
+      );
+      emitNotificationsUpdated();
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
@@ -82,6 +114,7 @@ export const useNotifications = () => {
     loading, 
     error, 
     markAsRead, 
+    markAsUnread,
     markAllAsRead, 
     deleteNotification,
     unreadCount,
