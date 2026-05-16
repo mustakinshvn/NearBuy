@@ -17,12 +17,10 @@ export const loginVendor = async (req, res) => {
         }
 
         const isPassValid = password === vendor.password;
+       
+        //This is for testing purposes only. In production, always hash passwords and use bcrypt.compare() to validate.
         // const isPasswordValid = await bcrypt.compare(password, vendor.password);
-        // if(!isPassWordValid){
-        //     return res.status(401).json({ message: "Invalid email or password" });
-        // }
-
-        //this is for plain text password comparison, will be replaced with bcrypt later
+       
         if (!isPassValid) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
