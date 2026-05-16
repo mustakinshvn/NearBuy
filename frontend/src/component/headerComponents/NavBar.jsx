@@ -63,7 +63,7 @@ const Navbar = () => {
 
   const vendorLinks = [
     { name: "Home", icon: Home, href: "/" },
-    { name: "Products", icon: ShoppingBag, href: "/vendor/products" },
+    { name: "My Products", icon: ShoppingBag, href: "/vendor/products" },
    { name: "Dashboard", icon: LayoutDashboard, href: "/vendor-dashboard" },    
    { name: "Notifications", icon: Bell, href: "/notifications" },
     { name: "About", icon: Info, href: "/about" },
