@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContextObject";
 import { customerAPI } from "../services/api";
 
-//check git account
-
+//addadashas
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
