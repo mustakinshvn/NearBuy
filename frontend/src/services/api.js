@@ -198,6 +198,109 @@ export const vendorAPI = {
   },
 };
 
+const getAdminAuthHeaders = () => {
+  const token = localStorage.getItem('adminToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+export const adminAPI = {
+  login: async (email, password) => {
+    return apiRequest('/admin/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  me: async () => {
+    return apiRequest('/admin/auth/me', {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getSummary: async () => {
+    return apiRequest('/admin/dashboard/summary', {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getConfiguration: async () => {
+    return apiRequest('/admin/configuration', {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  updateConfiguration: async (payload) => {
+    return apiRequest('/admin/configuration', {
+      method: 'PUT',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getCustomers: async () => {
+    const response = await apiRequest('/admin/customers', {
+      headers: getAdminAuthHeaders(),
+    });
+    return response.customers || [];
+  },
+
+  deleteCustomer: async (customerId) => {
+    return apiRequest(`/admin/customers/${customerId}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getVendors: async () => {
+    const response = await apiRequest('/admin/vendors', {
+      headers: getAdminAuthHeaders(),
+    });
+    return response.vendors || [];
+  },
+
+  deleteVendor: async (vendorId) => {
+    return apiRequest(`/admin/vendors/${vendorId}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getProducts: async () => {
+    const response = await apiRequest('/admin/products', {
+      headers: getAdminAuthHeaders(),
+    });
+    return response.products || [];
+  },
+
+  deleteProduct: async (productId) => {
+    return apiRequest(`/admin/products/${productId}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getOrders: async () => {
+    const response = await apiRequest('/admin/orders', {
+      headers: getAdminAuthHeaders(),
+    });
+    return response.orders || [];
+  },
+
+  deleteOrder: async (orderId) => {
+    return apiRequest(`/admin/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders(),
+    });
+  },
+
+  getNotifications: async () => {
+    const response = await apiRequest('/admin/notifications', {
+      headers: getAdminAuthHeaders(),
+    });
+    return response.notifications || [];
+  },
+};
+
 export const orderAPI = {
   create: async (orderData) => {
     return apiRequest('/orders', {
