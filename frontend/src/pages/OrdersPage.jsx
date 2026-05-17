@@ -15,6 +15,7 @@ import { orderAPI, orderItemAPI } from "../services/api";
 import Button from "../component/sharingComponents/Button";
 import { toast } from "react-hot-toast";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
+import { ROUTES } from "../lib/ROUTES";
 
 const OrdersPage = () => {
   const { orders, loading, error } = useOrders();
@@ -112,7 +113,7 @@ const OrdersPage = () => {
                 label="Try Again"
               />
               <a
-                href="/products"
+                href={ROUTES.PRODUCTS}
                 className="px-8 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-green-600 hover:text-blue-600 transition-all"
               >
                 Browse Products
@@ -173,14 +174,14 @@ const OrdersPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/products"
+                href={ROUTES.PRODUCTS}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-green-600 to-blue-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <ShoppingBag className="w-5 h-5" />
                 Browse Products
               </a>
               <a
-                href="/"
+                href={ROUTES.HOME}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-purple-600 hover:text-purple-600 transition-all"
               >
                 Back to Home

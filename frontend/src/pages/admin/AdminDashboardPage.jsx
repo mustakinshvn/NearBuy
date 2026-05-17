@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI } from '../../services/api';
 import { BarChart3, Package, ShoppingCart, Store, Users, BellRing, SlidersHorizontal } from 'lucide-react';
+import { ROUTES } from '../../lib/ROUTES';
 
 const cards = [
   { key: 'totalAdmins', label: 'Admins', icon: SlidersHorizontal, accent: 'from-emerald-500 to-teal-500' },
@@ -13,11 +14,11 @@ const cards = [
 ];
 
 const quickLinks = [
-  { to: '/admin/vendors', label: 'Manage vendors' },
-  { to: '/admin/customers', label: 'Manage customers' },
-  { to: '/admin/products', label: 'Manage products' },
-  { to: '/admin/orders', label: 'Manage orders' },
-  { to: '/admin/configuration', label: 'Edit configuration' },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.VENDORS}`, label: 'Manage vendors' },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.CUSTOMERS}`, label: 'Manage customers' },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.PRODUCTS}`, label: 'Manage products' },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.ORDERS}`, label: 'Manage orders' },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.CONFIGURATION}`, label: 'Edit configuration' },
 ];
 
 const AdminDashboardPage = () => {

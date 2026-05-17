@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Star, Package, ShoppingBag } from 'lucide-react';
 import { useVendors } from '../../hooks/useVendors';
+import { ROUTES } from '../../lib/ROUTES';
 
 const FeaturedVendors = () => {
   const { vendors, loading: vendorsLoading } = useVendors();
@@ -77,7 +78,7 @@ const FeaturedVendors = () => {
               className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-slate-100"
             >
               <Link
-                to={{ pathname: '/shops', search: `?vendor=${vendor?.vendor_id || vendor?.id}` }}
+                to={{ pathname: ROUTES.SHOPS, search: `?vendor=${vendor?.vendor_id || vendor?.id}` }}
                 aria-label={`View shop ${vendor?.shop_name || vendor?.name || 'vendor'}`}
                 className="block"
               >

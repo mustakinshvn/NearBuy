@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useVendorAuthContext } from "../../hooks/useVendorAuthContext";
 import profileAvatar from "../../assets/profile-avatar.png";
+import { ROUTES } from "../../lib/ROUTES";
 
 const ProfileLogo = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -34,12 +35,12 @@ const ProfileLogo = () => {
     }
 
     setShowDropdown(false);
-    navigate("/");
+    navigate(ROUTES.HOME);
   };
 
   const handleProfileClick = () => {
     if (!isAuthenticated && !isVendorAuthenticated) {
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
       return;
     }
     setShowDropdown(!showDropdown);
@@ -107,7 +108,7 @@ const ProfileLogo = () => {
 
               {isVendor ? (
                 <button
-                  onClick={() => goToRoute("/vendor-dashboard")}
+                  onClick={() => goToRoute(ROUTES.VENDOR_DASHBOARD)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <UserCheck size={16} />
@@ -117,7 +118,7 @@ const ProfileLogo = () => {
 
               {isVendor ? (
                 <button
-                  onClick={() => goToRoute("/vendor/products")}
+                  onClick={() => goToRoute(ROUTES.VENDOR_PRODUCTS)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <ShoppingBag size={16} />
@@ -127,7 +128,7 @@ const ProfileLogo = () => {
 
               {isVendor ? (
                 <button
-                  onClick={() => goToRoute("/vendor/add-products")}
+                  onClick={() => goToRoute(ROUTES.VENDOR_ADD_PRODUCTS)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <PlusCircle size={16} />
@@ -136,7 +137,7 @@ const ProfileLogo = () => {
               ) : null}
 
           <button
-                onClick={() => goToRoute("/profile")}
+                onClick={() => goToRoute(ROUTES.PROFILE)}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <User size={16} />
@@ -144,7 +145,7 @@ const ProfileLogo = () => {
           </button>
 
           <button
-                onClick={() => goToRoute("/orders")}
+                onClick={() => goToRoute(ROUTES.ORDERS)}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <ShoppingBag size={16} />
@@ -152,7 +153,7 @@ const ProfileLogo = () => {
           </button>
 
           <button
-                onClick={() => goToRoute("/notifications")}
+                onClick={() => goToRoute(ROUTES.NOTIFICATIONS)}
             className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-purple-50 flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Bell size={16} />

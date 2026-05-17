@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
+import { ROUTES } from "../../lib/ROUTES";
 
 const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,9 +13,9 @@ const SearchBar = () => {
     e.preventDefault();
 
     const query = searchQuery.trim();
-    const targetPath = query ? `/products?search=${encodeURIComponent(query)}` : "/products";
+    const targetPath = query ? `${ROUTES.PRODUCTS}?search=${encodeURIComponent(query)}` : ROUTES.PRODUCTS;
 
-    if (location.pathname === "/products") {
+    if (location.pathname === ROUTES.PRODUCTS) {
       navigate(targetPath, { replace: true });
       return;
     }
@@ -24,8 +25,8 @@ const SearchBar = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
-    if (location.pathname === "/products") {
-      navigate("/products", { replace: true });
+    if (location.pathname === ROUTES.PRODUCTS) {
+      navigate(ROUTES.PRODUCTS, { replace: true });
     }
   };
 

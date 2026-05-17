@@ -1,15 +1,16 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Store, Package, ClipboardList, BellRing, SlidersHorizontal, LogOut } from 'lucide-react';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { ROUTES } from '../../lib/ROUTES';
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/vendors', label: 'Vendors', icon: Store },
-  { to: '/admin/customers', label: 'Customers', icon: Users },
-  { to: '/admin/products', label: 'Products', icon: Package },
-  { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/admin/notifications', label: 'Notifications', icon: BellRing },
-  { to: '/admin/configuration', label: 'Configuration', icon: SlidersHorizontal },
+  { to: ROUTES.ADMIN, label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.VENDORS}`, label: 'Vendors', icon: Store },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.CUSTOMERS}`, label: 'Customers', icon: Users },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.PRODUCTS}`, label: 'Products', icon: Package },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.ORDERS}`, label: 'Orders', icon: ClipboardList },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.NOTIFICATIONS}`, label: 'Notifications', icon: BellRing },
+  { to: `${ROUTES.ADMIN}/${ROUTES.ADMIN_ROUTES.CONFIGURATION}`, label: 'Configuration', icon: SlidersHorizontal },
 ];
 
 const AdminLayout = () => {
@@ -18,7 +19,7 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login', { replace: true });
+    navigate(ROUTES.ADMIN_LOGIN, { replace: true });
   };
 
   return (

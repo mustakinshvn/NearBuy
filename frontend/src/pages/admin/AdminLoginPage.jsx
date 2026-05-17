@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Button from '../../component/sharingComponents/Button';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { ROUTES } from '../../lib/ROUTES';
 
 const AdminLoginPage = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const AdminLoginPage = () => {
     const result = await login(form.email, form.password);
 
     if (result.success) {
-      navigate('/admin', { replace: true });
+      navigate(ROUTES.ADMIN, { replace: true });
     } else {
       setError(result.error || 'Unable to sign in.');
     }

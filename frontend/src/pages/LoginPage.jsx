@@ -6,6 +6,7 @@ import Button from "../component/sharingComponents/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../lib/validation/schemas";
+import { ROUTES } from "../lib/ROUTES";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || ROUTES.HOME;
 
   const {
     register,
@@ -153,7 +154,7 @@ const LoginPage = () => {
           <p className="text-center mt-6 text-slate-600">
             Don't have an account?{" "}
             <Link
-              to="/signup"
+              to={ROUTES.SIGNUP}
               className="text-purple-600 font-semibold hover:text-purple-700"
             >
               Sign up

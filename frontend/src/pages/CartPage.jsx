@@ -3,6 +3,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
+import { ROUTES, getRoutePath } from "../lib/ROUTES";
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } =
@@ -12,7 +13,7 @@ const CartPage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
     }
   }, [isAuthenticated, navigate]);
 
@@ -36,7 +37,7 @@ const CartPage = () => {
             Add some products to get started!
           </p>
           <button
-            onClick={() => navigate("/products")}
+            onClick={() => navigate(ROUTES.PRODUCTS)}
             className="px-8 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
           >
             Browse Products
@@ -69,7 +70,7 @@ const CartPage = () => {
               >
                 <div className="flex gap-6">
                   <Link
-                    to={`/products/${item.product_id}`}
+                    to={getRoutePath(ROUTES.PRODUCT_DETAILS, { productId: item.product_id })}
                     className="shrink-0 hover:opacity-90 transition-all"
                   >
                     {item.main_image_url || item.image_urls?.[0] ? (
@@ -90,7 +91,7 @@ const CartPage = () => {
                       <div>
                         <h3 className="text-xl font-semibold text-slate-800">
                           <Link
-                            to={`/products/${item.product_id}`}
+                            to={getRoutePath(ROUTES.PRODUCT_DETAILS, { productId: item.product_id })}
                             className="hover:underline"
                           >
                             {item.title}
@@ -212,7 +213,7 @@ const CartPage = () => {
               </div>
 
               <button
-                onClick={() => navigate("/checkout")}
+                onClick={() => navigate(ROUTES.CHECKOUT)}
                 className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 Proceed to Checkout
@@ -220,7 +221,7 @@ const CartPage = () => {
               </button>
 
               <button
-                onClick={() => navigate("/products")}
+                onClick={() => navigate(ROUTES.PRODUCTS)}
                 className="w-full mt-4 border-2 border-blue-600 text-blue-600 py-3 rounded-lg font-medium hover:bg-blue-50 transition-all"
               >
                 Continue Shopping

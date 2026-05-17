@@ -9,6 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { notificationAPI } from "../services/api";
 import { useEffect, useState } from "react";
+import { ROUTES } from "../lib/ROUTES";
 const Header = () => {
   const { user, isAuthenticated } = useAuth();
   const { vendor, isVendorAuthenticated } = useVendorAuthContext();
@@ -63,7 +64,7 @@ const Header = () => {
 
             <div className="flex gap-3 lg:gap-5 items-center">
               <Link
-                to="/notifications"
+                to={ROUTES.NOTIFICATIONS}
                 className="lg:hidden relative inline-flex h-10 w-10 items-center justify-center text-slate-700 hover:text-blue-600 transition-all duration-300 hover:bg-blue-50 rounded-lg active:scale-95"
                 aria-label="Notifications"
               >

@@ -14,10 +14,11 @@ import { VendorAuthProvider } from "./context/VendorAuthContext.jsx";
 import { VendorOrderProvider } from "./context/VendorOrderContext.jsx";
 import ScrollToTop from "./component/ScrollToTop.jsx";
 import { AdminAuthProvider } from "./context/AdminAuthContext.jsx";
+import { ROUTES } from "./lib/ROUTES";
 
 export const AppFrame = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith(ROUTES.ADMIN);
 
   return (
     <>

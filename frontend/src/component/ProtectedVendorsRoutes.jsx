@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
+import { ROUTES } from "../lib/ROUTES";
 
 const ProtectedVendorsRoutes = ({ children }) => {
   const { isVendorAuthenticated } = useVendorAuthContext();
@@ -7,7 +8,7 @@ const ProtectedVendorsRoutes = ({ children }) => {
 
   if (!isVendorAuthenticated) {
     return (
-      <Navigate to="/admin-vendor-login" state={{ from: location }} replace />
+      <Navigate to={ROUTES.ADMIN_VENDOR_LOGIN} state={{ from: location }} replace />
     );
   }
 

@@ -6,6 +6,7 @@ import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { vendorLoginSchema } from "../lib/validation/schemas";
+import { ROUTES } from "../lib/ROUTES";
 
 const AdminVendorLoginPage = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const AdminVendorLoginPage = () => {
       const result = await vendorLogin(data.email, data.password);
 
       if (result.success) {
-        navigate("/vendor-dashboard", { replace: true });
+        navigate(ROUTES.VENDOR_DASHBOARD, { replace: true });
       } else {
         setLoginError(result.error || "Login failed. Please try again.");
       }

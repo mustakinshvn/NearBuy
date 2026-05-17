@@ -27,13 +27,14 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminEntityPage from "./pages/admin/AdminEntityPage";
 import AdminConfigurationPage from "./pages/admin/AdminConfigurationPage";
 import { adminAPI } from "./services/api";
+import { ROUTES } from "./lib/ROUTES";
 
 const ProtectedProfileRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const { isVendorAuthenticated } = useVendorAuthContext();
 
   if (!isAuthenticated && !isVendorAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   return children;
@@ -42,19 +43,19 @@ const ProtectedProfileRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/shops" element={<ShopsPage />} />
-      <Route path="/shops/:vendorId" element={<ShopDetailsPage />} />
-      <Route path="/products" element={<ProductsPage />} />
-      <Route path="/products/:productId" element={<ProductDetailsPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/admin-vendor-login" element={<AdminVendorLoginPage />} />
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route path={ROUTES.HOME} element={<HomePage />} />
+      <Route path={ROUTES.SHOPS} element={<ShopsPage />} />
+      <Route path={ROUTES.SHOP_DETAILS} element={<ShopDetailsPage />} />
+      <Route path={ROUTES.PRODUCTS} element={<ProductsPage />} />
+      <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
+      <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+      <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+      <Route path={ROUTES.SIGNUP} element={<SignUpPage />} />
+      <Route path={ROUTES.ADMIN_VENDOR_LOGIN} element={<AdminVendorLoginPage />} />
+      <Route path={ROUTES.ADMIN_LOGIN} element={<AdminLoginPage />} />
 
       <Route
-        path="/admin"
+        path={ROUTES.ADMIN}
         element={
           <ProtectedAdminRoute>
             <AdminLayout />
@@ -63,7 +64,7 @@ function App() {
       >
         <Route index element={<AdminDashboardPage />} />
         <Route
-          path="vendors"
+          path={ROUTES.ADMIN_ROUTES.VENDORS}
           element={
             <AdminEntityPage
               title="Vendors"
@@ -83,7 +84,7 @@ function App() {
           }
         />
         <Route
-          path="customers"
+          path={ROUTES.ADMIN_ROUTES.CUSTOMERS}
           element={
             <AdminEntityPage
               title="Customers"
@@ -102,7 +103,7 @@ function App() {
           }
         />
         <Route
-          path="products"
+          path={ROUTES.ADMIN_ROUTES.PRODUCTS}
           element={
             <AdminEntityPage
               title="Products"
@@ -122,7 +123,7 @@ function App() {
           }
         />
         <Route
-          path="orders"
+          path={ROUTES.ADMIN_ROUTES.ORDERS}
           element={
             <AdminEntityPage
               title="Orders"
@@ -142,7 +143,7 @@ function App() {
           }
         />
         <Route
-          path="notifications"
+          path={ROUTES.ADMIN_ROUTES.NOTIFICATIONS}
           element={
             <AdminEntityPage
               title="Notifications"
@@ -159,11 +160,11 @@ function App() {
             />
           }
         />
-        <Route path="configuration" element={<AdminConfigurationPage />} />
+        <Route path={ROUTES.ADMIN_ROUTES.CONFIGURATION} element={<AdminConfigurationPage />} />
       </Route>
 
       <Route
-        path="/vendor-dashboard"
+        path={ROUTES.VENDOR_DASHBOARD}
         element={
           <ProtectedVendorsRoutes>
             <VendorDashBoard />
@@ -172,7 +173,7 @@ function App() {
       />
 
       <Route
-        path="/vendor/products"
+        path={ROUTES.VENDOR_PRODUCTS}
         element={
           <ProtectedVendorsRoutes>
             <VendorProductsPage />
@@ -181,7 +182,7 @@ function App() {
       />
 
       <Route
-        path="/vendor/products/:productId/edit"
+        path={ROUTES.VENDOR_PRODUCT_EDIT}
         element={
           <ProtectedVendorsRoutes>
             <VendorAddProducts />
@@ -190,7 +191,7 @@ function App() {
       />
 
       <Route
-        path="/vendor/add-products"
+        path={ROUTES.VENDOR_ADD_PRODUCTS}
         element={
           <ProtectedVendorsRoutes>
             <VendorAddProducts />
@@ -199,7 +200,7 @@ function App() {
       />
 
       <Route
-        path="/profile"
+        path={ROUTES.PROFILE}
         element={
           <ProtectedProfileRoute>
             <ProfilePage />
@@ -207,7 +208,7 @@ function App() {
         }
       />
       <Route
-        path="/cart"
+        path={ROUTES.CART}
         element={
           <ProtectedRoute>
             <CartPage />
@@ -215,7 +216,7 @@ function App() {
         }
       />
       <Route
-        path="/checkout"
+        path={ROUTES.CHECKOUT}
         element={
           <ProtectedRoute>
             <CheckoutPage />
@@ -223,7 +224,7 @@ function App() {
         }
       />
       <Route
-        path="/orders"
+        path={ROUTES.ORDERS}
         element={
           <ProtectedRoute>
             <OrdersPage />
@@ -231,7 +232,7 @@ function App() {
         }
       />
       <Route
-        path="/notifications"
+        path={ROUTES.NOTIFICATIONS}
         element={
           <ProtectedProfileRoute>
             <NotificationsPage />

@@ -6,6 +6,7 @@ import Button from "../component/sharingComponents/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "../lib/validation/schemas";
+import { ROUTES } from "../lib/ROUTES";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SignUpPage = () => {
       const result = await signup(userData);
 
       if (result.success) {
-        navigate("/");
+        navigate(ROUTES.HOME);
       } else {
         // Preserve existing behavior (no visible submit error UI in this page today)
         void result;
@@ -201,7 +202,7 @@ const SignUpPage = () => {
           <p className="text-center mt-6 text-slate-600">
             Already have an account?{" "}
             <Link
-              to="/login"
+              to={ROUTES.LOGIN}
               className="text-blue-600 font-semibold hover:text-blue-700"
             >
               Login

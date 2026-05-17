@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Store } from 'lucide-react';
+import { ROUTES, getRoutePath } from '../../lib/ROUTES';
 
 const ShopVendorCard = ({ vendor }) => {
   return (
@@ -40,7 +41,7 @@ const ShopVendorCard = ({ vendor }) => {
         </div>
 
         <Link
-          to={`/shops/${vendor.vendor_id}`}
+          to={getRoutePath(ROUTES.SHOP_DETAILS, { vendorId: vendor.vendor_id })}
           className="inline-flex w-full items-center justify-center rounded-lg bg-linear-to-r from-green-500 to-blue-500 py-3 font-semibold text-white shadow-md transition-all hover:from-green-600 hover:to-blue-600 hover:shadow-lg active:scale-95"
         >
           Visit Shop

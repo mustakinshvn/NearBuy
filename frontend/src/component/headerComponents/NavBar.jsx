@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { useVendorAuthContext } from '../../hooks/useVendorAuthContext';
 import { notificationAPI } from '../../services/api';
+import { ROUTES } from '../../lib/ROUTES';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -53,20 +54,20 @@ const Navbar = () => {
   };
 
   const customerLinks = [
-    { name: "Home", icon: Home, href: "/" },
-    { name: "Shops", icon: Store, href: "/shops" },
-    { name: "Products", icon: ShoppingBag, href: "/products" },
-    { name: "Orders", icon: Package, href: "/orders" },
-    { name: "Notifications", icon: Bell, href: "/notifications" },
-    { name: "About", icon: Info, href: "/about" },
+    { name: "Home", icon: Home, href: ROUTES.HOME },
+    { name: "Shops", icon: Store, href: ROUTES.SHOPS },
+    { name: "Products", icon: ShoppingBag, href: ROUTES.PRODUCTS },
+    { name: "Orders", icon: Package, href: ROUTES.ORDERS },
+    { name: "Notifications", icon: Bell, href: ROUTES.NOTIFICATIONS },
+    { name: "About", icon: Info, href: ROUTES.ABOUT },
   ];
 
   const vendorLinks = [
-    { name: "Home", icon: Home, href: "/" },
-    { name: "My Products", icon: ShoppingBag, href: "/vendor/products" },
-   { name: "Dashboard", icon: LayoutDashboard, href: "/vendor-dashboard" },    
-   { name: "Notifications", icon: Bell, href: "/notifications" },
-    { name: "About", icon: Info, href: "/about" },
+    { name: "Home", icon: Home, href: ROUTES.HOME },
+    { name: "My Products", icon: ShoppingBag, href: ROUTES.VENDOR_PRODUCTS },
+   { name: "Dashboard", icon: LayoutDashboard, href: ROUTES.VENDOR_DASHBOARD },    
+   { name: "Notifications", icon: Bell, href: ROUTES.NOTIFICATIONS },
+    { name: "About", icon: Info, href: ROUTES.ABOUT },
   ];
 
   const navLinks = isVendorAuthenticated ? vendorLinks : customerLinks;

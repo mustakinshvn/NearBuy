@@ -18,6 +18,7 @@ import { useVendors } from "../hooks/useVendors";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
 import { ConfirmAlert } from "../component/sharingComponents/ConfirmAlert";
+import { ROUTES } from "../lib/ROUTES";
 
 const ProductsPage = () => {
   const { products: allProducts, loading, error } = useProducts();
@@ -45,7 +46,7 @@ const ProductsPage = () => {
 
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
       return;
     }
     const existingVendorId = cart[0]?.seller_id ?? null;
@@ -374,13 +375,13 @@ const ProductsPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/"
+                href={ROUTES.HOME}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Back to Home
               </a>
               <a
-                href="/shops"
+                href={ROUTES.SHOPS}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-blue-600 hover:text-blue-600 transition-all"
               >
                 Browse Shops

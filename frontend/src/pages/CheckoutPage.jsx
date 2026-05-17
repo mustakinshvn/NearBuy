@@ -13,6 +13,7 @@ import Button from "../component/sharingComponents/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema } from "../lib/validation/schemas";
+import { ROUTES } from "../lib/ROUTES";
 
 const CheckoutPage = () => {
   const { cart, getCartTotal, clearCart } = useCart();
@@ -50,7 +51,7 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
     } else if (user) {
       const current = getValues();
       reset(
@@ -67,7 +68,7 @@ const CheckoutPage = () => {
 
   if (!isAuthenticated) return null;
   if (cart.length === 0 && !orderPlaced) {
-    navigate("/products");
+    navigate(ROUTES.PRODUCTS);
     return null;
   }
 
@@ -290,11 +291,11 @@ const CheckoutPage = () => {
           <div className="space-y-3">
             <Button
               label="View Orders"
-              onClick={() => navigate("/orders")}
+              onClick={() => navigate(ROUTES.ORDERS)}
             />
             <Button
               label="Continue Shopping"
-              onClick={() => navigate("/products")}
+              onClick={() => navigate(ROUTES.PRODUCTS)}
               className="bg-linear-to-r from-red-600 to-yellow-600 hover:from-red-700 hover:to-yellow-500"
             />
           </div>
@@ -307,7 +308,7 @@ const CheckoutPage = () => {
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         <button
-          onClick={() => navigate("/cart")}
+          onClick={() => navigate(ROUTES.CART)}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-medium cursor-pointer"
         >
           <ArrowLeft size={20} />

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useProducts } from "../../hooks/useProducts";
 import ProductCard from "../ProductCard";
 import { ConfirmAlert } from "../sharingComponents/ConfirmAlert";
+import { ROUTES } from "../../lib/ROUTES";
 
 const FeaturedProducts = () => {
   const { products, loading: productsLoading } = useProducts();
@@ -42,7 +43,7 @@ const FeaturedProducts = () => {
             </p>
           </div>
           <Link
-            to="/products"
+            to={ROUTES.PRODUCTS}
             className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
           >
             View All

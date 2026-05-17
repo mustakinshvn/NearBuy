@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ROUTES } from "../../lib/ROUTES";
 const Category = () => {
 
  const categories = [
@@ -23,7 +24,7 @@ const Category = () => {
             {categories.map((category, index) => (
               <Link
                 key={index}
-                to="/products"
+                to={ROUTES.PRODUCTS}
                 className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 border border-slate-100"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">

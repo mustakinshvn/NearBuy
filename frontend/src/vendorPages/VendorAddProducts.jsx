@@ -18,6 +18,7 @@ import { productPayloadToFormData } from "../lib/formData";
 import { TrashIcon } from "lucide-react";
 import Button from "../component/sharingComponents/Button";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
+import { ROUTES } from "../lib/ROUTES";
 
 const VendorAddProducts = () => {
   const navigate = useNavigate();
@@ -503,7 +504,7 @@ const VendorAddProducts = () => {
         setAdditionalImageFiles([]);
         setVariantImageFiles([]);
         setFileInputKey((k) => k + 1);
-        navigate("/vendor/products");
+        navigate(ROUTES.VENDOR_PRODUCTS);
       } catch (err) {
         console.error(isEditMode ? "Error updating product" : "Error creating product", err);
         showError(err.message || (isEditMode ? "Failed to update product" : "Failed to create product"));

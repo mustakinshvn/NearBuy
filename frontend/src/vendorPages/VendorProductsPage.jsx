@@ -14,6 +14,7 @@ import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { productAPI } from "../services/api";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
+import { ROUTES, getRoutePath } from "../lib/ROUTES";
 
 const VendorProductsPage = () => {
   const { vendor } = useVendorAuthContext();
@@ -111,14 +112,14 @@ const VendorProductsPage = () => {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  to="/vendor/add-products"
+                  to={ROUTES.VENDOR_ADD_PRODUCTS}
                   className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 hover:bg-slate-800"
                 >
                   <PlusCircle className="h-4 w-4" />
                   Add New Product
                 </Link>
                 <Link
-                  to="/vendor-dashboard"
+                  to={ROUTES.VENDOR_DASHBOARD}
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 >
                   <BadgeCheck className="h-4 w-4" />
@@ -186,7 +187,7 @@ const VendorProductsPage = () => {
                     : "Add your first product to start managing your catalog."}
                 </p>
                 <Link
-                  to="/vendor/add-products"
+                  to={ROUTES.VENDOR_ADD_PRODUCTS}
                   className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -204,7 +205,7 @@ const VendorProductsPage = () => {
                   return (
                     <Link
                       key={product.product_id}
-                      to={`/vendor/products/${product.product_id}/edit`}
+                      to={getRoutePath(ROUTES.VENDOR_PRODUCT_EDIT, { productId: product.product_id })}
                       className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
                     >
                       <div className="relative h-52 bg-linear-to-br from-slate-100 to-blue-50">

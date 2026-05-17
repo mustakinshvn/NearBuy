@@ -3,6 +3,7 @@ import { Store, MapPin, Search, Mail, Phone, Filter, X, ChevronDown, RefreshCw, 
 import { useNavigate } from 'react-router-dom';
 import { useVendors } from '../hooks/useVendors';
 import ShopVendorCard from '../component/shopsPage/ShopVendorCard';
+import { ROUTES, getRoutePath } from '../lib/ROUTES';
 
 const ShopsPage = () => {
   const { vendors: allVendors, loading, error } = useVendors();
@@ -92,7 +93,7 @@ const ShopsPage = () => {
   };
 
   const openVendorShop = (vendorId) => {
-    navigate(`/shops/${vendorId}`);
+    navigate(getRoutePath(ROUTES.SHOP_DETAILS, { vendorId }));
   };
 
   if (loading) {
@@ -125,7 +126,7 @@ const ShopsPage = () => {
                 Try Again
               </button>
               <a 
-                href="/"
+                href={ROUTES.HOME}
                 className="px-8 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-blue-600 hover:text-blue-600 transition-all"
               >
                 Back to Home
@@ -268,10 +269,10 @@ const ShopsPage = () => {
             <p className="text-lg text-slate-600 mb-2">We're currently onboarding new vendors</p>
             <p className="text-slate-500 mb-8">Check back soon to discover amazing local shops!</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-green-500 to-blue-500 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105">
+              <a href={ROUTES.HOME} className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-green-500 to-blue-500 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105">
                 Back to Home
               </a>
-              <a href="/products" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-blue-600 hover:text-blue-600 transition-all">
+              <a href={ROUTES.PRODUCTS} className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:border-blue-600 hover:text-blue-600 transition-all">
                 Browse Products
               </a>
             </div>
