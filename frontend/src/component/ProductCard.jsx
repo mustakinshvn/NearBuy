@@ -91,21 +91,23 @@ const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
               )}
             </div>
           </div>
-          <button
-            onClick={handleAdd}
-            disabled={!product.is_available || hasInCart}
-            className={`w-full px-4 py-2 rounded-lg transition-all text-sm font-medium ${
-              product.is_available && !hasInCart
-                ? "bg-linear-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 cursor-pointer"
-                : "bg-slate-300 text-slate-500 cursor-not-allowed"
-            }`}
-          >
-            {!product.is_available
-              ? "Unavailable"
-              : hasInCart
-                ? "In Cart"
-                : "Add to Cart"}
-          </button>
+          {onAddToCart && (
+            <button
+              onClick={handleAdd}
+              disabled={!product.is_available || hasInCart}
+              className={`w-full px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                product.is_available && !hasInCart
+                  ? "bg-linear-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 cursor-pointer"
+                  : "bg-slate-300 text-slate-500 cursor-not-allowed"
+              }`}
+            >
+              {!product.is_available
+                ? "Unavailable"
+                : hasInCart
+                  ? "In Cart"
+                  : "Add to Cart"}
+            </button>
+          )}
         </div>
       </Link>
     );

@@ -169,10 +169,20 @@ export async function deleteVendor(req, res) {
 
 export async function listProducts(req, res) {
   try {
-    const limit = parseInt(req.query.limit, 10) || 100;
-    const offset = parseInt(req.query.offset, 10) || 0;
-    const products = await Product.getAll({ limit, offset });
-    return res.status(200).json({ message: getMessage('Admin.Product.List.Success'), products });
+    const defaultLimit = await Product.getDefaultPageSize();
+    const limit = parseInt(req.query.limit, 10) || defaultLimit;
+    const page = parseInt(req.query.page, 10);
+    const offsetFromQuery = parseInt(req.query.offset, 10);
+    const offset = Number.isInteger(page) && page > 0
+      ? (page - 1) * limit
+      : (Number.isInteger(offsetFromQuery) && offsetFromQuery >= 0 ? offsetFromQuery : 0);
+
+    const result = await Product.getAll({ limit, offset });
+    return res.status(200).json({
+      message: getMessage('Admin.Product.List.Success'),
+      products: result.products,
+      pagination: result.pagination,
+    });
   } catch (error) {
     return res.status(500).json({ message: getMessage('Admin.Common.InternalServerError'), error: error.message });
   }

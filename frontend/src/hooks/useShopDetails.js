@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { productAPI } from '../services/api';
 
-export const useShopDetails = (vendorId) => {
+export const useShopDetails = (vendorId, params = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState(null);
+  const serializedParams = useMemo(() => JSON.stringify(params || {}), [params]);
 
   useEffect(() => {
     let isActive = true;
@@ -21,11 +23,13 @@ export const useShopDetails = (vendorId) => {
       setError(null);
 
       try {
-        const productResponse = await productAPI.getBySeller(vendorId);
+        const parsedParams = serializedParams ? JSON.parse(serializedParams) : {};
+        const productResponse = await productAPI.getBySeller(vendorId, parsedParams);
 
         if (!isActive) return;
 
         setProducts(productResponse.products || []);
+        setPagination(productResponse.pagination || null);
       } catch (shopError) {
         if (!isActive) return;
         setProducts([]);
@@ -42,10 +46,11 @@ export const useShopDetails = (vendorId) => {
     return () => {
       isActive = false;
     };
-  }, [vendorId]);
+  }, [vendorId, serializedParams]);
 
   return {
     products,
+    pagination,
     loading,
     error,
   };

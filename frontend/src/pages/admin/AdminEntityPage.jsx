@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import PaginationControls from '../../component/sharingComponents/PaginationControls';
 
-const AdminEntityPage = ({ title, description, loadItems, deleteItem, columns, idKey = 'id', emptyMessage = 'No records found.' }) => {
+const AdminEntityPage = ({ title, description, loadItems, deleteItem, columns, idKey = 'id', emptyMessage = 'No records found.', itemsKey = 'items' }) => {
   const [items, setItems] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -13,8 +17,17 @@ const AdminEntityPage = ({ title, description, loadItems, deleteItem, columns, i
       try {
         setLoading(true);
         setError('');
-        const result = await loadItems();
-        if (active) setItems(Array.isArray(result) ? result : []);
+        const result = await loadItems({ page, limit: pageSize || undefined });
+        if (!active) return;
+
+        if (Array.isArray(result)) {
+          setItems(result);
+          setPagination(null);
+          return;
+        }
+
+        setItems(Array.isArray(result?.[itemsKey]) ? result[itemsKey] : []);
+        setPagination(result?.pagination || null);
       } catch (err) {
         if (active) setError(err.message || 'Unable to load records.');
       } finally {
@@ -26,7 +39,19 @@ const AdminEntityPage = ({ title, description, loadItems, deleteItem, columns, i
     return () => {
       active = false;
     };
-  }, [loadItems, refreshIndex]);
+  }, [loadItems, refreshIndex, page, pageSize, itemsKey]);
+
+  useEffect(() => {
+    if (pagination?.limit && pagination.limit !== pageSize) {
+      setPageSize(pagination.limit);
+    }
+  }, [pagination?.limit, pageSize]);
+
+  useEffect(() => {
+    if (pagination?.totalPages && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [pagination?.totalPages, page]);
 
   const handleDelete = async (item) => {
     if (!deleteItem) return;
@@ -105,6 +130,14 @@ const AdminEntityPage = ({ title, description, loadItems, deleteItem, columns, i
           </table>
         </div>
       </section>
+
+      {pagination?.totalPages > 1 && (
+        <PaginationControls
+          page={page}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 };

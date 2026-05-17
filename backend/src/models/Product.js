@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import Admin from './Admin.js';
 
 /**
  * Product model
@@ -12,6 +13,54 @@ import pool from '../config/db.js';
  * now also include a `variants` array aggregated from product_variants.
  */
 class Product {
+    static async getDefaultPageSize() {
+        return Admin.getSettingInt('products_page_size', 12);
+    }
+
+    static normalizePaginationInput({ limit, offset, page } = {}) {
+        const resolvedLimit = Number.parseInt(limit, 10);
+        const safeLimit = Number.isFinite(resolvedLimit) && resolvedLimit > 0
+            ? resolvedLimit
+            : null;
+
+        const resolvedPage = Number.parseInt(page, 10);
+        const safePage = Number.isFinite(resolvedPage) && resolvedPage > 0 ? resolvedPage : null;
+
+        const resolvedOffset = Number.parseInt(offset, 10);
+        const safeOffset = Number.isFinite(resolvedOffset) && resolvedOffset >= 0 ? resolvedOffset : null;
+
+        return { limit: safeLimit, offset: safeOffset, page: safePage };
+    }
+
+    static async resolveLimit(limit) {
+        const parsedLimit = Number.parseInt(limit, 10);
+        if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
+            return parsedLimit;
+        }
+
+        return Product.getDefaultPageSize();
+    }
+
+    static buildPaginationResult(rows, limit, offset) {
+        const totalItems = Number(rows[0]?.total_count || 0);
+        const products = rows.map(({ total_count, ...product }) => product);
+        const totalPages = limit > 0 ? Math.max(1, Math.ceil(totalItems / limit)) : 1;
+        const page = limit > 0 ? Math.floor(offset / limit) + 1 : 1;
+
+        return {
+            products,
+            pagination: {
+                totalItems,
+                totalPages,
+                page,
+                limit,
+                offset,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1,
+            },
+        };
+    }
+
     /**
      * Create a new product (base-level data only).
      *
@@ -112,22 +161,28 @@ class Product {
      */
     static async getAll({ limit = 100, offset = 0 } = {}) {
         try {
+            const safeLimit = await Product.resolveLimit(limit);
+            const safeOffset = Number.isFinite(Number(offset)) && Number(offset) >= 0 ? Number(offset) : 0;
             const query = `
-                SELECT
-                    p.*,
-                    COALESCE(
-                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
-                        '[]'::json
-                    ) AS variants
-                FROM products p
-                LEFT JOIN product_variants v ON v.product_id = p.product_id
-                GROUP BY p.product_id
-                ORDER BY p.created_at DESC
+                WITH grouped_products AS (
+                    SELECT
+                        p.*,
+                        COALESCE(
+                            json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                            '[]'::json
+                        ) AS variants
+                    FROM products p
+                    LEFT JOIN product_variants v ON v.product_id = p.product_id
+                    GROUP BY p.product_id
+                )
+                SELECT *, COUNT(*) OVER() AS total_count
+                FROM grouped_products
+                ORDER BY created_at DESC
                 LIMIT $1 OFFSET $2
             `;
 
-            const { rows } = await pool.query(query, [limit, offset]);
-            return rows;
+            const { rows } = await pool.query(query, [safeLimit, safeOffset]);
+            return Product.buildPaginationResult(rows, safeLimit, safeOffset);
         } catch (error) {
             throw new Error(`Error fetching all products: ${error.message}`);
         }
@@ -138,24 +193,30 @@ class Product {
      */
     static async searchByTitle(title, { limit = 100, offset = 0 } = {}) {
         try {
+            const safeLimit = await Product.resolveLimit(limit);
+            const safeOffset = Number.isFinite(Number(offset)) && Number(offset) >= 0 ? Number(offset) : 0;
             const query = `
-                SELECT
-                    p.*,
-                    COALESCE(
-                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
-                        '[]'::json
-                    ) AS variants
-                FROM products p
-                LEFT JOIN product_variants v ON v.product_id = p.product_id
-                WHERE p.title ILIKE $1
-                GROUP BY p.product_id
-                ORDER BY p.created_at DESC
+                WITH grouped_products AS (
+                    SELECT
+                        p.*,
+                        COALESCE(
+                            json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                            '[]'::json
+                        ) AS variants
+                    FROM products p
+                    LEFT JOIN product_variants v ON v.product_id = p.product_id
+                    WHERE p.title ILIKE $1
+                    GROUP BY p.product_id
+                )
+                SELECT *, COUNT(*) OVER() AS total_count
+                FROM grouped_products
+                ORDER BY created_at DESC
                 LIMIT $2 OFFSET $3
             `;
 
             const titleParam = `%${title}%`;
-            const { rows } = await pool.query(query, [titleParam, limit, offset]);
-            return rows;
+            const { rows } = await pool.query(query, [titleParam, safeLimit, safeOffset]);
+            return Product.buildPaginationResult(rows, safeLimit, safeOffset);
         } catch (error) {
             throw new Error(`Error searching products by title: ${error.message}`);
         }
@@ -164,24 +225,31 @@ class Product {
     /**
      * Fetch all products for a given seller, including variants array.
      */
-    static async getBySeller(sellerId) {
+    static async getBySeller(sellerId, { limit = 100, offset = 0 } = {}) {
         try {
+            const safeLimit = await Product.resolveLimit(limit);
+            const safeOffset = Number.isFinite(Number(offset)) && Number(offset) >= 0 ? Number(offset) : 0;
             const query = `
-                SELECT
-                    p.*,
-                    COALESCE(
-                        json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
-                        '[]'::json
-                    ) AS variants
-                FROM products p
-                LEFT JOIN product_variants v ON v.product_id = p.product_id
-                WHERE p.seller_id = $1
-                GROUP BY p.product_id
-                ORDER BY p.created_at DESC
+                WITH grouped_products AS (
+                    SELECT
+                        p.*,
+                        COALESCE(
+                            json_agg(v.*) FILTER (WHERE v.variant_id IS NOT NULL),
+                            '[]'::json
+                        ) AS variants
+                    FROM products p
+                    LEFT JOIN product_variants v ON v.product_id = p.product_id
+                    WHERE p.seller_id = $1
+                    GROUP BY p.product_id
+                )
+                SELECT *, COUNT(*) OVER() AS total_count
+                FROM grouped_products
+                ORDER BY created_at DESC
+                LIMIT $2 OFFSET $3
             `;
 
-            const { rows } = await pool.query(query, [sellerId]);
-            return rows;
+            const { rows } = await pool.query(query, [sellerId, safeLimit, safeOffset]);
+            return Product.buildPaginationResult(rows, safeLimit, safeOffset);
         } catch (error) {
             throw new Error(`Error fetching products by seller: ${error.message}`);
         }

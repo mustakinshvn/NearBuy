@@ -37,7 +37,7 @@ export const useNotifications = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.customer_id]);
+  }, [user?.customer_id, vendor?.vendor_id]);
 
   useEffect(() => {
     fetchNotifications();
