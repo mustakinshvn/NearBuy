@@ -8,7 +8,9 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import orderItemRoutes from './routes/orderItemRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { ROUTES } from './lib/ROUTES.js';
 
 const port = process.env.PORT;
 const app = express();
@@ -34,16 +36,17 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve uploaded files (e.g. product images)
-app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+app.use(ROUTES.UPLOADS, express.static(path.resolve(process.cwd(), 'uploads')));
 
-app.use('/api/customers', customerRoutes);
-app.use('/api/vendors', vendorRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/order-items', orderItemRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use(ROUTES.API.CUSTOMERS, customerRoutes);
+app.use(ROUTES.API.VENDORS, vendorRoutes);
+app.use(ROUTES.API.PRODUCTS, productRoutes);
+app.use(ROUTES.API.ORDERS, orderRoutes);
+app.use(ROUTES.API.ORDER_ITEMS, orderItemRoutes);
+app.use(ROUTES.API.NOTIFICATIONS, notificationRoutes);
+app.use(ROUTES.API.ADMIN, adminRoutes);
 
-app.get('/', (req, res) => {
+app.get(ROUTES.ROOT, (req, res) => {
     res.send('Welcome to the NearBuy API');
 });
 
@@ -65,6 +68,18 @@ async function initDb() {
 async function startServer() {
   console.log("Initializing database connection...");
   await initDb();
+
+  try {
+    const { default: Admin } = await import('./models/Admin.js');
+    const bootstrapResult = await Admin.ensureDefaultAdmin();
+    if (bootstrapResult.created) {
+      console.log(`✅ Default admin account created for ${bootstrapResult.admin.email}`);
+    } else if (bootstrapResult.reason && bootstrapResult.reason !== 'admin-exists') {
+      console.log(`ℹ️ Admin bootstrap skipped: ${bootstrapResult.reason}`);
+    }
+  } catch (error) {
+    console.warn('⚠️ Admin bootstrap skipped:', error.message);
+  }
   
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

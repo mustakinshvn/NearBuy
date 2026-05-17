@@ -2,13 +2,14 @@ import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
 import { mergeOrdersByOrderId, pendingOrdersCount, totalSalesAmount, deliveredOrdersCount } from "../lib/utils.js";
 import Product from "../models/Product.js";
+import { getMessage } from '../resources/messages.js';
 
 export const createOrder = async (req, res) => {
   try {
     const { customer_id, vendor_id, total_amount, discount_amount, payment_method, items } = req.body;
 
     if (!customer_id || !total_amount || !items || items.length === 0) {
-      return res.status(400).json({ message: "customer_id, total_amount, and items are required" });
+      return res.status(400).json({ message: getMessage('Validation.Order.Create.Validation.RequiredFields') });
     }
 
     const order = await Order.create({
@@ -22,7 +23,7 @@ export const createOrder = async (req, res) => {
     const orderItemsData = [];
     for (const item of items) {
       if (!item.product_id || !item.quantity || !item.unit_price) {
-        return res.status(400).json({ message: "Each item must have product_id, quantity, and unit_price" });
+        return res.status(400).json({ message: getMessage('Validation.Order.Create.Validation.ItemFieldsRequired') });
       }
 
       const orderItem = await OrderItem.create({
@@ -40,7 +41,7 @@ export const createOrder = async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Order created successfully",
+      message: getMessage('Order.Create.Success'),
       order: {
         order_id: order.order_id,
         customer_id: order.customer_id,
@@ -57,7 +58,7 @@ export const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Create order error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -65,13 +66,13 @@ export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.getAll();
     res.status(200).json({
-      message: "Orders retrieved successfully",
+      message: getMessage('Order.GetAll.Success'),
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Get all orders error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -81,13 +82,13 @@ export const getOrderById = async (req, res) => {
 
     const order = await Order.getById(orderId);
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: getMessage('Order.GetById.NotFound') });
     }
 
     const items = await OrderItem.getByOrderId(orderId);
 
     res.status(200).json({
-      message: "Order retrieved successfully",
+      message: getMessage('Order.GetById.Success'),
       order: {
         ...order,
         items,
@@ -95,7 +96,7 @@ export const getOrderById = async (req, res) => {
     });
   } catch (error) {
     console.error("Get order by ID error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -106,13 +107,13 @@ export const getOrdersByCustomer = async (req, res) => {
     const orders = await Order.getByCustomerId(customerId);
 
     res.status(200).json({
-      message: "Orders retrieved successfully",
+      message: getMessage('Order.GetByCustomer.Success'),
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Get orders by customer error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -130,7 +131,7 @@ export const getOrdersByVendor = async (req, res) => {
     mergedOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     res.status(200).json({
-      message: "Orders retrieved successfully",
+      message: getMessage('Order.GetByVendor.Success'),
       orderCount,
       pendingCount,
       deliveredCount,
@@ -140,7 +141,7 @@ export const getOrdersByVendor = async (req, res) => {
     });
   } catch (error) {
     console.error("Get orders by vendor error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -150,26 +151,26 @@ export const updateOrderStatus = async (req, res) => {
     const { order_status } = req.body;
 
     if (!order_status) {
-      return res.status(400).json({ message: "order_status is required" });
+      return res.status(400).json({ message: getMessage('Order.UpdateStatus.Validation.OrderStatusRequired') });
     }
 
     const validStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
     if (!validStatuses.includes(order_status)) {
-      return res.status(400).json({ message: `Invalid order status. Must be one of: ${validStatuses.join(', ')}` });
+      return res.status(400).json({ message: getMessage('Order.UpdateStatus.Validation.InvalidStatus') + validStatuses.join(', ') });
     }
 
     const order = await Order.updateOrderStatus(orderId, order_status);
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: getMessage('Order.UpdateStatus.NotFound') });
     }
 
     res.status(200).json({
-      message: "Order status updated successfully",
+      message: getMessage('Order.UpdateStatus.Success'),
       order,
     });
   } catch (error) {
     console.error("Update order status error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -179,26 +180,26 @@ export const updatePaymentStatus = async (req, res) => {
     const { payment_status } = req.body;
 
     if (!payment_status) {
-      return res.status(400).json({ message: "payment_status is required" });
+      return res.status(400).json({ message: getMessage('Order.UpdatePayment.Validation.PaymentStatusRequired') });
     }
 
     const validStatuses = ['Pending', 'Paid', 'Refunded'];
     if (!validStatuses.includes(payment_status)) {
-      return res.status(400).json({ message: `Invalid payment status. Must be one of: ${validStatuses.join(', ')}` });
+      return res.status(400).json({ message: getMessage('Order.UpdatePayment.Validation.InvalidStatus') + validStatuses.join(', ') });
     }
 
     const order = await Order.updatePaymentStatus(orderId, payment_status);
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: getMessage('Order.UpdatePayment.NotFound') });
     }
 
     res.status(200).json({
-      message: "Payment status updated successfully",
+      message: getMessage('Order.UpdatePayment.Success'),
       order,
     });
   } catch (error) {
     console.error("Update payment status error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -209,13 +210,13 @@ export const getPastOrdersByCustomer = async (req, res) => {
     const orders = await Order.getPastOrdersByCustomerId(customerId);
 
     res.status(200).json({
-      message: "Past orders retrieved successfully",
+      message: getMessage('Order.GetPastByCustomer.Success'),
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Get past orders by customer error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -229,7 +230,7 @@ export const getAllPastOrders = async (req, res) => {
     const orders = await Order.getAllPastOrders(validLimit, validOffset);
 
     res.status(200).json({
-      message: "All past orders retrieved successfully",
+      message: getMessage('Order.GetAllPast.Success'),
       count: orders.length,
       limit: validLimit,
       offset: validOffset,
@@ -237,7 +238,7 @@ export const getAllPastOrders = async (req, res) => {
     });
   } catch (error) {
     console.error("Get all past orders error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -249,15 +250,15 @@ export const deleteOrder = async (req, res) => {
 
     const deletedOrder = await Order.delete(orderId);
     if (!deletedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: getMessage('Order.Delete.NotFound') });
     }
 
     res.status(200).json({
-      message: "Order deleted successfully",
+      message: getMessage('Order.Delete.Success'),
       order_id: deletedOrder.order_id,
     });
   } catch (error) {
     console.error("Delete order error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: getMessage('Order.Common.InternalServerError'), error: error.message });
   }
 };

@@ -25,45 +25,46 @@ import {
   validateNotificationCreate,
   validateNotificationId,
 } from '../middleware/validation.js';
+import { ROUTES } from '../lib/ROUTES.js';
 
 const router = express.Router();
 
-router.post('/', validateNotificationCreate, createNotification);
+router.post(ROUTES.NOTIFICATIONS.BASE, validateNotificationCreate, createNotification);
 
-router.get('/', getAllNotifications);
+router.get(ROUTES.NOTIFICATIONS.BASE, getAllNotifications);
 
-router.get('/type/:type', getNotificationsByType);
+router.get(ROUTES.NOTIFICATIONS.TYPE, getNotificationsByType);
 
-router.get('/priority/:priority', getNotificationsByPriority);
+router.get(ROUTES.NOTIFICATIONS.PRIORITY, getNotificationsByPriority);
 
-router.get('/order/:orderId', getNotificationsByOrder);
+router.get(ROUTES.NOTIFICATIONS.ORDER, getNotificationsByOrder);
 
-router.get('/product/:productId', getNotificationsByProduct);
+router.get(ROUTES.NOTIFICATIONS.PRODUCT, getNotificationsByProduct);
 
-router.get('/:notificationId', validateNotificationId, getNotificationById);
+router.get(ROUTES.NOTIFICATIONS.BY_ID, validateNotificationId, getNotificationById);
 
-router.get('/customer/:customerId', getNotificationsByCustomer);
+router.get(ROUTES.NOTIFICATIONS.CUSTOMER, getNotificationsByCustomer);
 
-router.get('/customer/:customerId/unread', getUnreadByCustomer);
+router.get(ROUTES.NOTIFICATIONS.CUSTOMER_UNREAD, getUnreadByCustomer);
 
-router.get('/customer/:customerId/unread-count', getUnreadCountByCustomer);
+router.get(ROUTES.NOTIFICATIONS.CUSTOMER_UNREAD_COUNT, getUnreadCountByCustomer);
 
-router.get('/vendor/:vendorId', getNotificationsByVendor);
+router.get(ROUTES.NOTIFICATIONS.VENDOR, getNotificationsByVendor);
 
-router.get('/vendor/:vendorId/unread', getUnreadByVendor);
+router.get(ROUTES.NOTIFICATIONS.VENDOR_UNREAD, getUnreadByVendor);
 
-router.get('/vendor/:vendorId/unread-count', getUnreadCountByVendor);
+router.get(ROUTES.NOTIFICATIONS.VENDOR_UNREAD_COUNT, getUnreadCountByVendor);
 
-router.put('/:notificationId', validateNotificationId, updateNotification);
+router.put(ROUTES.NOTIFICATIONS.BY_ID, validateNotificationId, updateNotification);
 
-router.put('/:notificationId/read', validateNotificationId, markAsRead);
+router.put(ROUTES.NOTIFICATIONS.BY_ID.replace(':notificationId', ':notificationId/read'), validateNotificationId, markAsRead);
 
-router.put('/:notificationId/unread', validateNotificationId, markAsUnread);
+router.put(ROUTES.NOTIFICATIONS.BY_ID.replace(':notificationId', ':notificationId/unread'), validateNotificationId, markAsUnread);
 
-router.put('/read/multiple', markMultipleAsRead);
+router.put(ROUTES.NOTIFICATIONS.READ_MULTIPLE, markMultipleAsRead);
 
-router.delete('/:notificationId', validateNotificationId, deleteNotification);
+router.delete(ROUTES.NOTIFICATIONS.BY_ID, validateNotificationId, deleteNotification);
 
-router.delete('/delete/multiple', deleteMultipleNotifications);
+router.delete(ROUTES.NOTIFICATIONS.DELETE_MULTIPLE, deleteMultipleNotifications);
 
 export default router;

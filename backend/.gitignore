@@ -2,3 +2,4 @@
 backend/uploads/
 node_modules/
 dist
+sql

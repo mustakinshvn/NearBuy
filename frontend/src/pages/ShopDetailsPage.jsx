@@ -4,6 +4,7 @@ import { ArrowLeft, Store } from 'lucide-react';
 import { useVendors } from '../hooks/useVendors';
 import ShopDetailSection from '../component/shopsPage/ShopDetailSection';
 import { ShowLoading } from '../component/sharingComponents/ShowLoading';
+import { ROUTES } from '../lib/ROUTES';
 
 const ShopDetailsPage = () => {
   const { vendorId } = useParams();
@@ -36,7 +37,7 @@ const ShopDetailsPage = () => {
               Try Again
             </button>
             <Link
-              to="/shops"
+              to={ROUTES.SHOPS}
               className="px-5 py-3 rounded-xl bg-white border-2 border-slate-300 text-slate-700 font-semibold hover:border-blue-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -55,7 +56,7 @@ const ShopDetailsPage = () => {
           <h1 className="text-2xl font-bold text-slate-800 mb-3">Shop not found</h1>
           <p className="text-slate-600 mb-6">This shop is unavailable or has been removed.</p>
           <Link
-            to="/shops"
+            to={ROUTES.SHOPS}
             className="px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -71,7 +72,7 @@ const ShopDetailsPage = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="mb-6">
           <button
-            onClick={() => navigate('/shops')}
+            onClick={() => navigate(ROUTES.SHOPS)}
             className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-md hover:shadow-lg transition-all"
           >
             <ArrowLeft className="h-4 w-4" />

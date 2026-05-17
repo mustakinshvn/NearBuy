@@ -3,6 +3,7 @@ import ProductVariant from '../models/ProductVariant.js';
 import { getUploadedSingleImagePath } from '../middleware/upload.js';
 import { toPublicUrl } from '../lib/publicUrl.js';
 import { normalizeVariantPayload } from '../lib/requestCoercion.js';
+import { getMessage } from '../resources/messages.js';
 
 // Create a new variant for a specific product
 export const createProductVariant = async (req, res) => {
@@ -18,7 +19,7 @@ export const createProductVariant = async (req, res) => {
     // Ensure parent product exists
     const product = await Product.getById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Parent product not found' });
+      return res.status(404).json({ message: getMessage('ProductVariant.Create.Validation.ParentProductNotFound') });
     }
 
     const data = {
@@ -29,11 +30,11 @@ export const createProductVariant = async (req, res) => {
     const variant = await ProductVariant.create(data);
     return res
       .status(201)
-      .json({ message: 'Product variant created successfully', variant });
+      .json({ message: getMessage('ProductVariant.Create.Success'), variant });
   } catch (error) {
     console.error('Error creating product variant:', error);
     return res.status(500).json({
-      message: 'Internal server error',
+      message: getMessage('ProductVariant.Common.InternalServerError'),
       error: error.message,
     });
   }
@@ -46,19 +47,19 @@ export const getProductVariants = async (req, res) => {
 
     const product = await Product.getById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: getMessage('ProductVariant.GetAll.Validation.ParentProductNotFound') });
     }
 
     const variants = await ProductVariant.getByProductId(Number(productId));
     return res.status(200).json({
-      message: 'Product variants fetched successfully',
+      message: getMessage('ProductVariant.GetAll.Success'),
       product_id: Number(productId),
       variants,
     });
   } catch (error) {
     console.error('Error fetching product variants:', error);
     return res.status(500).json({
-      message: 'Internal server error',
+      message: getMessage('ProductVariant.Common.InternalServerError'),
       error: error.message,
     });
   }
@@ -71,22 +72,22 @@ export const getProductVariantById = async (req, res) => {
 
     const product = await Product.getById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: getMessage('ProductVariant.GetById.Validation.ParentProductNotFound') });
     }
 
     const variant = await ProductVariant.getById(Number(variantId));
     if (!variant || Number(variant.product_id) !== Number(productId)) {
-      return res.status(404).json({ message: 'Variant not found for this product' });
+      return res.status(404).json({ message: getMessage('ProductVariant.GetById.Validation.VariantNotFoundForProduct') });
     }
 
     return res.status(200).json({
-      message: 'Product variant fetched successfully',
+      message: getMessage('ProductVariant.GetById.Success'),
       variant,
     });
   } catch (error) {
     console.error('Error fetching product variant:', error);
     return res.status(500).json({
-      message: 'Internal server error',
+      message: getMessage('ProductVariant.Common.InternalServerError'),
       error: error.message,
     });
   }
@@ -105,24 +106,24 @@ export const updateProductVariant = async (req, res) => {
 
     const product = await Product.getById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: getMessage('ProductVariant.Update.Validation.ParentProductNotFound') });
     }
 
     const existing = await ProductVariant.getById(Number(variantId));
     if (!existing || Number(existing.product_id) !== Number(productId)) {
-      return res.status(404).json({ message: 'Variant not found for this product' });
+      return res.status(404).json({ message: getMessage('ProductVariant.Update.Validation.VariantNotFoundForProduct') });
     }
 
     const updated = await ProductVariant.update(Number(variantId), payload);
 
     return res.status(200).json({
-      message: 'Product variant updated successfully',
+      message: getMessage('ProductVariant.Update.Success'),
       variant: updated,
     });
   } catch (error) {
     console.error('Error updating product variant:', error);
     return res.status(500).json({
-      message: 'Internal server error',
+      message: getMessage('ProductVariant.Common.InternalServerError'),
       error: error.message,
     });
   }
@@ -135,24 +136,24 @@ export const deleteProductVariant = async (req, res) => {
 
     const product = await Product.getById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: getMessage('ProductVariant.Delete.Validation.ParentProductNotFound') });
     }
 
     const existing = await ProductVariant.getById(Number(variantId));
     if (!existing || Number(existing.product_id) !== Number(productId)) {
-      return res.status(404).json({ message: 'Variant not found for this product' });
+      return res.status(404).json({ message: getMessage('ProductVariant.Delete.Validation.VariantNotFoundForProduct') });
     }
 
     const deleted = await ProductVariant.delete(Number(variantId));
 
     return res.status(200).json({
-      message: 'Product variant deleted successfully',
+      message: getMessage('ProductVariant.Delete.Success'),
       variant: deleted,
     });
   } catch (error) {
     console.error('Error deleting product variant:', error);
     return res.status(500).json({
-      message: 'Internal server error',
+      message: getMessage('ProductVariant.Common.InternalServerError'),
       error: error.message,
     });
   }

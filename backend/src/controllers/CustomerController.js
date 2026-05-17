@@ -3,13 +3,14 @@ import bcrypt from "bcrypt";
 import { customerProfileImageUpload, getUploadedSingleImagePath } from '../middleware/upload.js';
 import { toPublicUrl } from '../lib/publicUrl.js';
 import { updateOneColumnIfExists } from '../lib/dbColumns.js';
+import { getMessage } from '../resources/messages.js';
 
 export const loginCustomer = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({ message: getMessage('Customer.Login.Validation.EmailAndPasswordRequired') });
     }
 
     console.log("Login attempt for email:", email);
@@ -19,16 +20,16 @@ export const loginCustomer = async (req, res) => {
 
     const customer = await Customer.getByEmail(email);
     if (!customer) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: getMessage('Customer.Login.Auth.InvalidCredentials') });
     }
     const isPasswordValid = await bcrypt.compare(password, customer.password);
       // const isPasswordValid = password === customer.password;
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: getMessage('Customer.Login.Auth.InvalidCredentials') });
     }
 
     res.status(200).json({
-      message: "Login successful",
+      message: getMessage('Customer.Login.Success'),
       customer: {
         customer_id: customer.customer_id,
         name: customer.name,
@@ -53,13 +54,13 @@ export const uploadCustomerProfilePhoto = async (req, res) => {
   try {
     const { customerId } = req.params;
     if (!customerId) {
-      return res.status(400).json({ message: 'Customer ID is required' });
+      return res.status(400).json({ message: getMessage('Customer.Profile.Upload.Validation.CustomerIdRequired') });
     }
 
     // Multer already ran; ensure file exists
     const relPath = getUploadedSingleImagePath(req, 'profiles/customers');
     if (!relPath) {
-      return res.status(400).json({ message: 'No profile image uploaded' });
+      return res.status(400).json({ message: getMessage('Customer.Profile.Upload.Validation.NoProfileImageUploaded') });
     }
 
     const url = toPublicUrl(req, relPath);
@@ -73,14 +74,14 @@ export const uploadCustomerProfilePhoto = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: 'Profile photo uploaded successfully',
+      message: getMessage('Customer.Profile.Upload.Success'),
       profile_image_url: url,
       persisted: result.updated,
       customer: result.row,
     });
   } catch (error) {
     console.error('Profile photo upload error:', error);
-    return res.status(500).json({ message: 'Internal server error', error: error.message });
+    return res.status(500).json({ message: getMessage('Customer.Common.InternalServerError'), error: error.message });
   }
 };
 
@@ -88,7 +89,7 @@ export const customerProfileUploadMiddleware = (req, res, next) => {
   customerProfileImageUpload(req, res, (err) => {
     if (!err) return next();
     const status = err.status || (err.code === 'LIMIT_FILE_SIZE' ? 413 : 400);
-    return res.status(status).json({ message: err.message || 'File upload failed' });
+      return res.status(status).json({ message: err.message || getMessage('Upload.Common.FileUploadFailed') });
   });
 };
 
@@ -97,12 +98,12 @@ export const registerCustomer = async (req, res) => {
     const { name, email, phone, password } = req.body;
 
     if (!name || !email || !phone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: getMessage('Customer.Register.Validation.AllFieldsRequired') });
     }
 
     const existingCustomer = await Customer.getByEmail(email);
     if (existingCustomer) {
-      return res.status(409).json({ message: "Email already exists" });
+      return res.status(409).json({ message: getMessage('Customer.Register.Validation.EmailAlreadyExists') });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -115,7 +116,7 @@ export const registerCustomer = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Customer registered successfully",
+      message: getMessage('Customer.Register.Success'),
       customer: {
         customer_id: customer.customer_id,
         name: customer.name,
@@ -134,7 +135,7 @@ export const getAllCustomers = async (req, res) => {
   try {
     const customers = await Customer.getAll();
     res.status(200).json({
-      message: "Customers fetched successfully",
+      message: getMessage('Customer.GetAll.Success'),
       count: customers.length,
       customers,
     });
@@ -149,17 +150,17 @@ export const getCustomerById = async (req, res) => {
     const { customerId } = req.params;
 
     if (!customerId) {
-      return res.status(400).json({ message: "Customer ID is required" });
+      return res.status(400).json({ message: getMessage('Customer.GetById.Validation.CustomerIdRequired') });
     }
 
     const customer = await Customer.getById(customerId);
 
     if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
+      return res.status(404).json({ message: getMessage('Customer.GetById.NotFound') });
     }
 
     res.status(200).json({
-      message: "Customer fetched successfully",
+      message: getMessage('Customer.GetById.Success'),
       customer,
     });
   } catch (error) {
@@ -173,22 +174,22 @@ export const updateCustomer = async (req, res) => {
     const { customerId } = req.params;
     const { name, email, phone, password } = req.body;
     if (!customerId) {
-      return res.status(400).json({ message: "Customer ID is required" });
+      return res.status(400).json({ message: getMessage('Customer.Update.Validation.CustomerIdRequired') });
     }
 
     if (!name || !email || !phone) {
-      return res.status(400).json({ message: "Name, email, and phone are required" });
+      return res.status(400).json({ message: getMessage('Customer.Update.Validation.NameEmailPhoneRequired') });
     }
 
     const existingCustomer = await Customer.getById(customerId);
     if (!existingCustomer) {
-      return res.status(404).json({ message: "Customer not found" });
+      return res.status(404).json({ message: getMessage('Customer.Update.NotFound') });
     }
 
     if (email !== existingCustomer.email) {
       const emailExists = await Customer.emailExists(email);
       if (emailExists) {
-        return res.status(409).json({ message: "Email already in use" });
+        return res.status(409).json({ message: getMessage('Customer.Update.Validation.EmailAlreadyInUse') });
       }
     }
 
@@ -197,7 +198,7 @@ export const updateCustomer = async (req, res) => {
     const updatedCustomer = await Customer.update(customerId, { name, email, phone, password: hashedPassword });
 
     res.status(200).json({
-      message: "Customer updated successfully",
+      message: getMessage('Customer.Update.Success'),
       customer: updatedCustomer,
     });
   } catch (error) {
@@ -211,18 +212,18 @@ export const deleteCustomer = async (req, res) => {
     const { customerId } = req.params;
 
     if (!customerId) {
-      return res.status(400).json({ message: "Customer ID is required" });
+      return res.status(400).json({ message: getMessage('Customer.Delete.Validation.CustomerIdRequired') });
     }
 
     const customer = await Customer.getById(customerId);
     if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
+      return res.status(404).json({ message: getMessage('Customer.Delete.NotFound') });
     }
 
     await Customer.delete(customerId);
 
     res.status(200).json({
-      message: "Customer deleted successfully",
+      message: getMessage('Customer.Delete.Success'),
       customer_id: customerId,
     });
   } catch (error) {

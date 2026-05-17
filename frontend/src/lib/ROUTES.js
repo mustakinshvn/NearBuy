@@ -1,0 +1,41 @@
+export const ROUTES = {
+  HOME: "/",
+  SHOPS: "/shops",
+  SHOP_DETAILS: "/shops/:vendorId",
+  PRODUCTS: "/products",
+  PRODUCT_DETAILS: "/products/:productId",
+  ABOUT: "/about",
+  LOGIN: "/login",
+  SIGNUP: "/signup",
+  ADMIN_VENDOR_LOGIN: "/admin-vendor-login",
+  ADMIN: "/admin",
+  ADMIN_LOGIN: "/admin/login",
+  ADMIN_ROUTES: {
+    DASHBOARD: "",
+    VENDORS: "vendors",
+    CUSTOMERS: "customers",
+    PRODUCTS: "products",
+    ORDERS: "orders",
+    NOTIFICATIONS: "notifications",
+    CONFIGURATION: "configuration",
+  },
+  VENDOR_DASHBOARD: "/vendor-dashboard",
+  VENDOR_PRODUCTS: "/vendor/products",
+  VENDOR_PRODUCT_EDIT: "/vendor/products/:productId/edit",
+  VENDOR_ADD_PRODUCTS: "/vendor/add-products",
+  PROFILE: "/profile",
+  CART: "/cart",
+  CHECKOUT: "/checkout",
+  ORDERS: "/orders",
+  NOTIFICATIONS: "/notifications",
+  TRACK_ORDER: "/track-order",
+  RETURN_POLICY: "/return-policy",
+  HELP_SUPPORT: "/help-support",
+  TERMS_CONDITIONS: "/terms-conditions",
+};
+
+export const getRoutePath = (route, params = {}) =>
+  Object.entries(params).reduce(
+    (path, [key, value]) => path.replace(`:${key}`, String(value)),
+    route,
+  );

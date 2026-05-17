@@ -15,6 +15,7 @@ import Staistics from '../component/homePage/Staistics';
 import HeroVisual from '../component/homePage/HeroVisual';
 import FeaturedProducts from '../component/homePage/FeaturedProducts';
 import FeaturedVendors from '../component/homePage/FeaturedVendors';
+import { ROUTES } from '../lib/ROUTES';
 
 const HomePage = () => {
 
@@ -44,7 +45,7 @@ const HomePage = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
-                  to="/products"
+                  to={ROUTES.PRODUCTS}
                   className="inline-flex items-center justify-center gap-2 bg-linear-to-r from-green-600 to-blue-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
                   <ShoppingBag size={20} />
@@ -53,7 +54,7 @@ const HomePage = () => {
                 </Link>
 
                 <Link
-                  to="/shops"
+                  to={ROUTES.SHOPS}
                   className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 border border-white/20 backdrop-blur"
                 >
                   <MapPin size={20} />

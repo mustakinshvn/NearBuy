@@ -2,8 +2,9 @@ import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import Logo from "../sharingComponents/logo";
 import { LinksTo } from "../sharingComponents/LinksTo";
 import { useVendorAuthContext } from "../../hooks/useVendorAuthContext";
+import { ROUTES } from "../../lib/ROUTES";
 
-const footerAbout = () => {
+const FooterAbout = () => {
   const { isVendorAuthenticated } = useVendorAuthContext();
 
   return (
@@ -43,7 +44,7 @@ const footerAbout = () => {
       </div>
       {!isVendorAuthenticated ? (
         <LinksTo
-          to="/admin-vendor-login"
+          to={ROUTES.ADMIN_VENDOR_LOGIN}
           label="Admin/Vendor Login"
           className="w-full py-3 bg-linear-to-r from-gray-500 to-gray-400 rounded-lg hover:from-gray-600 hover:to-gray-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center gap-2 mt-4 font-semibold text-gray-200 hover:text-gray-400"
         />
@@ -52,4 +53,4 @@ const footerAbout = () => {
   );
 };
 
-export default footerAbout;
+export default FooterAbout;

@@ -7,6 +7,7 @@ import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
 import { Link } from "react-router-dom";
 import { PlusIcon, ShoppingBag, LayoutGrid } from "lucide-react";
+import { ROUTES } from "../lib/ROUTES";
 
 const VendorDashBoard = () => {
   const { vendor } = useVendorAuthContext();
@@ -51,14 +52,14 @@ const VendorDashBoard = () => {
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            to="/vendor/products"
+            to={ROUTES.VENDOR_PRODUCTS}
             className="inline-flex bg-white text-gray-700 px-4 py-2 rounded border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors font-semibold items-center"
           >
             <LayoutGrid className="inline-block w-4 h-4 mr-2" />
             My Products
           </Link>
           <Link
-            to="/vendor/add-products"
+            to={ROUTES.VENDOR_ADD_PRODUCTS}
             className="inline-flex bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors font-semibold items-center"
           >
             <PlusIcon className="inline-block w-4 h-4 mr-2" />

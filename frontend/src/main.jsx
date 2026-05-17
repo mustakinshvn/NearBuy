@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
 import Header from "./component/Header.jsx";
@@ -12,6 +13,22 @@ import { Toaster } from "react-hot-toast";
 import { VendorAuthProvider } from "./context/VendorAuthContext.jsx";
 import { VendorOrderProvider } from "./context/VendorOrderContext.jsx";
 import ScrollToTop from "./component/ScrollToTop.jsx";
+import { AdminAuthProvider } from "./context/AdminAuthContext.jsx";
+import { ROUTES } from "./lib/ROUTES";
+
+export const AppFrame = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith(ROUTES.ADMIN);
+
+  return (
+    <>
+      <Toaster position="top-center" />
+      {!isAdminRoute && <Header />}
+      <App />
+      {!isAdminRoute && <Footer />}
+    </>
+  );
+};
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,14 +37,13 @@ createRoot(document.getElementById("root")).render(
         <ToastProvider>
           <AuthProvider>
             <VendorAuthProvider>
-              <VendorOrderProvider>
-                <CartProvider>
-                  <Toaster position="top-center" />
-                  <Header />
-                  <App />
-                  <Footer />
-                </CartProvider>
-              </VendorOrderProvider>
+              <AdminAuthProvider>
+                <VendorOrderProvider>
+                  <CartProvider>
+                    <AppFrame />
+                  </CartProvider>
+                </VendorOrderProvider>
+              </AdminAuthProvider>
             </VendorAuthProvider>
           </AuthProvider>
         </ToastProvider>

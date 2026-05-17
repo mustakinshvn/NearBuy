@@ -1,5 +1,6 @@
 import { ShoppingBag, Users } from "lucide-react"
 import { Link } from "react-router-dom"
+import { ROUTES } from "../../lib/ROUTES";
 const CTASection = () => {
   return (
      <div className="max-w-4xl mx-auto px-4 text-center">
@@ -12,7 +13,7 @@ const CTASection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/products"
+              to={ROUTES.PRODUCTS}
               className="inline-flex items-center justify-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <ShoppingBag size={20} />
@@ -20,7 +21,7 @@ const CTASection = () => {
             </Link>
 
             <Link
-              to="/login"
+              to={ROUTES.LOGIN}
               className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-900 font-semibold px-8 py-4 rounded-xl transition-all duration-300 border border-slate-200 shadow-sm hover:shadow-md"
             >
               <Users size={20} />

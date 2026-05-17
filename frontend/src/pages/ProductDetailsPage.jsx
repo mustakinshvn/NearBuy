@@ -13,6 +13,7 @@ import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { productAPI } from "../services/api";
 import { useCart } from "../hooks/useCart";
 import { ConfirmAlert } from "../component/sharingComponents/ConfirmAlert";
+import { ROUTES } from "../lib/ROUTES";
 
 const ProductDetailsPage = () => {
   const { id, productId } = useParams();
@@ -98,8 +99,8 @@ const ProductDetailsPage = () => {
       return;
     }
     const added = addToCart(displayProduct, quantity);
-    if (added) navigate("/checkout");
-    else navigate("/cart");
+    if (added) navigate(ROUTES.CHECKOUT);
+    else navigate(ROUTES.CART);
   };
 
   const handleShare = () => {
@@ -115,8 +116,8 @@ const ProductDetailsPage = () => {
     clearCart();
     const added = addToCart(displayProduct, pendingQuantity);
     if (pendingAction === "buy") {
-      if (added) navigate("/checkout");
-      else navigate("/cart");
+      if (added) navigate(ROUTES.CHECKOUT);
+      else navigate(ROUTES.CART);
     }
     setPendingAction(null);
     setPendingQuantity(1);

@@ -13,22 +13,23 @@ import {
   validateOrderItemCreate,
   validateOrderItemId,
 } from '../middleware/validation.js';
+import { ROUTES } from '../lib/ROUTES.js';
 
 const router = express.Router();
 
 // Order Item routes
-router.post('/', validateOrderItemCreate, addOrderItem);
+router.post(ROUTES.ORDER_ITEMS.BASE, validateOrderItemCreate, addOrderItem);
 
-router.get('/', getAllOrderItems);
+router.get(ROUTES.ORDER_ITEMS.BASE, getAllOrderItems);
 
-router.get('/:orderItemId', validateOrderItemId, getOrderItemById);
+router.get(ROUTES.ORDER_ITEMS.BY_ID, validateOrderItemId, getOrderItemById);
 
-router.get('/order/:orderId', getOrderItemsByOrderId);
+router.get(ROUTES.ORDER_ITEMS.BY_ORDER, getOrderItemsByOrderId);
 
-router.get('/product/:productId', getOrderItemsByProductId);
+router.get(ROUTES.ORDER_ITEMS.BY_PRODUCT, getOrderItemsByProductId);
 
-router.put('/:orderItemId', validateOrderItemId, updateOrderItem);
+router.put(ROUTES.ORDER_ITEMS.BY_ID, validateOrderItemId, updateOrderItem);
 
-router.delete('/:orderItemId', validateOrderItemId, deleteOrderItem);
+router.delete(ROUTES.ORDER_ITEMS.BY_ID, validateOrderItemId, deleteOrderItem);
 
 export default router;

@@ -15,25 +15,26 @@ import {
   validateCustomerUpdate,
   validateCustomerId,
 } from '../middleware/validation.js';
+import { ROUTES } from '../lib/ROUTES.js';
 
 const router = express.Router();
 
-router.post('/login', loginCustomer);
-router.post('/register', validateCustomerRegister, registerCustomer);   
+router.post(ROUTES.CUSTOMERS.LOGIN, loginCustomer);
+router.post(ROUTES.CUSTOMERS.REGISTER, validateCustomerRegister, registerCustomer);   
 
-router.get('/', getAllCustomers);        
+router.get(ROUTES.CUSTOMERS.BASE, getAllCustomers);        
 
-router.get('/:customerId', validateCustomerId, getCustomerById);    
+router.get(ROUTES.CUSTOMERS.BY_ID, validateCustomerId, getCustomerById);    
 
 router.post(
-  '/:customerId/profile-photo',
+  ROUTES.CUSTOMERS.PROFILE_PHOTO,
   validateCustomerId,
   customerProfileUploadMiddleware,
   uploadCustomerProfilePhoto,
 );
 
-router.put('/:customerId', validateCustomerId, validateCustomerUpdate, updateCustomer);    
+router.put(ROUTES.CUSTOMERS.BY_ID, validateCustomerId, validateCustomerUpdate, updateCustomer);    
 
-router.delete('/:customerId', validateCustomerId, deleteCustomer);         
+router.delete(ROUTES.CUSTOMERS.BY_ID, validateCustomerId, deleteCustomer);         
 
 export default router;

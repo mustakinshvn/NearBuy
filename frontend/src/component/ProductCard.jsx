@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Package, Heart, Star, ShoppingCart, ShoppingBag } from "lucide-react";
 import Button from "./sharingComponents/Button";
 import { useCart } from "../hooks/useCart";
+import { ROUTES, getRoutePath } from "../lib/ROUTES";
 
 const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
   const price = parseFloat(product.price) || 0;
@@ -25,7 +26,7 @@ const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
   if (mode === "grid") {
     return (
       <Link
-        to={`/products/${product.product_id}`}
+        to={getRoutePath(ROUTES.PRODUCT_DETAILS, { productId: product.product_id })}
         className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden block"
       >
         <div className="h-48 bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center relative overflow-hidden">
@@ -112,7 +113,7 @@ const ProductCard = ({ product, mode = "featured", onAddToCart }) => {
 
   return (
     <Link
-      to={`/products/${product.product_id}`}
+      to={getRoutePath(ROUTES.PRODUCT_DETAILS, { productId: product.product_id })}
       className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 overflow-hidden block"
     >
       <div className="relative overflow-hidden">

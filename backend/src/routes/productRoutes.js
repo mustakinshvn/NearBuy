@@ -9,6 +9,7 @@ import {
     updateProductVariant,
     deleteProductVariant,
 } from '../controllers/ProductVariantController.js';
+import { ROUTES } from '../lib/ROUTES.js';
 
 const router = Router();
 
@@ -32,21 +33,21 @@ const variantUploadHandler = (req, res, next) => {
     });
 };
 
-router.post('/', uploadHandler, asyncHandler(createProduct));
-router.get('/', asyncHandler(getAllProducts));
-router.get('/search', asyncHandler(searchProducts));
-router.get('/seller/:sellerId', asyncHandler(getProductsBySeller));
-router.get('/:id', asyncHandler(getProductById));
-router.put('/:id', uploadHandler, asyncHandler(updateProduct));
-router.patch('/:id', uploadHandler, asyncHandler(updateProduct));
-router.delete('/:id', asyncHandler(deleteProduct));
+router.post(ROUTES.PRODUCTS.BASE, uploadHandler, asyncHandler(createProduct));
+router.get(ROUTES.PRODUCTS.BASE, asyncHandler(getAllProducts));
+router.get(ROUTES.PRODUCTS.SEARCH, asyncHandler(searchProducts));
+router.get(ROUTES.PRODUCTS.BY_SELLER, asyncHandler(getProductsBySeller));
+router.get(ROUTES.PRODUCTS.BY_ID, asyncHandler(getProductById));
+router.put(ROUTES.PRODUCTS.BY_ID, uploadHandler, asyncHandler(updateProduct));
+router.patch(ROUTES.PRODUCTS.BY_ID, uploadHandler, asyncHandler(updateProduct));
+router.delete(ROUTES.PRODUCTS.BY_ID, asyncHandler(deleteProduct));
 
 // Nested routes for product variants
-router.post('/:productId/variants', variantUploadHandler, asyncHandler(createProductVariant));
-router.get('/:productId/variants', asyncHandler(getProductVariants));
-router.get('/:productId/variants/:variantId', asyncHandler(getProductVariantById));
-router.put('/:productId/variants/:variantId', variantUploadHandler, asyncHandler(updateProductVariant));
-router.patch('/:productId/variants/:variantId', variantUploadHandler, asyncHandler(updateProductVariant));
-router.delete('/:productId/variants/:variantId', asyncHandler(deleteProductVariant));
+router.post(ROUTES.PRODUCTS.VARIANTS, variantUploadHandler, asyncHandler(createProductVariant));
+router.get(ROUTES.PRODUCTS.VARIANTS, asyncHandler(getProductVariants));
+router.get(ROUTES.PRODUCTS.VARIANT_BY_ID, asyncHandler(getProductVariantById));
+router.put(ROUTES.PRODUCTS.VARIANT_BY_ID, variantUploadHandler, asyncHandler(updateProductVariant));
+router.patch(ROUTES.PRODUCTS.VARIANT_BY_ID, variantUploadHandler, asyncHandler(updateProductVariant));
+router.delete(ROUTES.PRODUCTS.VARIANT_BY_ID, asyncHandler(deleteProductVariant));
 
 export default router;

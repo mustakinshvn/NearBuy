@@ -53,9 +53,14 @@ backend/
   CLOUDINARY_API_KEY=your_api_key
   CLOUDINARY_API_SECRET=your_api_secret
   CLOUDINARY_FOLDER=nearbuy
+  ADMIN_JWT_SECRET=change_me
+  ADMIN_DEFAULT_NAME=Admin
+  ADMIN_DEFAULT_EMAIL=admin@nearbuy.com
+  ADMIN_DEFAULT_PASSWORD=change_me_now
    ```
 
   `CLOUDINARY_FOLDER` is optional and defaults to `nearbuy`.
+  `ADMIN_DEFAULT_*` values are used to create the first admin account if none exists.
 
 3. **Run database setup:**
    - Log in to your Neon console

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 import { useAuth } from "../../hooks/useAuth";
 import { useVendorAuthContext } from "../../hooks/useVendorAuthContext";
+import { ROUTES } from "../../lib/ROUTES";
 
 const Cart = () => {
   const { getCartCount } = useCart();
@@ -17,14 +18,14 @@ const Cart = () => {
 
   const handleCartClick = () => {
     if (isVendorAuthenticated) {
-      navigate("/vendor/add-products");
+      navigate(ROUTES.VENDOR_ADD_PRODUCTS);
       return;
     }
 
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: { pathname: "/cart" } } });
+      navigate(ROUTES.LOGIN, { state: { from: { pathname: ROUTES.CART } } });
     } else {
-      navigate("/cart");
+      navigate(ROUTES.CART);
     }
   };
 

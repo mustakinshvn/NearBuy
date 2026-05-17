@@ -3,6 +3,7 @@ import ProductVariant from '../models/ProductVariant.js';
 import { getUploadedProductImagePaths } from '../middleware/upload.js';
 import { toPublicUrl } from '../lib/publicUrl.js';
 import { normalizeProductPayload } from '../lib/requestCoercion.js';
+import { getMessage } from '../resources/messages.js';
 
 // Create a new product
 //
@@ -51,7 +52,7 @@ export const createProduct = async (req, res) => {
         }
 
         if (!payload.title || payload.price == null) {
-            return res.status(400).json({ message: 'title and price are required' });
+            return res.status(400).json({ message: getMessage('Product.Create.Validation.TitleAndPriceRequired') });
         }
 
         const { variants, ...productData } = payload;
@@ -74,13 +75,13 @@ export const createProduct = async (req, res) => {
         const productWithVariants = await Product.getById(product.product_id);
 
         res.status(201).json({
-            message: 'Product created successfully',
+            message: getMessage('Product.Create.Success'),
             product: productWithVariants || product,
             variants: createdVariants,
         });
     } catch (error) {
         console.error('Error creating product:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -90,10 +91,10 @@ export const getAllProducts = async (req, res) => {
         const limit = parseInt(req.query.limit, 10) || 100;
         const offset = parseInt(req.query.offset, 10) || 0;
         const products = await Product.getAll({ limit, offset });
-        res.status(200).json({ message: 'Products fetched successfully', products });
+        res.status(200).json({ message: getMessage('Product.GetAll.Success'), products });
     } catch (error) {
         console.error('Error fetching products:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -103,12 +104,12 @@ export const getProductById = async (req, res) => {
         const { id } = req.params;
         const product = await Product.getById(id);
         if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: getMessage('Product.GetById.NotFound') });
         }
-        res.status(200).json({ message: 'Product fetched successfully', product });
+        res.status(200).json({ message: getMessage('Product.GetById.Success'), product });
     } catch (error) {
         console.error('Error fetching product:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -117,10 +118,10 @@ export const getProductsBySeller = async (req, res) => {
     try {
         const { sellerId } = req.params;
         const products = await Product.getBySeller(sellerId);
-        res.status(200).json({ message: 'Products fetched successfully', products });
+        res.status(200).json({ message: getMessage('Product.GetBySeller.Success'), products });
     } catch (error) {
         console.error('Error fetching products by seller:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -129,15 +130,15 @@ export const searchProducts = async (req, res) => {
     try {
         const title = req.query.title;
         if (!title) {
-            return res.status(400).json({ message: 'Query parameter "title" is required' });
+            return res.status(400).json({ message: getMessage('Product.Search.Validation.QueryTitleRequired') });
         }
         const limit = parseInt(req.query.limit, 10) || 100;
         const offset = parseInt(req.query.offset, 10) || 0;
         const products = await Product.searchByTitle(title, { limit, offset });
-        res.status(200).json({ message: 'Products fetched successfully', products });
+        res.status(200).json({ message: getMessage('Product.Search.Success'), products });
     } catch (error) {
         console.error('Error searching products:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -167,12 +168,12 @@ export const updateProduct = async (req, res) => {
 
         const updated = await Product.update(id, payload);
         if (!updated) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: getMessage('Product.Update.NotFound') });
         }
-        res.status(200).json({ message: 'Product updated successfully', product: updated });
+        res.status(200).json({ message: getMessage('Product.Update.Success'), product: updated });
     } catch (error) {
         console.error('Error updating product:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };
 
@@ -182,11 +183,11 @@ export const deleteProduct = async (req, res) => {
         const { id } = req.params;
         const deleted = await Product.delete(id);
         if (!deleted) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: getMessage('Product.Delete.NotFound') });
         }
-        res.status(200).json({ message: 'Product deleted successfully', product: deleted });
+        res.status(200).json({ message: getMessage('Product.Delete.Success'), product: deleted });
     } catch (error) {
         console.error('Error deleting product:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
     }
 };

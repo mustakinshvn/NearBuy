@@ -16,28 +16,29 @@ import {
   validateOrderCreate,
   validateOrderId,
 } from '../middleware/validation.js';
+import { ROUTES } from '../lib/ROUTES.js';
 
 const router = express.Router();
 
 // Order routes
-router.post('/', validateOrderCreate, createOrder);
+router.post(ROUTES.ORDERS.BASE, validateOrderCreate, createOrder);
 
-router.get('/', getAllOrders);
+router.get(ROUTES.ORDERS.BASE, getAllOrders);
 
-router.get('/past/all', getAllPastOrders);
+router.get(ROUTES.ORDERS.PAST_ALL, getAllPastOrders);
 
-router.get('/:orderId', validateOrderId, getOrderById);
+router.get(ROUTES.ORDERS.BY_ID, validateOrderId, getOrderById);
 
-router.get('/customer/:customerId', getOrdersByCustomer);
+router.get(ROUTES.ORDERS.BY_CUSTOMER, getOrdersByCustomer);
 
-router.get('/customer/:customerId/past', getPastOrdersByCustomer);
+router.get(ROUTES.ORDERS.PAST_BY_CUSTOMER, getPastOrdersByCustomer);
 
-router.get('/vendor/:vendorId', getOrdersByVendor);
+router.get(ROUTES.ORDERS.BY_VENDOR, getOrdersByVendor);
 
-router.put('/:orderId/status', validateOrderId, updateOrderStatus);
+router.put(ROUTES.ORDERS.STATUS, validateOrderId, updateOrderStatus);
 
-router.put('/:orderId/payment-status', validateOrderId, updatePaymentStatus);
+router.put(ROUTES.ORDERS.PAYMENT_STATUS, validateOrderId, updatePaymentStatus);
 
-router.delete('/:orderId', validateOrderId, deleteOrder);
+router.delete(ROUTES.ORDERS.BY_ID, validateOrderId, deleteOrder);
 
 export default router;
