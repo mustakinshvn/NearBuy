@@ -99,6 +99,33 @@ class Admin {
     }
   }
 
+  static async getSetting(settingKey, fallback = null) {
+    try {
+      const { rows } = await pool.query(
+        `SELECT setting_value
+         FROM admin_settings
+         WHERE setting_key = $1`,
+        [settingKey],
+      );
+
+      return rows[0]?.setting_value ?? fallback;
+    } catch (error) {
+      throw new Error(`Error fetching admin setting ${settingKey}: ${error.message}`);
+    }
+  }
+
+  static async getSettingInt(settingKey, fallback = 0) {
+    const value = await Admin.getSetting(settingKey, null);
+    const parsed = Number.parseInt(value, 10);
+
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+
+    const parsedFallback = Number.parseInt(fallback, 10);
+    return Number.isFinite(parsedFallback) && parsedFallback > 0 ? parsedFallback : 0;
+  }
+
   static async upsertSettings(entries, updatedByAdminId = null) {
     try {
       const pairs = Object.entries(entries || {}).filter(([, value]) => value !== undefined);

@@ -1,3 +1,5 @@
+import { XCircle } from 'lucide-react';
+
 export const ShowError = ({ message }) => {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50">

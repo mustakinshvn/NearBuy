@@ -50,7 +50,7 @@ function App() {
       <Route path={ROUTES.PRODUCT_DETAILS} element={<ProductDetailsPage />} />
       <Route path={ROUTES.ABOUT} element={<AboutPage />} />
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-      <Route path={ROUTES.SIGNUP} element={<SignUpPage />} />
+              itemsKey="products"
       <Route path={ROUTES.ADMIN_VENDOR_LOGIN} element={<AdminVendorLoginPage />} />
       <Route path={ROUTES.ADMIN_LOGIN} element={<AdminLoginPage />} />
 

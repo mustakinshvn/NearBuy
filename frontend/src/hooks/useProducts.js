@@ -1,18 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { productAPI } from '../services/api';
 
-export const useProducts = () => {
+export const useProducts = (params = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState(null);
+  const serializedParams = useMemo(() => JSON.stringify(params || {}), [params]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await productAPI.getAll();
+        const parsedParams = serializedParams ? JSON.parse(serializedParams) : {};
+        const response = await productAPI.getAll(parsedParams);
         setProducts(response.products || []);
+        setPagination(response.pagination || null);
       } catch (err) {
         setError(err.message);
         console.error('Error fetching products:', err);
@@ -22,9 +26,9 @@ export const useProducts = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [serializedParams]);
 
-  return { products, loading, error };
+  return { products, pagination, loading, error };
 };
 
 export const useProduct = (productId) => {

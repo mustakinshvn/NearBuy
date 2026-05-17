@@ -51,6 +51,11 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 };
 
+const buildQueryString = (params = {}) => {
+  const filteredEntries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '');
+  return new URLSearchParams(filteredEntries).toString();
+};
+
 export const customerAPI = {
   register: async (customerData) => {
     return apiRequest('/customers/register', {
@@ -96,7 +101,7 @@ export const customerAPI = {
 
 export const productAPI = {
   getAll: async (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
+    const queryString = buildQueryString(params);
     const endpoint = queryString ? `/products?${queryString}` : '/products';
     return apiRequest(endpoint);
   },
@@ -105,12 +110,16 @@ export const productAPI = {
     return apiRequest(`/products/${productId}`);
   },
 
-  getBySeller: async (sellerId) => {
-    return apiRequest(`/products/seller/${sellerId}`);
+  getBySeller: async (sellerId, params = {}) => {
+    const queryString = buildQueryString(params);
+    const endpoint = queryString
+      ? `/products/seller/${sellerId}?${queryString}`
+      : `/products/seller/${sellerId}`;
+    return apiRequest(endpoint);
   },
 
   search: async (title, params = {}) => {
-    const queryParams = new URLSearchParams({ title, ...params }).toString();
+    const queryParams = buildQueryString({ title, ...params });
     return apiRequest(`/products/search?${queryParams}`);
   },
 
@@ -151,8 +160,10 @@ export const vendorAPI = {
     });
   },
 
-  getAll: async () => {
-    return apiRequest('/vendors');
+  getAll: async (params = {}) => {
+    const queryString = buildQueryString(params);
+    const endpoint = queryString ? `/vendors?${queryString}` : '/vendors';
+    return apiRequest(endpoint);
   },
 
   getById: async (vendorId) => {
@@ -265,11 +276,13 @@ export const adminAPI = {
     });
   },
 
-  getProducts: async () => {
-    const response = await apiRequest('/admin/products', {
+  getProducts: async (params = {}) => {
+    const queryString = buildQueryString(params);
+    const endpoint = queryString ? `/admin/products?${queryString}` : '/admin/products';
+    const response = await apiRequest(endpoint, {
       headers: getAdminAuthHeaders(),
     });
-    return response.products || [];
+    return response;
   },
 
   deleteProduct: async (productId) => {

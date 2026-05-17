@@ -88,10 +88,20 @@ export const createProduct = async (req, res) => {
 // Get all products (supports ?limit=&offset=)
 export const getAllProducts = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit, 10) || 100;
-        const offset = parseInt(req.query.offset, 10) || 0;
-        const products = await Product.getAll({ limit, offset });
-        res.status(200).json({ message: getMessage('Product.GetAll.Success'), products });
+        const defaultLimit = await Product.getDefaultPageSize();
+        const limit = parseInt(req.query.limit, 10) || defaultLimit;
+        const page = parseInt(req.query.page, 10);
+        const offsetFromQuery = parseInt(req.query.offset, 10);
+        const offset = Number.isInteger(page) && page > 0
+            ? (page - 1) * limit
+            : (Number.isInteger(offsetFromQuery) && offsetFromQuery >= 0 ? offsetFromQuery : 0);
+
+        const result = await Product.getAll({ limit, offset });
+        res.status(200).json({
+            message: getMessage('Product.GetAll.Success'),
+            products: result.products,
+            pagination: result.pagination,
+        });
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
@@ -117,8 +127,20 @@ export const getProductById = async (req, res) => {
 export const getProductsBySeller = async (req, res) => {
     try {
         const { sellerId } = req.params;
-        const products = await Product.getBySeller(sellerId);
-        res.status(200).json({ message: getMessage('Product.GetBySeller.Success'), products });
+        const defaultLimit = await Product.getDefaultPageSize();
+        const limit = parseInt(req.query.limit, 10) || defaultLimit;
+        const page = parseInt(req.query.page, 10);
+        const offsetFromQuery = parseInt(req.query.offset, 10);
+        const offset = Number.isInteger(page) && page > 0
+            ? (page - 1) * limit
+            : (Number.isInteger(offsetFromQuery) && offsetFromQuery >= 0 ? offsetFromQuery : 0);
+
+        const result = await Product.getBySeller(sellerId, { limit, offset });
+        res.status(200).json({
+            message: getMessage('Product.GetBySeller.Success'),
+            products: result.products,
+            pagination: result.pagination,
+        });
     } catch (error) {
         console.error('Error fetching products by seller:', error);
         res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });
@@ -132,10 +154,20 @@ export const searchProducts = async (req, res) => {
         if (!title) {
             return res.status(400).json({ message: getMessage('Product.Search.Validation.QueryTitleRequired') });
         }
-        const limit = parseInt(req.query.limit, 10) || 100;
-        const offset = parseInt(req.query.offset, 10) || 0;
-        const products = await Product.searchByTitle(title, { limit, offset });
-        res.status(200).json({ message: getMessage('Product.Search.Success'), products });
+        const defaultLimit = await Product.getDefaultPageSize();
+        const limit = parseInt(req.query.limit, 10) || defaultLimit;
+        const page = parseInt(req.query.page, 10);
+        const offsetFromQuery = parseInt(req.query.offset, 10);
+        const offset = Number.isInteger(page) && page > 0
+            ? (page - 1) * limit
+            : (Number.isInteger(offsetFromQuery) && offsetFromQuery >= 0 ? offsetFromQuery : 0);
+
+        const result = await Product.searchByTitle(title, { limit, offset });
+        res.status(200).json({
+            message: getMessage('Product.Search.Success'),
+            products: result.products,
+            pagination: result.pagination,
+        });
     } catch (error) {
         console.error('Error searching products:', error);
         res.status(500).json({ message: getMessage('Product.Common.InternalServerError'), error: error.message });

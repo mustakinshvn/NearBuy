@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import {
   ShoppingBag,
   Filter,
@@ -10,18 +10,15 @@ import {
 import ProductCard from "../component/ProductCard";
 import ShopVendorCard from "../component/shopsPage/ShopVendorCard";
 import { useCart } from "../hooks/useCart";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
 import { useVendors } from "../hooks/useVendors";
+import { usePageSearchParam } from "../hooks/usePageSearchParam";
+import PaginationControls from "../component/sharingComponents/PaginationControls";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
 import { ConfirmAlert } from "../component/sharingComponents/ConfirmAlert";
 import { ROUTES } from "../lib/ROUTES";
-
 const ProductsPage = () => {
-  const { products: allProducts, loading, error } = useProducts();
   const { vendors: allVendors } = useVendors();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,24 +28,29 @@ const ProductsPage = () => {
   const [minRating, setMinRating] = useState(0);
 
   const { cart, addToCart, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { page, searchParams, setSearchParams, setPageInParams } = usePageSearchParam();
 
   const [pendingProduct, setPendingProduct] = useState(null);
   const [showVendorConfirm, setShowVendorConfirm] = useState(false);
   const hasSearchQuery = searchQuery.trim().length > 0;
+
+  const updateSearchParams = useCallback((mutate) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      mutate(next);
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const productsQuery = { page };
 
   React.useEffect(() => {
     const query = searchParams.get("search") || "";
     setSearchQuery(query);
   }, [searchParams]);
 
+  const { products: allProducts, pagination, loading, error } = useProducts(productsQuery);
   const handleAddToCart = (product) => {
-    if (!isAuthenticated) {
-      navigate(ROUTES.LOGIN);
-      return;
-    }
     const existingVendorId = cart[0]?.seller_id ?? null;
     const newVendorId = product.seller_id ?? null;
 
@@ -149,7 +151,18 @@ const ProductsPage = () => {
     setSortBy("featured");
     setMinRating(0);
     setSearchParams({});
+    setPageInParams(1);
   };
+
+  React.useEffect(() => {
+    if (pagination?.totalPages && page > pagination.totalPages) {
+      setPageInParams(pagination.totalPages);
+    }
+  }, [pagination?.totalPages, page, setPageInParams]);
+
+  React.useEffect(() => {
+    setPageInParams(1);
+  }, [searchQuery, selectedCategory, priceRange, sortBy, minRating, setPageInParams]);
 
   if (loading) {
     return (
@@ -171,7 +184,7 @@ const ProductsPage = () => {
           <div>
             <h1 className="text-4xl font-bold text-slate-800 mb-2">Products</h1>
             <p className="text-slate-600">
-              Browse our collection of {filteredProducts.length} amazing
+              Browse our collection of {pagination?.totalItems ?? filteredProducts.length} amazing
               products
             </p>
           </div>
@@ -198,18 +211,15 @@ const ProductsPage = () => {
               onChange={(e) => {
                 const nextQuery = e.target.value;
                 setSearchQuery(nextQuery);
+                setPageInParams(1);
 
                 if (nextQuery.trim()) {
-                  setSearchParams((current) => {
-                    const next = new URLSearchParams(current);
+                  updateSearchParams((next) => {
                     next.set("search", nextQuery.trim());
-                    return next;
                   });
                 } else {
-                  setSearchParams((current) => {
-                    const next = new URLSearchParams(current);
+                  updateSearchParams((next) => {
                     next.delete("search");
-                    return next;
                   });
                 }
               }}
@@ -221,10 +231,9 @@ const ProductsPage = () => {
                 type="button"
                 onClick={() => {
                   setSearchQuery("");
-                  setSearchParams((current) => {
-                    const next = new URLSearchParams(current);
+                  setPageInParams(1);
+                  updateSearchParams((next) => {
                     next.delete("search");
-                    return next;
                   });
                 }}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
@@ -458,16 +467,25 @@ const ProductsPage = () => {
                 </button>
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.product_id}
-                    product={product}
-                    mode="grid"
-                    onAddToCart={handleAddToCart}
+              <>
+                <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.product_id}
+                      product={product}
+                      mode="grid"
+                      onAddToCart={handleAddToCart}
+                    />
+                  ))}
+                </div>
+                {pagination?.totalPages > 1 && (
+                  <PaginationControls
+                    page={page}
+                    totalPages={pagination.totalPages}
+                    onPageChange={setPageInParams}
                   />
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-xl mx-auto">
                 <div className="bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">

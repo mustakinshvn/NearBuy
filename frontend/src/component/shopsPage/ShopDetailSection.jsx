@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import ProductCard from '../ProductCard';
 import { useShopDetails } from '../../hooks/useShopDetails';
+import PaginationControls from '../sharingComponents/PaginationControls';
 import { ShowLoading } from '../sharingComponents/ShowLoading';
 import { useAuth } from '../../hooks/useAuth';
 import { notificationAPI } from '../../services/api';
@@ -124,7 +125,8 @@ const AskForProductForm = ({ vendor }) => {
 };
 
 const ShopDetailSection = ({ vendor }) => {
-  const { products, loading, error } = useShopDetails(vendor?.vendor_id);
+  const [page, setPage] = useState(1);
+  const { products, pagination, loading, error } = useShopDetails(vendor?.vendor_id, { page });
   const [searchQuery, setSearchQuery] = useState('');
   const { cart, addToCart, clearCart } = useCart();
   const [pendingProduct, setPendingProduct] = useState(null);
@@ -168,6 +170,10 @@ const ShopDetailSection = ({ vendor }) => {
       );
     });
   }, [products, searchQuery]);
+
+  const activePage = pagination?.totalPages && page > pagination.totalPages
+    ? pagination.totalPages
+    : page;
 
   if (!vendor) return null;
 
@@ -285,7 +291,10 @@ const ShopDetailSection = ({ vendor }) => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
               placeholder="Search products by title, brand, or description..."
               className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-slate-700 shadow-sm outline-none transition-all focus:border-blue-400 focus:shadow-md"
             />
@@ -299,16 +308,25 @@ const ShopDetailSection = ({ vendor }) => {
           ) : error ? (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">{error}</div>
           ) : filteredProducts.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.product_id}
-                  product={product}
-                  mode="featured"
-                  onAddToCart={handleAddToCart}
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.product_id}
+                    product={product}
+                    mode="featured"
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
+              </div>
+              {pagination?.totalPages > 1 && (
+                <PaginationControls
+                  page={activePage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setPage}
                 />
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
               {searchQuery

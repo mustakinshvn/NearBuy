@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { productAPI } from "../services/api";
+import PaginationControls from "../component/sharingComponents/PaginationControls";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
 import { ROUTES, getRoutePath } from "../lib/ROUTES";
@@ -19,9 +20,12 @@ import { ROUTES, getRoutePath } from "../lib/ROUTES";
 const VendorProductsPage = () => {
   const { vendor } = useVendorAuthContext();
   const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(null);
 
   const vendorId = vendor?.vendor_id ?? vendor?.id ?? vendor?.seller_id ?? null;
 
@@ -41,9 +45,10 @@ const VendorProductsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await productAPI.getBySeller(vendorId);
+        const response = await productAPI.getBySeller(vendorId, { page, limit: pageSize || undefined });
         if (!active) return;
         setProducts(response.products || []);
+        setPagination(response.pagination || null);
       } catch (err) {
         if (active) setError(err.message || "Failed to load vendor products");
       } finally {
@@ -56,7 +61,7 @@ const VendorProductsPage = () => {
     return () => {
       active = false;
     };
-  }, [vendorId]);
+  }, [vendorId, page, pageSize]);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -72,7 +77,19 @@ const VendorProductsPage = () => {
     });
   }, [products, searchQuery]);
 
-  const totalProducts = products.length;
+  useEffect(() => {
+    if (pagination?.limit && pagination.limit !== pageSize) {
+      setPageSize(pagination.limit);
+    }
+  }, [pagination?.limit, pageSize]);
+
+  useEffect(() => {
+    if (pagination?.totalPages && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [pagination?.totalPages, page]);
+
+  const totalProducts = pagination?.totalItems ?? products.length;
   const activeProducts = products.filter((product) => product.is_available).length;
   const lowStockProducts = products.filter(
     (product) => Number(product.stock_quantity || 0) <= 5,
@@ -167,7 +184,10 @@ const VendorProductsPage = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search by title, brand, category..."
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
@@ -195,88 +215,97 @@ const VendorProductsPage = () => {
                 </Link>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredProducts.map((product) => {
-                  const displayPrice = Number(
-                    product.discount_price || product.price || 0,
-                  ).toFixed(2);
-                  const stock = Number(product.stock_quantity || 0);
+              <>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {filteredProducts.map((product) => {
+                    const displayPrice = Number(
+                      product.discount_price || product.price || 0,
+                    ).toFixed(2);
+                    const stock = Number(product.stock_quantity || 0);
 
-                  return (
-                    <Link
-                      key={product.product_id}
-                      to={getRoutePath(ROUTES.VENDOR_PRODUCT_EDIT, { productId: product.product_id })}
-                      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <div className="relative h-52 bg-linear-to-br from-slate-100 to-blue-50">
-                        {product.main_image_url ? (
-                          <img
-                            src={product.main_image_url}
-                            alt={product.title}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <Package className="h-14 w-14 text-blue-300" />
-                          </div>
-                        )}
-                        <div className="absolute left-4 top-4 flex items-center gap-2">
-                          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur">
-                            {product.category_name || "Uncategorized"}
-                          </span>
-                          {!product.is_available ? (
-                            <span className="rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-                              Unavailable
+                    return (
+                      <Link
+                        key={product.product_id}
+                        to={getRoutePath(ROUTES.VENDOR_PRODUCT_EDIT, { productId: product.product_id })}
+                        className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+                      >
+                        <div className="relative h-52 bg-linear-to-br from-slate-100 to-blue-50">
+                          {product.main_image_url ? (
+                            <img
+                              src={product.main_image_url}
+                              alt={product.title}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center">
+                              <Package className="h-14 w-14 text-blue-300" />
+                            </div>
+                          )}
+                          <div className="absolute left-4 top-4 flex items-center gap-2">
+                            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur">
+                              {product.category_name || "Uncategorized"}
                             </span>
-                          ) : null}
-                        </div>
-                        <div className="absolute bottom-4 right-4 rounded-full bg-slate-900/80 p-3 text-white shadow-lg transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                          <PencilLine className="h-4 w-4" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 p-5">
-                        <div>
-                          <h3 className="line-clamp-2 text-lg font-semibold text-slate-900 group-hover:text-blue-700">
-                            {product.title}
-                          </h3>
-                          <p className="mt-1 text-sm text-slate-500">
-                            {product.brand || "No brand"}
-                          </p>
+                            {!product.is_available ? (
+                              <span className="rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                                Unavailable
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="absolute bottom-4 right-4 rounded-full bg-slate-900/80 p-3 text-white shadow-lg transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                            <PencilLine className="h-4 w-4" />
+                          </div>
                         </div>
 
-                        <div className="flex items-end justify-between">
+                        <div className="space-y-3 p-5">
                           <div>
-                            <p className="text-xs uppercase tracking-wide text-slate-500">
-                              Price
-                            </p>
-                            <p className="text-2xl font-bold text-slate-900">
-                              ৳{displayPrice}
-                            </p>
-                          </div>
-                          <div className="text-right text-sm text-slate-600">
-                            <p>
-                              Stock: <span className="font-semibold">{stock}</span>
-                            </p>
-                            <p>
-                              Reviews: <span className="font-semibold">{product.total_reviews || 0}</span>
+                            <h3 className="line-clamp-2 text-lg font-semibold text-slate-900 group-hover:text-blue-700">
+                              {product.title}
+                            </h3>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {product.brand || "No brand"}
                             </p>
                           </div>
-                        </div>
 
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                          <span className="text-sm font-medium text-slate-600">
-                            Edit product details
-                          </span>
-                          <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
-                            Open <ArrowRight className="h-4 w-4" />
-                          </span>
+                          <div className="flex items-end justify-between">
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-slate-500">
+                                Price
+                              </p>
+                              <p className="text-2xl font-bold text-slate-900">
+                                ৳{displayPrice}
+                              </p>
+                            </div>
+                            <div className="text-right text-sm text-slate-600">
+                              <p>
+                                Stock: <span className="font-semibold">{stock}</span>
+                              </p>
+                              <p>
+                                Reviews: <span className="font-semibold">{product.total_reviews || 0}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                            <span className="text-sm font-medium text-slate-600">
+                              Edit product details
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
+                              Open <ArrowRight className="h-4 w-4" />
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {pagination?.totalPages > 1 && (
+                  <PaginationControls
+                    page={page}
+                    totalPages={pagination.totalPages}
+                    onPageChange={setPage}
+                  />
+                )}
+              </>
             )}
           </div>
         </section>

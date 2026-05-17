@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useVendorAuthContext } from "../hooks/useVendorAuthContext";
 import { useToast } from "../hooks/useToast";
@@ -93,7 +93,7 @@ const VendorAddProducts = () => {
   );
   const [variantImagePreviewUrls, setVariantImagePreviewUrls] = useState([]);
 
-  const normalizeImageUrls = (value) => {
+  const normalizeImageUrls = useCallback((value) => {
     if (!value) return [];
     if (Array.isArray(value)) return value.filter(Boolean);
     if (typeof value === "string") {
@@ -103,9 +103,9 @@ const VendorAddProducts = () => {
         .filter(Boolean);
     }
     return [];
-  };
+  }, []);
 
-  const mapProductToFormValues = (product) => ({
+  const mapProductToFormValues = useCallback((product) => ({
     title: product?.title || "",
     description: product?.description || "",
     brand: product?.brand || "",
@@ -180,7 +180,7 @@ const VendorAddProducts = () => {
           dimensions: variant?.dimensions || "",
         }))
       : [],
-  });
+  }), [normalizeImageUrls]);
 
   useEffect(() => {
     if (!mainImageFile) {
@@ -225,7 +225,7 @@ const VendorAddProducts = () => {
         if (url) URL.revokeObjectURL(url);
       }
     };
-  }, [existingVariantImageUrls, variantImageFiles]);
+  }, [existingVariantImageUrls, isEditMode, variantImageFiles]);
 
   useEffect(() => {
     let active = true;
@@ -276,7 +276,7 @@ const VendorAddProducts = () => {
     return () => {
       active = false;
     };
-  }, [defaultValues, isEditMode, productId, replace, reset]);
+  }, [defaultValues, isEditMode, mapProductToFormValues, normalizeImageUrls, productId, replace, reset]);
 
   const handleReset = () => {
     const initialValues = isEditMode && loadedProduct
