@@ -1,12 +1,34 @@
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 const UPLOAD_ROOT = path.resolve(process.cwd(), 'uploads');
-const PRODUCT_UPLOAD_DIR = path.join(UPLOAD_ROOT, 'products');
+const CLOUDINARY_BASE_FOLDER = String(process.env.CLOUDINARY_FOLDER || 'nearbuy').replace(/^\/+|\/+$/g, '');
+const HAS_CLOUDINARY_CONFIG = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET,
+);
+
+if (HAS_CLOUDINARY_CONFIG) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log(`Cloudinary storage enabled for folder: ${CLOUDINARY_BASE_FOLDER || 'nearbuy'}`);
+} else {
+  console.log('Cloudinary storage disabled; using local disk upload fallback.');
+}
+
+function normalizeRelativeDir(relativeDir) {
+  return String(relativeDir || '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+}
 
 function resolveUploadDir(relativeDir) {
-  return path.join(UPLOAD_ROOT, relativeDir);
+  return path.join(UPLOAD_ROOT, normalizeRelativeDir(relativeDir));
 }
 
 function ensureDir(dir) {
@@ -20,17 +42,54 @@ function safeBaseName(originalName) {
   return sanitized || 'image';
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    ensureDir(PRODUCT_UPLOAD_DIR);
-    cb(null, PRODUCT_UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${safeBaseName(file.originalname)}-${unique}${ext}`);
-  },
-});
+function uniquePublicId(originalName) {
+  return `${safeBaseName(originalName)}-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+}
+
+function getFieldRelativeDir(relativeDir, fieldname) {
+  const dir = normalizeRelativeDir(relativeDir);
+  if (dir === 'products' && fieldname === 'variantImages') {
+    return 'products/variants';
+  }
+  return dir;
+}
+
+function getCloudinaryFolder(relativeDir, file) {
+  const fieldDir = getFieldRelativeDir(relativeDir, file?.fieldname);
+  return [CLOUDINARY_BASE_FOLDER, fieldDir].filter(Boolean).join('/');
+}
+
+function createDiskStorage(relativeDir) {
+  const dest = resolveUploadDir(relativeDir);
+
+  return multer.diskStorage({
+    destination: (req, file, cb) => {
+      ensureDir(dest);
+      cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `${uniquePublicId(file.originalname)}${ext}`);
+    },
+  });
+}
+
+function createStorage(relativeDir) {
+  if (!HAS_CLOUDINARY_CONFIG) {
+    return createDiskStorage(relativeDir);
+  }
+
+  return new CloudinaryStorage({
+    cloudinary,
+    params: async (req, file) => ({
+      folder: getCloudinaryFolder(relativeDir, file),
+      public_id: uniquePublicId(file.originalname),
+      resource_type: 'image',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'],
+      transformation: [{ quality: 'auto' }, { fetch_format: 'auto' }],
+    }),
+  });
+}
 
 function imageOnlyFileFilter(req, file, cb) {
   if (file?.mimetype && file.mimetype.startsWith('image/')) {
@@ -41,16 +100,34 @@ function imageOnlyFileFilter(req, file, cb) {
   cb(err);
 }
 
-const upload = multer({
-  storage,
-  fileFilter: imageOnlyFileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-    files: 61, // main + additional + variants + future headroom
-  },
-});
+function createUpload(relativeDir, { files = 1 } = {}) {
+  return multer({
+    storage: createStorage(relativeDir),
+    fileFilter: imageOnlyFileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+      files,
+    },
+  });
+}
 
-export const productImagesUpload = upload.fields([
+function buildStoredImagePath(file, relativeDir) {
+  if (!file) return null;
+
+  const remoteUrl = file.path || file.secure_url || file.url;
+  if (remoteUrl && /^https?:\/\//i.test(String(remoteUrl))) {
+    return remoteUrl;
+  }
+
+  if (!file.filename) return null;
+
+  const dir = getFieldRelativeDir(relativeDir, file.fieldname);
+  return `/uploads/${dir}/${file.filename}`;
+}
+
+export const productImagesUpload = createUpload('products', {
+  files: 61,
+}).fields([
   { name: 'mainImage', maxCount: 1 },
   { name: 'images', maxCount: 10 },
   { name: 'variantImages', maxCount: 50 },
@@ -62,7 +139,7 @@ export function getUploadedProductImagePaths(req) {
   const images = Array.isArray(files.images) ? files.images : [];
   const variantImages = Array.isArray(files.variantImages) ? files.variantImages : [];
 
-  const toRelative = (file) => (file?.filename ? `/uploads/products/${file.filename}` : null);
+  const toRelative = (file) => buildStoredImagePath(file, 'products');
 
   return {
     mainImagePath: toRelative(main),
@@ -71,45 +148,28 @@ export function getUploadedProductImagePaths(req) {
   };
 }
 
-function makeUpload(relativeDir, { files = 1 } = {}) {
-  const dest = resolveUploadDir(relativeDir);
-
-  const customStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      ensureDir(dest);
-      cb(null, dest);
-    },
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase();
-      const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      cb(null, `${safeBaseName(file.originalname)}-${unique}${ext}`);
-    },
-  });
-
-  return multer({
-    storage: customStorage,
-    fileFilter: imageOnlyFileFilter,
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-      files,
-    },
-  });
-}
-
-export const customerProfileImageUpload = makeUpload('profiles/customers', {
+export const customerProfileImageUpload = createUpload('profiles/customers', {
   files: 1,
 }).single('profileImage');
 
-export const vendorProfileImageUpload = makeUpload('profiles/vendors', {
+export const vendorProfileImageUpload = createUpload('profiles/vendors', {
   files: 1,
 }).single('profileImage');
 
-export const productVariantImageUpload = makeUpload('products/variants', {
+export const productVariantImageUpload = createUpload('products/variants', {
   files: 1,
 }).single('image');
 
 export function getUploadedSingleImagePath(req, relativeDir) {
-  if (!req.file?.filename) return null;
-  const dir = String(relativeDir || '').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+  if (!req.file) return null;
+
+  const remoteUrl = req.file.path || req.file.secure_url || req.file.url;
+  if (remoteUrl && /^https?:\/\//i.test(String(remoteUrl))) {
+    return remoteUrl;
+  }
+
+  if (!req.file.filename) return null;
+
+  const dir = getFieldRelativeDir(relativeDir, req.file.fieldname);
   return `/uploads/${dir}/${req.file.filename}`;
 }

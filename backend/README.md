@@ -49,7 +49,13 @@ backend/
    ```env
    PORT=5000
    DATABASE_URL=postgresql://[user]:[password]@[host]/[database]?sslmode=require
+  CLOUDINARY_CLOUD_NAME=your_cloud_name
+  CLOUDINARY_API_KEY=your_api_key
+  CLOUDINARY_API_SECRET=your_api_secret
+  CLOUDINARY_FOLDER=nearbuy
    ```
+
+  `CLOUDINARY_FOLDER` is optional and defaults to `nearbuy`.
 
 3. **Run database setup:**
    - Log in to your Neon console

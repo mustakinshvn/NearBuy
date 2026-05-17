@@ -13,10 +13,17 @@
     "prepare": "husky",
     "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": ["ecommerce", "nearBuy", "marketplace"],
+  "keywords": [
+    "ecommerce",
+    "nearBuy",
+    "marketplace"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cloudinary": "^1.41.3",
+    "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
