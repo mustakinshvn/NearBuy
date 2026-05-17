@@ -10,6 +10,7 @@ const defaultFields = {
   banner_message: 'Welcome to the NearBuy admin panel',
   default_commission_rate: '0',
   products_page_size: '12',
+  shops_page_size: '9',
 };
 
 const AdminConfigurationPage = () => {
@@ -111,6 +112,11 @@ const AdminConfigurationPage = () => {
         <label className="block">
           <span className="mb-2 block text-sm text-slate-300">Products per page</span>
           <input name="products_page_size" type="number" min="1" value={form.products_page_size} onChange={handleChange} className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-emerald-400" />
+        </label>
+
+        <label className="block">
+          <span className="mb-2 block text-sm text-slate-300">Shops per page</span>
+          <input name="shops_page_size" type="number" min="1" value={form.shops_page_size} onChange={handleChange} className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-emerald-400" />
         </label>
 
         <label className="block lg:col-span-2">
