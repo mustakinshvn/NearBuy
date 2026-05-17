@@ -32,11 +32,11 @@ const AdminLayout = () => {
           </div>
 
           <nav className="space-y-2">
-            {navItems.map(({ to, label, icon: Icon, end }) => (
+            {navItems.map((item) => (
               <NavLink
-                key={to}
-                to={to}
-                end={end}
+                key={item.to}
+                to={item.to}
+                end={item.end}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all ${
                     isActive
@@ -45,8 +45,8 @@ const AdminLayout = () => {
                   }`
                 }
               >
-                <Icon className="h-4 w-4" />
-                {label}
+                <item.icon className="h-4 w-4" />
+                {item.label}
               </NavLink>
             ))}
           </nav>

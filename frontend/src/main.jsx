@@ -15,7 +15,7 @@ import { VendorOrderProvider } from "./context/VendorOrderContext.jsx";
 import ScrollToTop from "./component/ScrollToTop.jsx";
 import { AdminAuthProvider } from "./context/AdminAuthContext.jsx";
 
-const AppFrame = () => {
+export const AppFrame = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 

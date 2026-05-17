@@ -79,13 +79,13 @@ const AdminDashboardPage = () => {
       )}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {cards.map(({ key, label, icon: Icon, accent }) => (
-          <div key={key} className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-black/10">
-            <div className={`inline-flex rounded-2xl bg-linear-to-r ${accent} p-3 text-white`}>
-              <Icon className="h-5 w-5" />
+        {cards.map((card) => (
+          <div key={card.key} className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-black/10">
+            <div className={`inline-flex rounded-2xl bg-linear-to-r ${card.accent} p-3 text-white`}>
+              <card.icon className="h-5 w-5" />
             </div>
-            <p className="mt-4 text-sm text-slate-400">{label}</p>
-            <p className="mt-2 text-3xl font-bold text-white">{loading ? '...' : Number(summary?.[key] || 0).toLocaleString()}</p>
+            <p className="mt-4 text-sm text-slate-400">{card.label}</p>
+            <p className="mt-2 text-3xl font-bold text-white">{loading ? '...' : Number(summary?.[card.key] || 0).toLocaleString()}</p>
           </div>
         ))}
       </section>

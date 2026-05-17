@@ -3,7 +3,7 @@ import Logo from "../sharingComponents/logo";
 import { LinksTo } from "../sharingComponents/LinksTo";
 import { useVendorAuthContext } from "../../hooks/useVendorAuthContext";
 
-const footerAbout = () => {
+const FooterAbout = () => {
   const { isVendorAuthenticated } = useVendorAuthContext();
 
   return (
@@ -52,4 +52,4 @@ const footerAbout = () => {
   );
 };
 
-export default footerAbout;
+export default FooterAbout;

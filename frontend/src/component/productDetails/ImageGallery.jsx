@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 
 const ImageGallery = ({ product, selectedImage, onSelectImage }) => {
-  
   const price = parseFloat(product.price) || 0;
   const discountPrice = product.discount_price ? parseFloat(product.discount_price) : null;
   const hasDiscount = discountPrice && discountPrice < price;
@@ -15,14 +14,9 @@ const ImageGallery = ({ product, selectedImage, onSelectImage }) => {
       ]
     : product.image_urls || [];
 
-  const [internalIndex, setInternalIndex] = useState(selectedImage || 0);
-
-  useEffect(() => {
-    setInternalIndex(typeof selectedImage === 'number' ? selectedImage : 0);
-  }, [selectedImage]);
+  const internalIndex = typeof selectedImage === 'number' ? selectedImage : 0;
 
   const handleImageSelect = (idx) => {
-    setInternalIndex(idx);
     if (typeof onSelectImage === 'function') onSelectImage(idx);
   };
 

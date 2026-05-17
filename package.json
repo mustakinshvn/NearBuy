@@ -10,6 +10,8 @@
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm run preview",
     "build:frontend": "cd frontend && npm run build",
+    "lint:frontend": "cd frontend && npm run lint",
+    "check": "npm run lint:frontend && npm run build:frontend",
     "prepare": "husky",
     "test": "echo \"No tests specified\" && exit 0"
   },

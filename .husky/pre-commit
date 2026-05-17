@@ -6,3 +6,5 @@ if [ "$branch_name" = "main" ]; then
   echo "Direct commits on main are blocked. Create a feature branch first."
   exit 1
 fi
+
+npm run check
