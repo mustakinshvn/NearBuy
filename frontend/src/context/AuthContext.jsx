@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContextObject";
 import { customerAPI } from "../services/api";
 
-//testing git account
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
