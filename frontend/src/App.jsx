@@ -111,6 +111,7 @@ function App() {
               loadItems={adminAPI.getProducts}
               deleteItem={adminAPI.deleteProduct}
               idKey="product_id"
+              itemsKey="products"
               columns={[
                 { key: 'product_id', label: 'ID' },
                 { key: 'title', label: 'Title' },
