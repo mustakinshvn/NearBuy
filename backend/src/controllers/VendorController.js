@@ -1,4 +1,5 @@
 import Vendor from "../models/Vendor.js";
+import Admin from "../models/Admin.js";
 import bcrypt from "bcrypt";
 import { vendorProfileImageUpload, getUploadedSingleImagePath } from '../middleware/upload.js';
 import { toPublicUrl } from '../lib/publicUrl.js';
@@ -176,10 +177,20 @@ export const getVendorByEmail = async (req, res) => {
 
 export const getAllVendors = async (req, res) => {
     try {
+        const shopsPageSize = await Admin.getSettingInt('shops_page_size', 9);
         const vendors = await Vendor.getAll();
         return res.status(200).json({
             message: getMessage('Vendor.GetAll.Success'),
             vendors,
+            pagination: {
+                page: 1,
+                totalItems: vendors.length,
+                totalPages: Math.max(1, Math.ceil(vendors.length / shopsPageSize)),
+                limit: shopsPageSize,
+                offset: 0,
+                hasNextPage: false,
+                hasPreviousPage: false,
+            },
         });
     } catch (error) {
         console.error('Error fetching vendors:', error);

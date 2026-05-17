@@ -5,6 +5,7 @@ export const useVendors = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -13,6 +14,7 @@ export const useVendors = () => {
         setError(null);
         const response = await vendorAPI.getAll();
         setVendors(response.vendors || []);
+        setPagination(response.pagination || null);
       } catch (err) {
         setError(err.message);
         console.error('Error fetching vendors:', err);
@@ -92,6 +94,7 @@ export const useVendors = () => {
 
   return {
     vendors,
+    pagination,
     loading,
     error,
     getVendorById,

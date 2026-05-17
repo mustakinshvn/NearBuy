@@ -160,8 +160,10 @@ export const vendorAPI = {
     });
   },
 
-  getAll: async () => {
-    return apiRequest('/vendors');
+  getAll: async (params = {}) => {
+    const queryString = buildQueryString(params);
+    const endpoint = queryString ? `/vendors?${queryString}` : '/vendors';
+    return apiRequest(endpoint);
   },
 
   getById: async (vendorId) => {

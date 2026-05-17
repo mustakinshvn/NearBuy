@@ -10,9 +10,9 @@ import {
 import ProductCard from "../component/ProductCard";
 import ShopVendorCard from "../component/shopsPage/ShopVendorCard";
 import { useCart } from "../hooks/useCart";
-import { useSearchParams } from "react-router-dom";
 import { useProducts } from "../hooks/useProducts";
 import { useVendors } from "../hooks/useVendors";
+import { usePageSearchParam } from "../hooks/usePageSearchParam";
 import PaginationControls from "../component/sharingComponents/PaginationControls";
 import { ShowLoading } from "../component/sharingComponents/ShowLoading";
 import { ShowError } from "../component/sharingComponents/ShowError";
@@ -28,12 +28,11 @@ const ProductsPage = () => {
   const [minRating, setMinRating] = useState(0);
 
   const { cart, addToCart, clearCart } = useCart();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { page, searchParams, setSearchParams, setPageInParams } = usePageSearchParam();
 
   const [pendingProduct, setPendingProduct] = useState(null);
   const [showVendorConfirm, setShowVendorConfirm] = useState(false);
   const hasSearchQuery = searchQuery.trim().length > 0;
-  const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
 
   const updateSearchParams = useCallback((mutate) => {
     setSearchParams((current) => {
@@ -42,16 +41,6 @@ const ProductsPage = () => {
       return next;
     });
   }, [setSearchParams]);
-
-  const setPageInParams = useCallback((nextPage) => {
-    updateSearchParams((next) => {
-      if (nextPage > 1) {
-        next.set("page", String(nextPage));
-      } else {
-        next.delete("page");
-      }
-    });
-  }, [updateSearchParams]);
 
   const productsQuery = { page };
 

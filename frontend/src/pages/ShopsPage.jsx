@@ -2,17 +2,22 @@ import React, { useMemo, useState } from 'react';
 import { Store, MapPin, Search, Mail, Phone, Filter, X, ChevronDown, RefreshCw, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVendors } from '../hooks/useVendors';
+import { useClientPagination } from '../hooks/useClientPagination';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import ShopVendorCard from '../component/shopsPage/ShopVendorCard';
+import PaginationControls from '../component/sharingComponents/PaginationControls';
 import { ROUTES, getRoutePath } from '../lib/ROUTES';
 
 const ShopsPage = () => {
-  const { vendors: allVendors, loading, error } = useVendors();
+  const { vendors: allVendors, pagination, loading, error } = useVendors();
   const navigate = useNavigate();
+  const { page, setPageInParams } = usePageSearchParam();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('All');
   const [selectedArea, setSelectedArea] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
+  const pageSize = pagination?.limit || 9;
 
   const cities = useMemo(() => {
     const citySet = new Set(['All']);
@@ -48,6 +53,7 @@ const ShopsPage = () => {
 
   const handleCityChange = (city) => {
     setSelectedCity(city);
+    setPageInParams(1);
     if (city !== selectedCity) {
       setSelectedArea('All');
     }
@@ -90,7 +96,14 @@ const ShopsPage = () => {
     setSelectedArea('All');
     setSortBy('newest');
     setShowFilters(false);
+    setPageInParams(1);
   };
+
+  const {
+    totalPages,
+    activePage,
+    paginatedItems: paginatedVendors,
+  } = useClientPagination({ items: filteredVendors, page, pageSize });
 
   const openVendorShop = (vendorId) => {
     navigate(getRoutePath(ROUTES.SHOP_DETAILS, { vendorId }));
@@ -165,7 +178,10 @@ const ShopsPage = () => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPageInParams(1);
+              }}
               placeholder="Search vendors by shop name, owner, area, or description..."
               className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl shadow-md focus:shadow-xl focus:ring-2 focus:ring-blue-400 transition-all outline-none text-slate-700 font-medium"
             />
@@ -202,7 +218,10 @@ const ShopsPage = () => {
                   {availableAreas.map((area) => (
                     <button
                       key={area}
-                      onClick={() => setSelectedArea(area)}
+                      onClick={() => {
+                        setSelectedArea(area);
+                        setPageInParams(1);
+                      }}
                       className={`px-4 py-2 rounded-lg font-medium transition-all ${
                         selectedArea === area
                           ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md'
@@ -219,7 +238,10 @@ const ShopsPage = () => {
                 <label className="block text-sm font-semibold text-slate-700 mb-3">Sort By</label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPageInParams(1);
+                  }}
                   className="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none font-medium text-slate-700"
                 >
                   <option value="newest">Newest First</option>
@@ -278,11 +300,20 @@ const ShopsPage = () => {
             </div>
           </div>
         ) : filteredVendors.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVendors.map((vendor) => (
-            <ShopVendorCard key={vendor.vendor_id} vendor={vendor} onVisitShop={openVendorShop} />
-          ))}
-        </div>
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedVendors.map((vendor) => (
+              <ShopVendorCard key={vendor.vendor_id} vendor={vendor} onVisitShop={openVendorShop} />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <PaginationControls
+              page={activePage}
+              totalPages={totalPages}
+              onPageChange={setPageInParams}
+            />
+          )}
+        </>
         ) : (
           <div className="bg-white rounded-3xl shadow-xl p-12 text-center max-w-xl mx-auto">
             <div className="bg-slate-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
